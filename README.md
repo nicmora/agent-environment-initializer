@@ -1,0 +1,125 @@
+# Agente inicializador de entornos (*Environment Initializer Agent*)
+
+Un agente con *skills*, **agnóstico al modelo de IA**, que te ayuda a **poner en
+marcha una aplicación con todas sus dependencias de entorno** (bases de datos,
+caché, mensajería, almacenamiento de objetos, servicios externos) en proyectos
+nuevos (*greenfield*) o existentes (*brownfield*).
+
+Funciona como un **wizard conversacional**: te hace preguntas, te ofrece
+alternativas y termina generando un entorno **Docker / Docker Compose**
+reproducible. Habla siempre en **español latinoamericano** y **nunca borra ni
+sobrescribe** recursos o datos existentes.
+
+## Qué hace
+
+- **Brownfield:** escanea el repo, detecta dependencias con evidencia, revisa qué
+  tenés ya en tu máquina (contenedores, servicios del SO, puertos) y te propone,
+  por cada dependencia: **reutilizar**, **conectar a una instancia externa**,
+  **crear desde cero** o **mockear**.
+- **Greenfield:** te pregunta qué necesita el proyecto (monorepo/multirepo, tipo
+  de app, persistencia, caché, mensajería, storage, integraciones) y arma el
+  entorno.
+- **Infra compartida:** te ofrece una pila de servicios centralizada del equipo
+  (`dev-infra`) para ahorrar recursos, aislando cada proyecto por
+  schema / base numerada / vhost / bucket / prefijo — sin pisar a los demás.
+- **Servicios externos:** conexión real o simulación (WireMock / Mockoon / Prism
+  / LocalStack / OIDC falso), con modo mixto y perfiles de compose.
+- **Verifica** que todo levante y **documenta** el resultado en `ENVIRONMENT.md`.
+
+Contexto y decisiones de diseño completos: [`context.md`](context.md).
+
+## Estructura del repo
+
+```
+context.md                        Documento de contexto (el "por qué" y el "qué")
+agent/
+  AGENT.md                        Identidad y reglas del agente (fuente de verdad, agnóstica)
+  skills/
+    detect-environment/SKILL.md   Escaneo de repo brownfield
+    greenfield-wizard/SKILL.md    Cuestionario de proyecto nuevo
+    brownfield-wizard/SKILL.md    Estrategia por dependencia
+    inspect-local-resources/…     Qué hay en la máquina
+    shared-infra/SKILL.md         Pila de infraestructura compartida
+    compose-builder/SKILL.md      Generación de compose y .env
+    service-recipes/SKILL.md      Recetas por servicio (Postgres, Redis, Kafka, …)
+    external-mocks/SKILL.md       Conexión real vs. mock
+    verify-environment/SKILL.md   Healthchecks y arranque de prueba
+    document-environment/SKILL.md Generación de ENVIRONMENT.md
+adapters/
+  claude-code/                    Skills + subagente nativos de Claude Code
+  copilot/                        .github/copilot-instructions.md
+  generic/PROMPT.md               System prompt para GPT / Gemini / Cursor / otros
+```
+
+Las *skills* son **archivos Markdown con un procedimiento paso a paso**. Cada una
+lleva un frontmatter (`name`, `description`) que Claude Code usa para activarlas
+solas; para otros asistentes, el agente simplemente **lee el archivo** cuando lo
+necesita.
+
+## Cómo lo uso en otros proyectos
+
+### Claude Code
+
+Instalación global (una vez), disponible en todos los proyectos:
+
+```powershell
+$repo = "C:\Users\nicmora\Projects\sk-agent-environment-initializer"
+New-Item -ItemType Directory -Force "$HOME\.claude\skills","$HOME\.claude\agents" | Out-Null
+Copy-Item "$repo\agent\skills\*" "$HOME\.claude\skills\" -Recurse -Force
+Copy-Item "$repo\agent\AGENT.md" "$HOME\.claude\skills\AGENT.md" -Force
+Copy-Item "$repo\adapters\claude-code\agents\env-initializer.md" "$HOME\.claude\agents\" -Force
+```
+
+Luego, en cualquier repo:
+
+```
+> quiero levantar este proyecto localmente
+> agregá Redis al entorno de desarrollo
+> @env-initializer ¿por qué no arranca la base?
+```
+
+Detalle y opción por-proyecto: [`adapters/claude-code/README.md`](adapters/claude-code/README.md).
+
+### GitHub Copilot
+
+1. Copiá la carpeta `agent/` a la raíz del proyecto (o a `.agent/`).
+2. Copiá [`adapters/copilot/copilot-instructions.md`](adapters/copilot/copilot-instructions.md)
+   a `.github/copilot-instructions.md`.
+3. Pedile en el chat: *"configurá el entorno de desarrollo de este proyecto"*.
+
+### GPT / ChatGPT / Gemini / Cursor / otros
+
+1. Copiá la carpeta `agent/` a la raíz del proyecto.
+2. Pegá [`adapters/generic/PROMPT.md`](adapters/generic/PROMPT.md) como *system
+   prompt* / instrucciones del proyecto.
+3. Si el asistente no puede leer archivos, pegá también el contenido de
+   `agent/AGENT.md` y de las skills a medida que el flujo las pida.
+
+## Cómo empieza una sesión
+
+El agente detecta (o te pregunta) si el proyecto es *greenfield* o *brownfield* y
+arranca el flujo:
+
+```
+detect-environment ─┐
+                    ├─> brownfield-wizard ─> compose-builder ─> verify-environment ─> document-environment
+inspect-local-resources ┘        │  ▲                ▲
+greenfield-wizard ───────────────┘  └─ shared-infra ─┴─ service-recipes ─ external-mocks
+```
+
+Podés hablarle en cualquier momento, aunque el entorno esté a medio configurar.
+
+## Reglas que el agente nunca rompe
+
+- Español latinoamericano en toda interacción.
+- No ejecuta `docker compose down -v`, `docker volume rm`, `DROP`, `TRUNCATE`,
+  `rm -rf` sobre recursos existentes sin que se lo pidas explícitamente.
+- Muestra el diff de cada archivo antes de escribirlo.
+- Las credenciales van a `.env.local` (fuera de git), nunca al repo.
+- Ofrece siempre reutilizar / conectar / crear / mockear, y prioriza la infra
+  compartida.
+
+## Qué NO cubre (por ahora)
+
+Despliegue a producción, IaC (Terraform / Kubernetes prod), CI/CD, gestión de
+secretos productivos y migración de datos de negocio.
