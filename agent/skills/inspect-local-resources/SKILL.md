@@ -13,6 +13,28 @@ de crear.
 ## Procedimiento (solo lectura)
 
 ### Docker
+
+**Primero verificá que el daemon responda:** `docker info` (o `docker ps`).
+
+Si falla con "Cannot connect to the Docker daemon" / "error during connect" /
+pipe `docker_engine` no encontrado, **Docker está instalado pero apagado**. No
+sigas como si no hubiera nada: puede haber contenedores parados (postgres,
+rabbit, emuladores) que sirven para reutilizar. Frená y **ofrecé arrancar
+Docker**:
+
+- Windows: `Start-Process "$Env:ProgramFiles\Docker\Docker\Docker Desktop.exe"`
+  y esperá en loop a que `docker info` responda (timeout ~90 s).
+- macOS: `open -a Docker`, mismo poll.
+- Linux: `sudo systemctl start docker` (pedí confirmación por el `sudo`).
+
+Es una acción no destructiva (solo levanta el servicio), pero **pedí permiso
+antes** porque arranca software y consume recursos. Si la persona prefiere no
+levantarlo, seguí sin Docker y dejá anotado que no se pudo inspeccionar.
+
+Con el daemon arriba:
+- `docker ps -a --format '{{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}'`
+  (incluí `-a`: los contenedores **parados** también son candidatos a reutilizar
+  — ofrecé arrancarlos con `docker start <name>`, nunca recrearlos).
 - `docker ps --format '{{.Names}}\t{{.Image}}\t{{.Ports}}\t{{.Status}}'`
 - `docker network ls` y `docker volume ls`
 - Para candidatos relevantes (imágenes de postgres, mysql, mongo, redis,
@@ -35,14 +57,21 @@ de crear.
 
 ## Salida
 
-| Recurso | Origen (Docker / SO / —) | Endpoint | Credenciales conocidas | ¿Reutilizable para? |
-|---|---|---|---|---|
+| Recurso | Origen (Docker / SO / —) | Estado (corriendo / parado) | Endpoint | Credenciales conocidas | ¿Reutilizable para? |
+|---|---|---|---|---|---|
 
 Y una lista de **puertos ocupados** relevante para `compose-builder`.
 
+Si el daemon de Docker estaba apagado, dejalo explícito en la salida: "Docker
+estaba apagado; lo levanté con permiso y encontré N contenedores" o "la persona
+optó por no levantarlo, no se pudo inspeccionar Docker".
+
 ## Reglas
 
-- Nunca detengas, reinicies ni borres contenedores/servicios. Solo observás.
-- Si no tenés permiso para ejecutar comandos, pedí a la persona que pegue la
-  salida de `docker ps` y de la lista de puertos.
+- Nunca **borres ni reinicies** contenedores/servicios existentes.
+- Sí podés, **con permiso explícito**, arrancar el daemon de Docker si está
+  apagado y hacer `docker start <name>` de un contenedor parado que la persona
+  quiera reutilizar. Nada más.
+- Si no tenés permiso para ejecutar comandos, pedí a la persona que levante
+  Docker y pegue la salida de `docker ps -a` y de la lista de puertos.
 - No asumas credenciales: si no podés leerlas, preguntá.

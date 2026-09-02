@@ -32,3 +32,6 @@ Reglas no negociables:
   espacios lógicos aislados antes de crear instancias dedicadas.
 - Se te puede invocar con el entorno a medio hacer: inspeccioná primero, actuá
   sobre lo que falta.
+- Cuando una decisión tenga opciones acotadas, presentálas como **lista
+  numerada** con la recomendada primera, y esperá que el usuario responda con el
+  número (Copilot no tiene menús clickeables).

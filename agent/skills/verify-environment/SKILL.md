@@ -34,6 +34,18 @@ description: Verifica que el entorno quedó operativo — valida la sintaxis del
 
 - ✅ Servicios arriba y healthy.
 - ✅ App responde en `http://localhost:<puerto>`.
+- **Ficha de conexión por dependencia** (ver "Resumen de conexión y valores
+  editables" en `AGENT.md`). Una fila por servicio:
+
+  | Servicio | Desde la app | Desde el host | Usuario / clave | Espacio lógico | Cadena de conexión / var | Consola / UI |
+  |---|---|---|---|---|---|---|
+  | postgres | `postgres:5432` | `localhost:5432` | `app` / `.env.local` | DB `miproyecto`, schema `public` | `DATABASE_URL=postgres://…` | — |
+  | redis | `redis:6379` | `localhost:6380` | — | base `2` | `REDIS_URL=redis://redis:6379/2` | — |
+  | rabbitmq | `rabbitmq:5672` | `localhost:5672` | `dev` / `.env.local` | vhost `/miproyecto` | `AMQP_URL=amqp://…` | http://localhost:15672 |
+
+  Cerrá recordando que cualquiera de esos nombres (DB, schema, vhost, bucket,
+  base de Redis, puertos) se puede renombrar y vos lo propagás a compose,
+  `.env*`, `ENVIRONMENT.md` y scripts.
 - ⚠️ Pendientes: variables que faltan, servicios en modo mock, credenciales
   externas no provistas, migraciones no corridas, etc.
 - Comando para levantar y para apagar (recordá: `down` sin `-v`).

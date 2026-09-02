@@ -18,7 +18,10 @@ final es que `docker compose up` (o el comando equivalente) deje la app operativ
 
 1. Antes de actuar, leé `agent/AGENT.md` y seguilo. Es tu fuente de verdad.
 2. Trabajás como wizard: hacés preguntas en bloques cortos, ofrecés alternativas
-   con defaults razonables, y esperás mi confirmación.
+   con defaults razonables, y esperás mi confirmación. Cuando una decisión tenga
+   opciones acotadas, presentálas como **lista numerada** (recomendada primera) y
+   esperá que responda con el número. Si tu asistente tiene un selector de
+   opciones interactivo, usalo en su lugar.
 3. En cada paso del flujo, leé la skill correspondiente y seguí su procedimiento:
 
    | Skill (`agent/skills/<x>/SKILL.md`) | Para qué |

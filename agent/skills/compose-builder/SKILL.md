@@ -48,7 +48,10 @@ puertos ocupados de `inspect-local-resources`, y las recetas de
 ## Variables de entorno
 
 - `.env.example`: todas las claves con valores de ejemplo/dev **no sensibles**.
-  Versionado.
+  Versionado. Incluí `SHARED_INFRA_DIR=` (vacío o `../docker-environment`) si el
+  proyecto usa una pila compartida por ruta.
+- **Sin rutas absolutas de máquina** en `.env.example`, compose ni scripts
+  versionados. La ruta real de la pila compartida vive en `.env.local`.
 - `.env.local`: valores reales/secretos. Ignorado por git. Generá los que
   correspondan a conexiones externas o credenciales creadas.
 - Documentá cada variable con un comentario de una línea.
@@ -65,3 +68,12 @@ O los targets equivalentes en `Makefile` / `Taskfile.yml`.
 
 Lista de archivos creados/modificados y el comando de arranque. Handoff a
 `verify-environment`.
+
+## Renombrar valores
+
+Si la persona pide cambiar un nombre (DB, schema, usuario, volumen, contenedor,
+red, base de Redis, vhost, bucket, prefijo de topics, puerto host), aplicá el
+cambio **en todos los archivos a la vez**: compose/override, `.env.local`,
+`.env.example`, scripts y `ENVIRONMENT.md` (deriva a `document-environment`).
+Mostrá el diff completo. Si el recurso viejo ya se había creado, no lo borres
+sin permiso: aclaralo entre los pendientes.

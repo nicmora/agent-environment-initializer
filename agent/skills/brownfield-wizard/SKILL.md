@@ -26,6 +26,9 @@ decisión. Orden de preferencia sugerido (pero la persona elige):
    - Servicio instalado en el SO (Postgres, Redis, etc. en el host) → apuntar la
      app a `localhost:<puerto>` y, si hace falta, crear una DB/usuario nuevos
      **sin tocar** lo existente.
+   - En ambos casos: **no metas la app en una DB/schema/vhost/bucket existente
+     sin preguntar.** Ofrecé crear un espacio lógico propio y proponé un nombre
+     (editable) para él.
 3. **Instancia externa** (staging, cloud, otro equipo) → pedí host, puerto,
    credenciales y guardalas en `.env.local`. Verificá conectividad de red.
 4. **Crear desde cero en Docker** → deriva a `service-recipes` para las preguntas
@@ -51,6 +54,10 @@ Una tabla de decisiones:
 
 | Dependencia | Estrategia elegida | Detalle (host/puerto/espacio lógico) | Variables de entorno a setear | Archivo destino |
 |---|---|---|---|---|
+
+Los nombres de la columna "Detalle" (DB, schema, usuario, base de Redis, vhost,
+bucket, prefijo, puerto host) son **propuestas editables**: mostralas como
+"propuesto: `X`" y confirmá con la persona antes del handoff.
 
 Handoff a `compose-builder` (para lo que haya que crear) y a
 `document-environment`.

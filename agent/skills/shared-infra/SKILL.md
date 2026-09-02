@@ -64,12 +64,27 @@ instancia**:
 - Actualizá la tabla de espacios lógicos en `~/dev-infra/README.md`.
 
 ### 4. Registrar la decisión
-Devolvé a `document-environment` los datos: qué pila se usa, en qué ruta, qué
-espacio lógico se asignó y qué variables quedaron seteadas.
+Devolvé a `document-environment` los datos: qué pila se usa, qué espacio lógico
+se asignó y qué variables quedaron seteadas.
+
+**La ruta de la pila NO se hardcodea en archivos versionados** (`ENVIRONMENT.md`,
+scripts, compose, `.env.example`). Es propia de cada máquina. Elegí una:
+
+- **Repo hermano (preferido):** documentá que `docker-environment` va clonado al
+  lado del proyecto y referencialo como `../docker-environment/…`. Incluí el
+  `git clone <url>` en los prerrequisitos.
+- **Variable de entorno:** `SHARED_INFRA_DIR` en `.env.local` (cada persona pone
+  su ruta), placeholder en `.env.example`; scripts y doc usan `${SHARED_INFRA_DIR}`.
+
+Lo que sí es portable y va versionado: el **nombre de la red externa** y los
+**nombres de servicio** de la pila (`postgres`, `redis`, …), porque son iguales
+en toda máquina.
 
 ## Reglas
 
 - Nunca borres ni recrees la pila compartida ni sus volúmenes.
 - Toda incorporación es aditiva y con confirmación previa.
+- Nunca escribas rutas absolutas de la máquina en archivos versionados (ver
+  paso 4).
 - Si la persona no quiere pila compartida, volvé a `brownfield-wizard` /
   `greenfield-wizard` con la opción de instancia dedicada.

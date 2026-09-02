@@ -9,6 +9,27 @@ Para cada servicio: **preguntas mínimas** (con defaults) y **bloque de compose*
 Siempre incluir healthcheck y volumen nombrado. Versiones: sugerí una LTS/estable
 reciente y confirmá.
 
+## Antes de generar: proponer y confirmar valores
+
+Los defaults de cada receta son **propuestas**, no decisiones. Presentá una
+tabla de "valores propuestos" y ofrecé editarlos antes de crear nada:
+
+| Dato | Propuesto | ¿Cambiar? |
+|---|---|---|
+| nombre de DB / schema / bucket / vhost | `<default>` | |
+| usuario / contraseña de dev | `<default>` | |
+| puerto en el host | `<default>` | |
+| nombre de contenedor / volumen / red | `<prefijo-proyecto>_…` | |
+| versión de imagen | `<LTS>` | |
+
+## Después de crear: ficha de conexión
+
+Al terminar cada servicio, mostrá su **ficha de conexión** (ver "Resumen de
+conexión y valores editables" en `AGENT.md`): host/puerto desde la app y desde
+el host, credenciales (`.env.local`), espacio lógico, cadena de conexión lista
+para pegar, variable/s de entorno, URL de consola/UI y comando de cliente
+rápido.
+
 ## PostgreSQL
 Preguntas: versión (default 16), nombre de DB, usuario/clave de dev, puerto host
 (default 5432), ¿volumen persistente? (default sí).
