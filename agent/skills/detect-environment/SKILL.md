@@ -1,6 +1,6 @@
 ---
 name: env-detect-environment
-description: Escanea un repositorio existente (brownfield) para detectar sus dependencias de entorno — bases de datos, caché, mensajería, storage, servicios externos — a partir de manifiestos, archivos de infraestructura, configuración y código, y produce un informe con evidencia. Usar al inicio de un proyecto brownfield o cuando el usuario pide "escaneá el proyecto" / "detectá qué necesita para correr".
+description: Escanea un repositorio existente (brownfield) para detectar sus dependencias de entorno — bases de datos, caché, mensajería, storage, servicios externos — a partir de manifiestos, archivos de infraestructura, configuración y código, y produce un informe con evidencia. Usar al inicio de un proyecto brownfield o cuando el usuario pide "escanea el proyecto" / "detecta qué necesita para correr".
 ---
 
 # Skill: detect-environment
@@ -12,25 +12,25 @@ evidencia (archivo y línea) y nivel de confianza (confirmado / inferido).
 
 ## Procedimiento
 
-1. **Manifiestos de dependencias.** Buscá y leé:
+1. **Manifiestos de dependencias.** Busca y lee:
    `package.json`, `pnpm-lock.yaml`/`yarn.lock`, `pom.xml`, `build.gradle(.kts)`,
    `requirements*.txt`, `pyproject.toml`, `Pipfile`, `go.mod`, `Gemfile`,
    `composer.json`, `*.csproj`, `Cargo.toml`.
-   Identificá clientes conocidos: `pg`/`psycopg`/`mysql2`/`mongoose`/`redis`/
+   Identifica clientes conocidos: `pg`/`psycopg`/`mysql2`/`mongoose`/`redis`/
    `ioredis`/`amqplib`/`kafkajs`/`@aws-sdk/*`/`elasticsearch`/`minio`, drivers
    JDBC, `spring-boot-starter-data-*`, etc.
 
-2. **Infraestructura existente.** Buscá:
+2. **Infraestructura existente.** Busca:
    `docker-compose*.yml`, `compose*.yaml`, `Dockerfile*`, `.devcontainer/`,
    `Makefile`, `Taskfile*`, `Procfile`, `k8s/`, `helm/`, `charts/`, `skaffold*`.
-   Si ya hay un `docker-compose*.yml`, listá sus servicios y volúmenes; **no lo
+   Si ya hay un `docker-compose*.yml`, lista sus servicios y volúmenes; **no lo
    modifiques** en esta skill.
 
-3. **Configuración.** Leé:
+3. **Configuración.** Lee:
    `.env`, `.env.*`, `application*.yml`/`application*.properties`, `config/`,
    `settings*.py`, `appsettings*.json`, `*.config.js`, `knexfile*`, `ormconfig*`,
    `prisma/schema.prisma`, `alembic.ini`, `flyway*`, `liquibase*`.
-   Extraé cadenas de conexión y hosts/puertos.
+   Extrae cadenas de conexión y hosts/puertos.
 
 4. **Código.** Grep de:
    - URLs y esquemas: `postgres://`, `mysql://`, `mongodb://`, `redis://`,
@@ -39,19 +39,19 @@ evidencia (archivo y línea) y nivel de confianza (confirmado / inferido).
      `System.getenv`, `@Value("${...}")`, `config(...)`) para armar la lista de
      variables **referenciadas pero no definidas**.
 
-5. **Pruebas de integración.** Buscá `Testcontainers`, `docker-compose` de test,
+5. **Pruebas de integración.** Busca `Testcontainers`, `docker-compose` de test,
    `@SpringBootTest`, fixtures que levanten servicios. Suelen revelar versiones
    exactas de imágenes.
 
-6. **Migraciones de esquema.** Detectá Flyway/Liquibase/Alembic/Prisma
+6. **Migraciones de esquema.** Detecta Flyway/Liquibase/Alembic/Prisma
    Migrate/Knex/EF Core y su ubicación. No las ejecutes todavía.
 
-7. **Documentación.** Leé `README*`, `CONTRIBUTING*`, `docs/` buscando la sección
+7. **Documentación.** Lee `README*`, `CONTRIBUTING*`, `docs/` buscando la sección
    de "cómo correr localmente".
 
 ## Salida
 
-Presentá una tabla:
+Presenta una tabla:
 
 | Dependencia | Tipo | Evidencia (archivo:línea) | Versión sugerida | Confianza | Variables de entorno relacionadas |
 |---|---|---|---|---|---|
@@ -59,10 +59,10 @@ Presentá una tabla:
 Y una lista de **variables referenciadas sin valor** y de **puertos** que el
 proyecto espera.
 
-Terminá preguntando si seguimos con `inspect-local-resources` (ver qué hay en la
-máquina) y luego `brownfield-wizard` (elegir estrategia por dependencia).
+Termina preguntando si se continúa con `inspect-local-resources` (ver qué hay en
+la máquina) y luego `brownfield-wizard` (elegir estrategia por dependencia).
 
 ## Reglas
 
 - Solo lectura. No escribas ni ejecutes servicios en esta skill.
-- Si algo es ambiguo, marcá "inferido" y explicá por qué.
+- Si algo es ambiguo, márcalo como "inferido" y explica por qué.

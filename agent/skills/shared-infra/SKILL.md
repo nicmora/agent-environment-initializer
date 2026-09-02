@@ -25,53 +25,54 @@ instancia**:
 ## Procedimiento
 
 ### 1. Detectar si ya existe
-- Buscá un proyecto de Compose llamado `dev-infra` / `shared-infra` /
+- Busca un proyecto de Compose llamado `dev-infra` / `shared-infra` /
   `local-infra` con `docker compose ls` y `docker network ls` (red tipo
   `dev-infra_default` o `shared-infra`).
-- Buscá una carpeta conocida (preguntá a la persona dónde la tiene; sugerí
+- Busca una carpeta conocida (pregunta a la persona dónde la tiene; sugiere
   `~/dev-infra/`).
-- Si existe: mostrá sus servicios y su red. Pasá a **paso 3**.
+- Si existe: muestra sus servicios y su red. Pasa al **paso 3**.
 
 ### 2. Proponer crearla (si no existe y la persona quiere)
 - Ubicación: carpeta **fuera** del proyecto actual (p. ej. `~/dev-infra/`), para
-  que sea reutilizable. Confirmá la ruta.
-- Preguntá qué servicios incluir (solo los que el ecosistema del equipo usa).
-- Generá `~/dev-infra/docker-compose.yml` con:
+  que sea reutilizable. Confirma la ruta.
+- Pregunta qué servicios incluir (solo los que el ecosistema del equipo usa).
+- Genera `~/dev-infra/docker-compose.yml` con:
   - una red externa nombrada, p. ej. `name: devnet`, declarada como
     `networks: { devnet: { name: devnet } }`.
   - volúmenes con nombre estable por servicio.
   - `service-recipes` para la config de cada uno (versiones, credenciales de
     dev, puertos en el host).
   - healthchecks.
-- Generá `~/dev-infra/README.md` con: cómo levantar (`docker compose up -d`),
+- Genera `~/dev-infra/README.md` con: cómo levantar (`docker compose up -d`),
   la lista de endpoints y credenciales, y **la tabla de espacios lógicos
   asignados** (se va completando a medida que cada proyecto se suma).
 
 ### 3. Conectar el proyecto actual a la pila compartida
 - En el `docker-compose.override.yml` (o `.dev.yml`) del proyecto, **no**
   redefinas los servicios de infra; en su lugar:
-  - conectá los servicios de la app a la red externa compartida:
+  - conecta los servicios de la app a la red externa compartida:
     `networks: { devnet: { external: true } }`.
-  - seteá las variables de conexión de la app apuntando al **nombre de servicio**
-    de la pila compartida (p. ej. `DB_HOST=postgres`, `REDIS_URL=redis://redis:6379/3`).
-- Creá el **espacio lógico** de este proyecto de forma aditiva:
+  - define las variables de conexión de la app apuntando al **nombre de
+    servicio** de la pila compartida (p. ej. `DB_HOST=postgres`,
+    `REDIS_URL=redis://redis:6379/3`).
+- Crea el **espacio lógico** de este proyecto de forma aditiva:
   - Postgres: `CREATE DATABASE <proj>;` o `CREATE SCHEMA <proj>; CREATE ROLE
     <proj>_user LOGIN PASSWORD '...';` — nunca `DROP` nada.
-  - Redis: elegí una base numerada libre (revisá cuáles ya están en uso en el
+  - Redis: elige una base numerada libre (revisa cuáles ya están en uso en el
     README de la pila).
   - RabbitMQ: `rabbitmqctl add_vhost <proj>` + usuario + permisos.
   - MinIO: `mc mb local/<proj>` + usuario/policy.
-- Actualizá la tabla de espacios lógicos en `~/dev-infra/README.md`.
+- Actualiza la tabla de espacios lógicos en `~/dev-infra/README.md`.
 
 ### 4. Registrar la decisión
-Devolvé a `document-environment` los datos: qué pila se usa, qué espacio lógico
-se asignó y qué variables quedaron seteadas.
+Devuelve a `document-environment` los datos: qué pila se usa, qué espacio lógico
+se asignó y qué variables quedaron definidas.
 
 **La ruta de la pila NO se hardcodea en archivos versionados** (`ENVIRONMENT.md`,
-scripts, compose, `.env.example`). Es propia de cada máquina. Elegí una:
+scripts, compose, `.env.example`). Es propia de cada máquina. Elige una:
 
-- **Repo hermano (preferido):** documentá que `docker-environment` va clonado al
-  lado del proyecto y referencialo como `../docker-environment/…`. Incluí el
+- **Repo hermano (preferido):** documenta que `docker-environment` va clonado al
+  lado del proyecto y referéncialo como `../docker-environment/…`. Incluye el
   `git clone <url>` en los prerrequisitos.
 - **Variable de entorno:** `SHARED_INFRA_DIR` en `.env.local` (cada persona pone
   su ruta), placeholder en `.env.example`; scripts y doc usan `${SHARED_INFRA_DIR}`.
@@ -86,5 +87,5 @@ en toda máquina.
 - Toda incorporación es aditiva y con confirmación previa.
 - Nunca escribas rutas absolutas de la máquina en archivos versionados (ver
   paso 4).
-- Si la persona no quiere pila compartida, volvé a `brownfield-wizard` /
+- Si la persona no quiere pila compartida, vuelve a `brownfield-wizard` /
   `greenfield-wizard` con la opción de instancia dedicada.

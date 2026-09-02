@@ -13,7 +13,7 @@ sobrescribe** recursos o datos existentes.
 ## Qué hace
 
 - **Brownfield:** escanea el repo, detecta dependencias con evidencia, revisa qué
-  tenés ya en tu máquina (contenedores, servicios del SO, puertos) y te propone,
+  tienes ya en tu máquina (contenedores, servicios del SO, puertos) y te propone,
   por cada dependencia: **reutilizar**, **conectar a una instancia externa**,
   **crear desde cero** o **mockear**.
 - **Greenfield:** te pregunta qué necesita el proyecto (monorepo/multirepo, tipo
@@ -82,17 +82,17 @@ Detalle y opción por-proyecto: [`adapters/claude-code/README.md`](adapters/clau
 
 ### GitHub Copilot
 
-1. Copiá la carpeta `agent/` a la raíz del proyecto (o a `.agent/`).
-2. Copiá [`adapters/copilot/copilot-instructions.md`](adapters/copilot/copilot-instructions.md)
+1. Copia la carpeta `agent/` a la raíz del proyecto (o a `.agent/`).
+2. Copia [`adapters/copilot/copilot-instructions.md`](adapters/copilot/copilot-instructions.md)
    a `.github/copilot-instructions.md`.
-3. Pedile en el chat: *"configurá el entorno de desarrollo de este proyecto"*.
+3. Pídele en el chat: *"configura el entorno de desarrollo de este proyecto"*.
 
 ### GPT / ChatGPT / Gemini / Cursor / otros
 
-1. Copiá la carpeta `agent/` a la raíz del proyecto.
-2. Pegá [`adapters/generic/PROMPT.md`](adapters/generic/PROMPT.md) como *system
+1. Copia la carpeta `agent/` a la raíz del proyecto.
+2. Pega [`adapters/generic/PROMPT.md`](adapters/generic/PROMPT.md) como *system
    prompt* / instrucciones del proyecto.
-3. Si el asistente no puede leer archivos, pegá también el contenido de
+3. Si el asistente no puede leer archivos, pega también el contenido de
    `agent/AGENT.md` y de las skills a medida que el flujo las pida.
 
 ## Cómo empieza una sesión
@@ -107,13 +107,13 @@ inspect-local-resources ┘        │  ▲                ▲
 greenfield-wizard ───────────────┘  └─ shared-infra ─┴─ service-recipes ─ external-mocks
 ```
 
-Podés hablarle en cualquier momento, aunque el entorno esté a medio configurar.
+Puedes hablarle en cualquier momento, aunque el entorno esté a medio configurar.
 
 ## Reglas que el agente nunca rompe
 
 - Español latinoamericano en toda interacción.
 - No ejecuta `docker compose down -v`, `docker volume rm`, `DROP`, `TRUNCATE`,
-  `rm -rf` sobre recursos existentes sin que se lo pidas explícitamente.
+  `rm -rf` sobre recursos existentes sin que se lo pidas de forma explícita.
 - Muestra el diff de cada archivo antes de escribirlo.
 - Las credenciales van a `.env.local` (fuera de git), nunca al repo.
 - Ofrece siempre reutilizar / conectar / crear / mockear, y prioriza la infra

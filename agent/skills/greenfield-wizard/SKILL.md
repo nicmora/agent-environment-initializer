@@ -13,14 +13,14 @@ dependencia.
 
 ## Procedimiento
 
-Hacé las preguntas en bloques cortos, una idea por vez. No abrumes: si una
-respuesta cierra un tema, saltá el resto de ese bloque.
+Haz las preguntas en bloques cortos, una idea por vez. No abrumes: si una
+respuesta cierra un tema, salta el resto de ese bloque.
 
 ### Bloque 1 — Estructura del repositorio
 - ¿Monorepo (varios servicios/paquetes/frontend) o repo único de un servicio?
-- Si monorepo: ¿qué servicios habrá y en qué lenguaje/framework cada uno?
-- Si repo único: ¿con qué otros microservicios (otros repos) se comunica y cómo
-  (HTTP, gRPC, eventos)?
+- Si es monorepo: ¿qué servicios habrá y en qué lenguaje/framework cada uno?
+- Si es repo único: ¿con qué otros microservicios (otros repos) se comunica y
+  cómo (HTTP, gRPC, eventos)?
 
 ### Bloque 2 — Aplicación
 - Tipo: backend / frontend / worker o batch / CLI / librería / full-stack.
@@ -44,27 +44,32 @@ respuesta cierra un tema, saltá el resto de ese bloque.
 
 ### Bloque 7 — Integraciones externas
 - ¿APIs de terceros? ¿Auth externo (OIDC/SSO)? ¿Pagos? ¿Email/SMS?
-- Para cada una: ¿en desarrollo querés conexión real o mock? (deriva a
+- Para cada una: ¿en desarrollo prefieres conexión real o mock? (deriva a
   `external-mocks`).
 
 ### Bloque 8 — Configuración y secretos
 - ¿Cómo se cargan las variables? (`.env`, config server, secretos del SO).
 
 ### Bloque 9 — Puertos y red
-- Puertos que expondrá cada servicio. Cruzá con `inspect-local-resources` para
-  evitar colisiones.
+- Puertos que expondrá cada servicio. Crúzalos con `inspect-local-resources`
+  para evitar colisiones.
 
 ## Salida
 
 1. Un **resumen del entorno objetivo**: lista de servicios (propios + infra),
-   con tipo, imagen/versión propuesta y puerto.
-2. Para cada dependencia de infra: preguntá si preferís **pila compartida**
+   con tipo, imagen/variante/versión propuesta (por defecto alpine o slim),
+   puerto y presupuesto de memoria sugerido. Todo como default parametrizable.
+   Estos son defaults, no decisiones: al materializar cada servicio,
+   `service-recipes` pregunta de forma explícita la variante/imagen base, la
+   versión/tag y el presupuesto de memoria (perfil o `mem_limit` +
+   `mem_reservation` personalizados), ofreciendo las alternativas.
+2. Para cada dependencia de infra: pregunta si se prefiere **pila compartida**
    (deriva a `shared-infra`) o **instancia dedicada al proyecto**.
 3. Handoff a `compose-builder` + `service-recipes` para materializar, y luego
    `document-environment`.
 
 ## Reglas
 
-- No generes archivos en esta skill; solo dejá el plan acordado.
-- Proponé defaults razonables para no trabar a la persona ("si no tenés
+- No generes archivos en esta skill; solo deja el plan acordado.
+- Propón defaults razonables para no trabar a la persona ("si no tienes
   preferencia, uso Postgres 16").

@@ -13,7 +13,7 @@ cómo correr la app localmente.
 ## Portabilidad — el archivo se versiona
 
 `ENVIRONMENT.md` se commitea y lo usa **todo el equipo**. Tiene que servir en
-cualquier máquina. Prohibido en este archivo (y en `.env.example`, scripts y
+cualquier máquina. Está prohibido en este archivo (y en `.env.example`, scripts y
 compose versionados):
 
 - Rutas absolutas con usuario (`C:\Users\nicmora\…`, `/home/nico/…`,
@@ -23,16 +23,16 @@ compose versionados):
 
 En su lugar:
 
-- **Pila compartida / infra externa:** referenciala por convención portable.
+- **Pila compartida / infra externa:** referénciala por convención portable.
   Opción A (preferida): repo hermano — `../docker-environment/docker-compose.yml`,
-  con un prerrequisito explícito ("cloná `docker-environment` al lado de este
+  con un prerrequisito explícito ("clona `docker-environment` al lado de este
   repo: `git clone <url>`"). Opción B: variable `SHARED_INFRA_DIR` que cada
   persona define en su `.env.local` con la ruta de su máquina; en la doc y los
-  scripts usás `${SHARED_INFRA_DIR}`.
-- **Credenciales de dev:** en `ENVIRONMENT.md` mostrá el valor de ejemplo y aclará
-  "definido en `.env.local`". El valor real vive solo en `.env.local`; en
+  scripts usas `${SHARED_INFRA_DIR}`.
+- **Credenciales de dev:** en `ENVIRONMENT.md` muestra el valor de ejemplo y
+  aclara "definido en `.env.local`". El valor real vive solo en `.env.local`; en
   `.env.example` va un placeholder.
-- Si necesitás mostrar una ruta, que sea **relativa a la raíz del repo**.
+- Si necesitas mostrar una ruta, que sea **relativa a la raíz del repo**.
 
 ## Plantilla
 
@@ -46,7 +46,7 @@ En su lugar:
 
 - Docker + Docker Compose.
 - <si aplica> Pila compartida `docker-environment` clonada como repo hermano
-  (`../docker-environment`), o `SHARED_INFRA_DIR` seteado en `.env.local`.
+  (`../docker-environment`), o `SHARED_INFRA_DIR` definido en `.env.local`.
 
 ## Cómo levantar
 
@@ -62,12 +62,14 @@ docker compose down          # NUNCA con -v (borraría los datos)
 
 ## Servicios
 
-| Servicio | Estrategia | Endpoint (desde la app / desde el host) | Perfil | Notas |
-|---|---|---|---|---|
-| postgres | pila compartida (~/dev-infra) | postgres:5432 / localhost:5432 | — | schema `miproyecto`, usuario `miproyecto_user` |
-| redis | creado (override) | redis:6379/2 / localhost:6380 | infra | — |
-| payments-api | mock (Prism) | payments-mock:4010 | mock | stubs en ./mocks/payments |
-| ... | ... | ... | ... | ... |
+| Servicio | Estrategia | Endpoint (desde la app / desde el host) | Imagen (variable) | Mem límite (variable) | Perfil | Notas |
+|---|---|---|---|---|---|---|
+| postgres | pila compartida (~/dev-infra) | postgres:5432 / localhost:5432 | `postgres:16-alpine` (`POSTGRES_IMAGE`) | 512m (`POSTGRES_MEM`) | — | schema `miproyecto` |
+| redis | creado (override) | redis:6379/2 / localhost:6380 | `redis:7-alpine` (`REDIS_IMAGE`) | 256m (`REDIS_MEM`) | infra | — |
+| payments-api | mock (Prism) | payments-mock:4010 | `stoplight/prism:5` | 256m | mock | stubs en ./mocks/payments |
+| ... | ... | ... | ... | ... | ... | ... |
+
+Anota que imagen y límite son defaults pisables desde `.env.local`.
 
 ## Variables de entorno
 
@@ -90,13 +92,13 @@ docker compose down          # NUNCA con -v (borraría los datos)
 
 ## Procedimiento
 
-1. Si `ENVIRONMENT.md` no existe, crealo con la plantilla.
-2. Si existe, **actualizá solo las secciones que cambiaron** (no reescribas lo
-   que la persona haya editado a mano; mostrá el diff).
-2b. **Antes de escribir, revisá que no haya rutas absolutas con usuario, nombres
+1. Si `ENVIRONMENT.md` no existe, créalo con la plantilla.
+2. Si existe, **actualiza solo las secciones que cambiaron** (no reescribas lo
+   que la persona haya editado a mano; muestra el diff).
+2b. **Antes de escribir, revisa que no haya rutas absolutas con usuario, nombres
    de carpeta personales ni secretos reales** (ver "Portabilidad"). Si los hay,
-   reemplazalos por la convención portable y avisá.
-3. Reflejá siempre: estrategia por dependencia, perfiles de compose, comandos, y
+   reemplázalos por la convención portable y avisa.
+3. Refleja siempre: estrategia por dependencia, perfiles de compose, comandos, y
    espacios lógicos de la pila compartida.
-4. Si tocaste la pila compartida, actualizá también su README
+4. Si tocaste la pila compartida, actualiza también su README
    (`~/dev-infra/README.md`) con el espacio lógico asignado a este proyecto.

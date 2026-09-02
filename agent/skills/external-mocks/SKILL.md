@@ -7,9 +7,9 @@ description: Para servicios externos (APIs de terceros, microservicios de otro e
 
 ## Decisión por cada servicio externo
 
-Preguntá:
-1. ¿Tenés acceso real en desarrollo (credenciales + red)? ¿Querés usarlo?
-2. ¿O preferís simularlo para poder levantar la app sin depender de él?
+Pregunta:
+1. ¿Tienes acceso real en desarrollo (credenciales + red)? ¿Quieres usarlo?
+2. ¿O prefieres simularlo para poder levantar la app sin depender de él?
 
 Se puede elegir distinto por servicio (**modo mixto**). La elección se controla
 con perfiles de compose (`--profile mock`) y/o una variable
@@ -18,8 +18,8 @@ con perfiles de compose (`--profile mock`) y/o una variable
 ## Conexión real
 
 - Credenciales y endpoints en `.env.local`.
-- Verificá conectividad (`curl`/ping desde donde corre la app).
-- Si es un microservicio propio en otro repo: ofrecé clonarlo y sumarlo al
+- Verifica conectividad (`curl`/ping desde donde corre la app).
+- Si es un microservicio propio en otro repo: ofrece clonarlo y sumarlo al
   compose, o apuntar a su instancia de staging.
 
 ## Simulación por tipo
@@ -35,18 +35,18 @@ con perfiles de compose (`--profile mock`) y/o una variable
     profiles: ["mock"]
   ```
 - **Sin spec** → WireMock o Mockoon con stubs a mano en `./mocks/<servicio>/`.
-  Documentá cómo agregar/editar respuestas.
-- Apuntá la variable de la app (`PAYMENTS_BASE_URL`) al mock cuando el perfil
+  Documenta cómo agregar/editar respuestas.
+- Apunta la variable de la app (`PAYMENTS_BASE_URL`) al mock cuando el perfil
   `mock` está activo.
 
 ### gRPC
-- WireMock gRPC extension o un stub server generado del `.proto`. Guardá los
+- WireMock gRPC extension o un stub server generado del `.proto`. Guarda los
   `.proto` en `./mocks/`.
 
 ### Colas / eventos
-- Usá el broker local (real, de la pila) + un **productor de eventos de ejemplo**
+- Usa el broker local (real, de la pila) + un **productor de eventos de ejemplo**
   (script o pequeño servicio que publica mensajes de muestra) y/o un
-  **consumidor simulado** que solo loguea. Guardá los payloads de ejemplo en
+  **consumidor simulado** que solo loguea. Guarda los payloads de ejemplo en
   `./mocks/events/`.
 
 ### Servicios cloud (AWS/Azure/GCP)
@@ -54,7 +54,7 @@ con perfiles de compose (`--profile mock`) y/o una variable
 
 ### Auth / OIDC
 - Emisor de tokens de prueba (p. ej. `oauth2-proxy`/`mock-oauth2-server` de
-  navikt, o Keycloak con un realm de dev). Configurá `issuer`, `jwks_uri` y un
+  navikt, o Keycloak con un realm de dev). Configura `issuer`, `jwks_uri` y un
   set de usuarios de prueba.
 
 ## Salida

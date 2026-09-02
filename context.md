@@ -128,6 +128,9 @@ deje la aplicación operativa.
   `Dockerfile` de desarrollo cuando sea necesario, de archivos `.env` de ejemplo
   y locales, de scripts de arranque y de un documento explicativo
   `ENVIRONMENT.md`.
+- Parametrización de imágenes, versiones y variantes (alpine/slim/otras) y de
+  los límites de recursos (memoria/CPU) de cada servicio, con un default
+  razonable y la posibilidad de ajustarlo por variables de entorno.
 - Determinación de la estrategia de conexión por dependencia: reutilización,
   conexión externa, creación o simulación.
 - Configuración de simuladores para servicios externos (HTTP, colas de mensajes y
@@ -291,7 +294,8 @@ sea posible alternar entre configuraciones sin necesidad de rehacerlas.
   `dev-infra/docker-compose.yml` con su red reutilizable), cuando se opte por
   crearla, junto con la documentación de los espacios lógicos asignados a cada
   servicio.
-- `Dockerfile` de desarrollo, cuando la aplicación requiera un contenedor propio.
+- `Dockerfile` de desarrollo, cuando la aplicación requiera un contenedor propio,
+  con la imagen base y su variante (alpine/slim) como `ARG` con default.
 - `.env.example` (versionado, sin secretos) y `.env.local` (excluido del control
   de versiones).
 - Actualización de `.gitignore` para excluir secretos y datos.

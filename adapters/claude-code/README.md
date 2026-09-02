@@ -35,13 +35,13 @@ Copy-Item "$repo\adapters\claude-code\agents\env-initializer.md" ".\.claude\agen
 
 ## Uso
 
-- Escribí lo que necesitás en lenguaje natural: *"quiero levantar este proyecto
-  localmente"*, *"agregá Redis al entorno"*, *"¿por qué no arranca la base?"*.
+- Escribe lo que necesitas en lenguaje natural: *"quiero levantar este proyecto
+  localmente"*, *"agrega Redis al entorno"*, *"¿por qué no arranca la base?"*.
   Las skills `env-*` se activan solas.
-- O invocá el subagente: `@env-initializer levantá el entorno de este repo`.
-- Podés pedir una skill puntual por nombre: *"usá env-detect-environment"*.
+- O invoca el subagente: `@env-initializer levanta el entorno de este repo`.
+- Puedes pedir una skill puntual por nombre: *"usa env-detect-environment"*.
 
 ## Actualizar
 
-Volvé a correr el `cp` / `Copy-Item`. Para desinstalar, borrá los archivos
+Vuelve a ejecutar el `cp` / `Copy-Item`. Para desinstalar, borra los archivos
 `env-*` de `~/.claude/skills/` y `~/.claude/agents/env-initializer.md`.
