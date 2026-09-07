@@ -51,16 +51,31 @@ evidencia (archivo y línea) y nivel de confianza (confirmado / inferido).
 
 ## Salida
 
-Presenta una tabla:
+Este es siempre el **primer paso** del flujo: la persona todavía no tomó
+ninguna decisión y en la máquina no se tocó nada (ni Docker). Presenta, en este
+orden:
 
-| Dependencia | Tipo | Evidencia (archivo:línea) | Versión sugerida | Confianza | Variables de entorno relacionadas |
-|---|---|---|---|---|---|
+1. **Resumen del stack tecnológico**, en prosa corta: lenguaje(s) y versión,
+   framework principal, gestor de paquetes, tipo de aplicación
+   (backend/frontend/worker/CLI/full-stack), estructura del repo
+   (monorepo/servicio único) y cómo arranca hoy (script de `package.json`,
+   `Makefile`, comando en el README) si ya hay evidencia de eso.
+2. **Tabla de dependencias de entorno detectadas**:
 
-Y una lista de **variables referenciadas sin valor** y de **puertos** que el
-proyecto espera.
+   | Dependencia | Tipo | Evidencia (archivo:línea) | Versión sugerida | Confianza | Variables de entorno relacionadas |
+   |---|---|---|---|---|---|
 
-Termina preguntando si se continúa con `inspect-local-resources` (ver qué hay en
-la máquina) y luego `brownfield-wizard` (elegir estrategia por dependencia).
+3. **Configuración existente**: archivos de config relevantes encontrados
+   (`.env*`, `application.yml`, etc.) y si ya hay infraestructura declarada
+   (`docker-compose*.yml`, `Dockerfile`, `k8s/`, …) — sin modificarla.
+4. Lista de **variables referenciadas sin valor** y de **puertos** que el
+   proyecto espera.
+
+Con ese resumen mostrado, pasa directo a preguntar cómo arrancar la app y la
+estrategia de cada dependencia (`brownfield-wizard`). **No ejecutes
+`inspect-local-resources` todavía** — Docker y la máquina se revisan recién si
+alguna estrategia elegida más adelante realmente lo necesita (ver `AGENT.md`,
+regla 11).
 
 ## Reglas
 

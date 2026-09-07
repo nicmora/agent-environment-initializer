@@ -48,7 +48,7 @@ instancia**:
   asignados** (se va completando a medida que cada proyecto se suma).
 
 ### 3. Conectar el proyecto actual a la pila compartida
-- En el `docker-compose.override.yml` (o `.dev.yml`) del proyecto, **no**
+- En `env/docker-compose.override.yml` (o `.dev.yml`) del proyecto, **no**
   redefinas los servicios de infra; en su lugar:
   - conecta los servicios de la app a la red externa compartida:
     `networks: { devnet: { external: true } }`.
@@ -68,18 +68,20 @@ instancia**:
 Devuelve a `document-environment` los datos: qué pila se usa, qué espacio lógico
 se asignó y qué variables quedaron definidas.
 
-**La ruta de la pila NO se hardcodea en archivos versionados** (`ENVIRONMENT.md`,
-scripts, compose, `.env.example`). Es propia de cada máquina. Elige una:
+**La ruta de la pila NO se hardcodea** en `env/ENVIRONMENT.md`, scripts,
+compose ni `.env.example` — aunque `env/` no se versione, si la persona
+regenera el entorno en otra máquina la ruta absoluta de hoy ya no sirve. Elige
+una:
 
 - **Repo hermano (preferido):** documenta que `docker-environment` va clonado al
   lado del proyecto y referéncialo como `../docker-environment/…`. Incluye el
   `git clone <url>` en los prerrequisitos.
-- **Variable de entorno:** `SHARED_INFRA_DIR` en `.env.local` (cada persona pone
-  su ruta), placeholder en `.env.example`; scripts y doc usan `${SHARED_INFRA_DIR}`.
+- **Variable de entorno:** `SHARED_INFRA_DIR` en `env/.env.local` (cada
+  persona pone su ruta), placeholder en `env/.env.example`; scripts y doc
+  usan `${SHARED_INFRA_DIR}`.
 
-Lo que sí es portable y va versionado: el **nombre de la red externa** y los
-**nombres de servicio** de la pila (`postgres`, `redis`, …), porque son iguales
-en toda máquina.
+Lo que sí es estable entre máquinas: el **nombre de la red externa** y los
+**nombres de servicio** de la pila (`postgres`, `redis`, …).
 
 ## Reglas
 

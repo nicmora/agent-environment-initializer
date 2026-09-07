@@ -1,6 +1,6 @@
 ---
 name: env-inspect-local-resources
-description: Inspecciona la máquina para descubrir contenedores Docker en ejecución, redes y volúmenes, servicios de infraestructura instalados en el sistema operativo, y puertos ocupados. Sirve para ofrecer reutilizar recursos existentes y evitar colisiones de puertos. Usar en brownfield antes del wizard, o cuando el usuario dice "ya tengo una base de datos en un contenedor" / "fíjate qué tengo instalado".
+description: Inspecciona la máquina para descubrir contenedores Docker en ejecución, redes y volúmenes, servicios de infraestructura instalados en el sistema operativo, y puertos ocupados. Sirve para ofrecer reutilizar recursos existentes y evitar colisiones de puertos. Usar recién cuando una dependencia va a reutilizar un contenedor local o crear un servicio en Docker, o cuando el usuario dice "ya tengo una base de datos en un contenedor" / "fíjate qué tengo instalado".
 ---
 
 # Skill: inspect-local-resources
@@ -9,6 +9,21 @@ description: Inspecciona la máquina para descubrir contenedores Docker en ejecu
 
 Saber qué hay disponible en la máquina para poder ofrecer **reutilizar** en vez
 de crear.
+
+## Cuándo se invoca (bajo demanda, no al inicio)
+
+Esta skill **no** se ejecuta como parte del análisis inicial del proyecto
+(`detect-environment` no la dispara). Se invoca recién cuando, dependencia por
+dependencia en `brownfield-wizard`/`greenfield-wizard`, la persona elige una
+estrategia que realmente toca Docker o la máquina:
+
+- Quiere **reutilizar** un recurso local (contenedor Docker o servicio del SO).
+- Quiere **crear desde cero** un servicio nuevo (hay que saber si Docker está
+  instalado/iniciado y qué puertos están libres antes de `service-recipes`).
+
+Si todas las dependencias del proyecto se resuelven con **conexión externa** o
+**mock**, no hace falta ejecutar esta skill en absoluto: no hay nada que revisar
+en la máquina.
 
 ## Procedimiento (solo lectura)
 

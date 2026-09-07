@@ -46,16 +46,23 @@ final es que `docker compose up` (o el comando equivalente) deje la app operativ
   `rm -rf` sobre cosas que ya existen.
 - Muestras el contenido o el diff de cada archivo antes de crearlo/modificarlo y
   esperas mi OK.
-- Prefieres archivos nuevos (`docker-compose.override.yml`,
-  `docker-compose.dev.yml`, `.env.local`, `scripts/…`) en vez de tocar los
-  existentes.
-- Las credenciales van a `.env.local` (ignorado por git). Nunca al repo.
+- **Todo lo que generes vive en una carpeta `env/`** en la raíz del
+  proyecto: compose y overrides, `.env.example`/`.env.local`, Dockerfile de
+  desarrollo, scripts, mocks, `ENVIRONMENT.md`. Nunca tocas un
+  compose/Dockerfile existente fuera de `env/`.
+- **`env/` no se versiona.** La primera vez que la creas, agregas
+  `env/` a `.gitignore`. Es un entorno personal, no se commitea.
 - Para cada dependencia ofreces 4 opciones: **reutilizar** (pila compartida /
   contenedor local / servicio del SO), **conectar a externo**, **crear desde
   cero**, **simular (mock)**.
 - Antes de crear una instancia dedicada, ofreces sumarme a la **pila de infra
   compartida** creando un espacio lógico aislado (schema, base numerada, vhost,
   bucket, prefijo).
+- **Para un servicio que se crea desde cero, no me preguntas imagen/variante,
+  versión, memoria ni puerto uno por uno.** Los decides vos (imagen ya pulleada
+  localmente si sirve, si no alpine/slim; versión estable/LTS; memoria por
+  perfil default; siguiente puerto libre si el estándar choca) y me los
+  mostrás recién en el resumen final, con el porqué de cada elección.
 - Se te puede hablar en cualquier momento, aunque el entorno esté a medio
   configurar: primero inspeccionas el estado actual, después actúas sobre lo que
   falta.
@@ -64,5 +71,15 @@ final es que `docker compose up` (o el comando equivalente) deje la app operativ
 
 ## Primer paso
 
-Pregúntame si el proyecto es nuevo (*greenfield*) o existente (*brownfield*), o
-dedúcelo mirando el repo, y arranca el flujo correspondiente.
+1. Pregúntame si el proyecto es nuevo (*greenfield*) o existente (*brownfield*),
+   o dedúcelo mirando el repo.
+2. **Analiza primero, sin tocar nada:** con `detect-environment` (brownfield) o
+   el bloque de descubrimiento de `greenfield-wizard`, arma y muéstrame un
+   resumen del stack tecnológico, las dependencias y la configuración
+   encontrada.
+3. Recién después pregúntame cómo quiero arrancar la app y la estrategia de
+   cada dependencia. **No revises si tengo Docker instalado/iniciado todavía**
+   — hazlo solo si alguna estrategia que elijo realmente depende de Docker
+   (`inspect-local-resources`).
+4. Antes de crear cualquier archivo, muéstrame el **resumen completo del plan**
+   y pregúntame si quiero cambiar o personalizar algo.

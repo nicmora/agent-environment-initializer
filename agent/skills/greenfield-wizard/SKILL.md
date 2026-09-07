@@ -50,23 +50,27 @@ respuesta cierra un tema, salta el resto de ese bloque.
 ### Bloque 8 — Configuración y secretos
 - ¿Cómo se cargan las variables? (`.env`, config server, secretos del SO).
 
-### Bloque 9 — Puertos y red
-- Puertos que expondrá cada servicio. Crúzalos con `inspect-local-resources`
-  para evitar colisiones.
+### Bloque 9 — Red
+- No preguntes puertos: si alguna dependencia va a crearse en Docker (bloque
+  3-7), ejecuta `inspect-local-resources` para saber qué está ocupado y que el
+  agente elija el puerto de cada servicio sin preguntarlo (ver `service-recipes`).
+  Si todo se resuelve con conexión externa o mock, no hace falta ni este paso.
 
 ## Salida
 
 1. Un **resumen del entorno objetivo**: lista de servicios (propios + infra),
-   con tipo, imagen/variante/versión propuesta (por defecto alpine o slim),
-   puerto y presupuesto de memoria sugerido. Todo como default parametrizable.
-   Estos son defaults, no decisiones: al materializar cada servicio,
-   `service-recipes` pregunta de forma explícita la variante/imagen base, la
-   versión/tag y el presupuesto de memoria (perfil o `mem_limit` +
-   `mem_reservation` personalizados), ofreciendo las alternativas.
+   con tipo e imagen/variante/versión/memoria/puerto que decidió el agente
+   (ver criterio en `service-recipes` y "Lo que el agente decide solo" en
+   `AGENT.md`). Esto no se pregunta dependencia por dependencia: se resuelve y
+   se muestra recién en el resumen final del punto 3, con la posibilidad de
+   cambiarlo ahí.
 2. Para cada dependencia de infra: pregunta si se prefiere **pila compartida**
    (deriva a `shared-infra`) o **instancia dedicada al proyecto**.
-3. Handoff a `compose-builder` + `service-recipes` para materializar, y luego
-   `document-environment`.
+3. **Resumen final y ajustes.** Antes del handoff, presenta el plan completo
+   (servicios, estrategia, imágenes, puertos, memoria, archivos a crear dentro
+   de `env/`) y pregunta si algo se quiere cambiar o personalizar.
+4. Handoff a `compose-builder` + `service-recipes` para materializar dentro de
+   `env/`, y luego `document-environment`.
 
 ## Reglas
 

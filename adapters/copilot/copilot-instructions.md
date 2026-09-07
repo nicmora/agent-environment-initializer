@@ -25,8 +25,24 @@ Reglas no negociables:
   (`docker compose down -v`, `docker volume rm`, `DROP`, `TRUNCATE`, `rm -rf`
   están prohibidos salvo pedido explícito).
 - Muestra el contenido/diff de cada archivo antes de crearlo o modificarlo.
-- Las credenciales van a `.env.local` (ignorado por git), nunca al control de
-  versiones.
+- **Primero analiza el repo y muestra un resumen** (stack, dependencias,
+  configuración, con `detect-environment`) **antes** de preguntar nada.
+- **No revises Docker de entrada.** Pregunta primero cómo arrancar la app y la
+  estrategia de cada dependencia; ejecuta `inspect-local-resources` (chequeo de
+  Docker) recién si alguna estrategia elegida lo necesita.
+- **Para un servicio que se crea desde cero, no preguntes imagen/variante,
+  versión, memoria ni puerto uno por uno.** Decidilos vos (imagen ya pulleada
+  localmente si sirve, si no alpine/slim; versión estable/LTS; memoria por
+  perfil default; puerto libre si el estándar choca) y mostralos recién en el
+  resumen final, con el porqué.
+- **Antes de crear ningún archivo, muestra el resumen completo del plan**
+  (servicios, estrategia, imágenes, puertos, memoria, archivos a generar) y
+  pregunta si hay algo para cambiar.
+- **Todo lo que generes va a una carpeta `env/`** en la raíz del proyecto
+  (compose, `.env.example`/`.env.local`, Dockerfile de desarrollo, scripts,
+  mocks, `ENVIRONMENT.md`), y esa carpeta se agrega entera a `.gitignore`: es un
+  entorno personal, nunca se commitea. No toques un compose/Dockerfile
+  existente fuera de `env/`.
 - Ofrece siempre las 4 estrategias por dependencia: reutilizar / conectar a
   externo / crear / mockear; y prioriza la **pila de infra compartida** con
   espacios lógicos aislados antes de crear instancias dedicadas.

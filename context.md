@@ -53,10 +53,11 @@ resolver una incidencia. Ante un conflicto, su proceder es el siguiente:
   un recurso existente en lugar de su recreación).
 - Ejecutar acciones destructivas únicamente cuando la persona usuaria lo solicite
   de forma expresa y previa confirmación.
-- Generar los archivos nuevos de forma diferenciada (por ejemplo,
-  `docker-compose.override.yml`, `docker-compose.dev.yml` o `.env.local`) y, en
-  caso de modificar archivos existentes, presentar el *diff* correspondiente y
-  solicitar aprobación.
+- Generar los archivos nuevos de forma diferenciada, todos dentro de una
+  carpeta `env/` (por ejemplo, `env/docker-compose.override.yml`,
+  `env/docker-compose.dev.yml` o `env/.env.local`; véase la sección
+  2.8) y, en caso de modificar archivos existentes, presentar el *diff*
+  correspondiente y solicitar aprobación.
 
 ### 2.4. Flexibilidad de elección
 
@@ -110,7 +111,49 @@ siguiente:
   incorporación se realiza de forma aditiva (un nuevo *schema*, una nueva cola,
   un nuevo *bucket*) y previa confirmación.
 
-### 2.7. Reproducibilidad y trazabilidad
+### 2.7. Orden de la interacción: analizar antes de preguntar, Docker solo si hace falta
+
+El agente sigue siempre el mismo orden, sin importar cómo se lo invoque:
+
+1. **Analiza el proyecto y muestra un resumen** — stack tecnológico,
+   dependencias detectadas y configuración existente — antes de formular
+   ninguna pregunta y sin tocar la máquina ni Docker.
+2. **Pregunta cómo arrancar la aplicación y, dependencia por dependencia, qué
+   estrategia usar** (reutilizar, conectar a externo, crear o simular).
+3. **Inspecciona Docker y la máquina únicamente si alguna estrategia elegida lo
+   requiere** (reutilizar un contenedor local, o crear un servicio desde cero).
+   Si el proyecto se resuelve enteramente con conexiones externas o
+   simulaciones, este paso se omite por completo.
+4. **Presenta el plan completo y ofrece ajustarlo** antes de generar un solo
+   archivo: servicios, estrategia por dependencia, imágenes, puertos, memoria y
+   la lista de archivos que va a crear.
+5. Recién entonces materializa los archivos.
+
+### 2.8. Artefactos generados en una carpeta local, no versionada
+
+Todo archivo que el agente agrega para poner en marcha el proyecto —
+definiciones de Compose y sus *overrides*, `Dockerfile` de desarrollo, archivos
+`.env` de ejemplo y locales, scripts de conveniencia, *stubs* de simulación y el
+documento `ENVIRONMENT.md`— se ubica dentro de una carpeta `env/` en la
+raíz del proyecto, nunca sueltos junto al código ni mezclados con
+infraestructura preexistente. La primera vez que el agente crea esa carpeta,
+agrega la línea `env/` a `.gitignore`.
+
+`env/` es un entorno **personal** de quien lo generó, no una convención
+que el resto del equipo comparta por control de versiones: nada de lo que hay
+adentro se commitea. Esto no exime de cuidar la portabilidad: el agente evita
+igualmente rutas absolutas con usuario o nombres de carpeta propios de una
+máquina, de modo que la persona pueda regenerar `env/` sin fricción si
+cambia de equipo o reclona el repositorio.
+
+Cuando el proyecto ya tiene un `docker-compose.yml` u otra infraestructura
+versionada en la raíz, el agente no la toca: la referencia desde
+`env/` (por ejemplo, un *override* que se combina con `-f` explícito en
+el comando de arranque, ya que Docker Compose solo mezcla automáticamente un
+`docker-compose.override.yml` que esté en el mismo directorio que el archivo
+base).
+
+### 2.9. Reproducibilidad y trazabilidad
 
 Toda configuración aplicada por el agente queda documentada: los servicios
 disponibles, el modo de conexión de la aplicación, las variables de entorno
@@ -204,13 +247,16 @@ ejes de indagación son, entre otros:
    con los servicios ya en ejecución en el equipo.
 
 A partir de las respuestas, el agente propone una definición base de
-`docker-compose.yml` acompañada de un documento `ENVIRONMENT.md`. Para cada
-servicio nuevo, formula las preguntas de configuración necesarias (nombre de la
-base de datos, credenciales de desarrollo, versión de la imagen, volumen
-persistente, puerto en el equipo anfitrión, entre otras). Antes de crear
-servicios de infraestructura dedicados, el agente ofrece adherir la aplicación a
-la pila compartida descrita en la sección 2.6, creando en ella el espacio lógico
-correspondiente.
+`env/docker-compose.yml` acompañada de un documento
+`env/ENVIRONMENT.md`. Para cada servicio nuevo, formula las preguntas de
+configuración necesarias (nombre de la base de datos, credenciales de
+desarrollo, versión de la imagen, volumen persistente, puerto en el equipo
+anfitrión, entre otras). Antes de crear servicios de infraestructura dedicados,
+el agente ofrece adherir la aplicación a la pila compartida descrita en la
+sección 2.6, creando en ella el espacio lógico correspondiente. Solo si se
+decide crear algún servicio en Docker, el agente inspecciona antes la máquina
+(sección 2.7) para evitar colisiones de puertos. Antes de generar los archivos,
+presenta el plan completo y ofrece ajustarlo.
 
 ### 5.2. Escenario *brownfield* (proyecto preexistente)
 
@@ -229,11 +275,13 @@ correspondiente.
    - Pruebas de integración y sus *testcontainers* o *fixtures*.
    - Migraciones de esquema.
    - Documentación existente (`README`, `CONTRIBUTING`, directorio `docs/`).
-2. **Informe de hallazgos.** El agente presenta la relación de dependencias
-   detectadas, con indicación de la evidencia (archivo y línea) y distinción
-   entre los hallazgos confirmados y los inferidos.
-3. **Determinación de la estrategia por dependencia.** Para cada dependencia, el
-   agente consulta:
+2. **Informe de hallazgos.** El agente presenta, antes de preguntar nada, un
+   resumen del stack tecnológico y la relación de dependencias detectadas, con
+   indicación de la evidencia (archivo y línea) y distinción entre los
+   hallazgos confirmados y los inferidos.
+3. **Cómo arranca la app y estrategia por dependencia.** El agente pregunta
+   primero cómo se quiere levantar la aplicación (comando, contenedor propio o
+   en el host). Después, para cada dependencia, consulta:
    - Si existe una pila de infraestructura compartida en el equipo (véase la
      sección 2.6), en cuyo caso se ofrece conectar la aplicación a esta y crear
      en ella el espacio lógico correspondiente (*schema*, base numerada,
@@ -243,22 +291,31 @@ correspondiente.
      ejecución, en cuyo caso se ofrece la conexión a este mediante la detección
      de su nombre, red, puerto y credenciales cuando sea posible; o un servicio
      instalado en el sistema operativo, en cuyo caso se ofrece dirigir la
-     aplicación a `localhost`.
+     aplicación a `localhost`. **Recién en este punto** —si la persona elige
+     reutilizar un recurso local o crear uno desde cero— el agente inspecciona
+     Docker y la máquina (sección 2.7); si todas las dependencias se resuelven
+     por conexión externa o simulación, esa inspección no llega a ejecutarse.
    - Si se desea la conexión a una instancia externa (*staging* o nube), en cuyo
      caso se solicitan el *host*, el puerto y las credenciales, que se almacenan
-     en `.env.local` (no versionado).
+     en `env/.env.local`.
    - Si se desea la creación del recurso desde cero en Docker, en cuyo caso se
      formulan las preguntas de configuración y el servicio se incorpora,
-     preferentemente, a un archivo `docker-compose.override.yml` o
-     `docker-compose.dev.yml`, sin alterar la definición existente.
+     preferentemente, a un archivo `env/docker-compose.override.yml` o
+     `env/docker-compose.dev.yml`, sin alterar la definición existente.
    - Si se trata de un servicio de un tercero o de otro equipo, se ofrece la
      conexión real o la simulación, conforme a la sección 6.
-4. **Preservación de lo existente.** Cuando exista un `docker-compose.yml`, el
-   agente no lo reescribe, sino que trabaja mediante *overrides*. Si un puerto
-   está ocupado, propone otro. Si existe un volumen con datos, no lo recrea.
-5. **Cierre.** El agente genera o actualiza el documento `ENVIRONMENT.md`,
-   documenta el comando de arranque, ejecuta una comprobación de salud e informa
-   de las tareas pendientes.
+4. **Preservación de lo existente.** Cuando exista un `docker-compose.yml` en la
+   raíz del repositorio, el agente no lo reescribe, sino que trabaja mediante
+   *overrides* ubicados en `env/` (combinados con `-f` explícito al
+   arrancar). Si un puerto está ocupado, propone otro. Si existe un volumen con
+   datos, no lo recrea.
+5. **Resumen del plan y ajustes.** Antes de generar un solo archivo, el agente
+   presenta el plan consolidado (servicios, estrategia, imágenes, puertos,
+   memoria, archivos a crear en `env/`) y pregunta si algo se quiere
+   cambiar o personalizar.
+6. **Cierre.** El agente genera o actualiza el documento
+   `env/ENVIRONMENT.md`, documenta el comando de arranque, ejecuta una
+   comprobación de salud e informa de las tareas pendientes.
 
 ## 6. Estrategia de simulación para dependencias externas
 
@@ -267,7 +324,7 @@ microservicio de otro equipo o proveedor de nube—, el agente ofrece las
 siguientes opciones:
 
 - **Conexión real.** Configuración de credenciales y puntos de acceso reales en
-  el archivo `.env.local`.
+  el archivo `env/.env.local`.
 - **Simulación** (*mock* o *stub*), según la naturaleza del servicio:
   - Servicios HTTP/REST/gRPC: puesta en marcha de un servidor de simulación
     dentro de la definición de Compose (WireMock, Mockoon, Prism a partir de una
@@ -281,32 +338,42 @@ siguientes opciones:
 - **Modo mixto.** Combinación de servicios reales y simulados, seleccionable por
   dependencia.
 
-La estrategia adoptada se registra en el documento `ENVIRONMENT.md` y se gobierna
-mediante variables de entorno y perfiles de Compose (`--profile`), de modo que
-sea posible alternar entre configuraciones sin necesidad de rehacerlas.
+La estrategia adoptada se registra en el documento `env/ENVIRONMENT.md` y
+se gobierna mediante variables de entorno y perfiles de Compose (`--profile`),
+de modo que sea posible alternar entre configuraciones sin necesidad de
+rehacerlas.
 
 ## 7. Artefactos generados
 
-- `docker-compose.yml` en el escenario *greenfield*, o
-  `docker-compose.override.yml` y `docker-compose.dev.yml` en el escenario
-  *brownfield*.
+Todos los artefactos de esta sección se ubican dentro de una carpeta
+`env/` en la raíz del proyecto (véase la sección 2.8) y esa carpeta se
+agrega íntegramente a `.gitignore`: ninguno de estos archivos se versiona.
+
+- `env/docker-compose.yml` en el escenario *greenfield*, o
+  `env/docker-compose.override.yml` y `env/docker-compose.dev.yml`
+  en el escenario *brownfield* (sin tocar un `docker-compose.yml` preexistente
+  fuera de `env/`).
 - Definición de la pila de infraestructura compartida (por ejemplo, un proyecto
   `dev-infra/docker-compose.yml` con su red reutilizable), cuando se opte por
-  crearla, junto con la documentación de los espacios lógicos asignados a cada
-  servicio.
-- `Dockerfile` de desarrollo, cuando la aplicación requiera un contenedor propio,
-  con la imagen base y su variante (alpine/slim) como `ARG` con default.
-- `.env.example` (versionado, sin secretos) y `.env.local` (excluido del control
-  de versiones).
-- Actualización de `.gitignore` para excluir secretos y datos.
-- Scripts de conveniencia (`scripts/dev-up`, `scripts/dev-down`,
-  `scripts/dev-logs`) o los *targets* equivalentes en `Makefile` o `Taskfile`.
-- Configuración de los simuladores (directorios `mocks/`, `wiremock/` o
-  `stubs/`).
-- `ENVIRONMENT.md`: inventario de servicios, modo de conexión, variables de
-  entorno, puertos, procedimientos de arranque y de detención, estrategia
-  adoptada para cada dependencia (real, creada, reutilizada o simulada) y tareas
-  pendientes.
+  crearla — esta pila es un proyecto de Compose aparte, independiente de
+  `env/`, y su propia gestión de versionado queda fuera del alcance de
+  este agente —, junto con la documentación de los espacios lógicos asignados a
+  cada servicio.
+- `env/Dockerfile.dev`, cuando la aplicación requiera un contenedor
+  propio, con la imagen base y su variante (alpine/slim) como `ARG` con
+  default; el contexto de build sigue siendo la raíz del proyecto.
+- `env/.env.example` y `env/.env.local`.
+- Alta de la línea `env/` en `.gitignore` (creándolo si no existe).
+- Scripts de conveniencia (`env/scripts/dev-up`,
+  `env/scripts/dev-down`, `env/scripts/dev-logs`) o los *targets*
+  equivalentes en `env/Makefile` o `env/Taskfile`, que arman el
+  comando completo de Compose con los `-f` que correspondan.
+- Configuración de los simuladores (directorios `env/mocks/`,
+  `env/wiremock/` o `env/stubs/`).
+- `env/ENVIRONMENT.md`: inventario de servicios, modo de conexión,
+  variables de entorno, puertos, procedimientos de arranque y de detención,
+  estrategia adoptada para cada dependencia (real, creada, reutilizada o
+  simulada) y tareas pendientes.
 
 ## 8. Reglas de seguridad y de no destrucción
 

@@ -8,12 +8,16 @@ description: Verifica que el entorno quedó operativo — valida la sintaxis del
 ## Procedimiento
 
 1. **Validar configuración.**
-   `docker compose config` (detecta errores de sintaxis/variables sin resolver).
+   Usa el comando completo con los `-f` que arma `compose-builder` (compose base
+   + `env/docker-compose.override.yml` + `--env-file env/.env.local`
+   si hay compose previo; solo `env/docker-compose.yml` en greenfield):
+   `docker compose ... config` (detecta errores de sintaxis/variables sin resolver).
 
 2. **Levantar infra primero.**
-   `docker compose --profile infra up -d` (o la pila compartida si aplica).
-   Espera los healthchecks: `docker compose ps` hasta `healthy`. Timeout
-   razonable; si algo no pasa a healthy, muestra `docker compose logs <svc>`.
+   El mismo comando con `--profile infra up -d` (o la pila compartida si
+   aplica). Espera los healthchecks: `docker compose ... ps` hasta `healthy`.
+   Timeout razonable; si algo no pasa a healthy, muestra
+   `docker compose ... logs <svc>`.
 
 3. **Migraciones de esquema (opcional, con permiso).**
    Si el proyecto tiene Flyway/Liquibase/Alembic/Prisma/Knex/EF y la persona
@@ -39,13 +43,13 @@ description: Verifica que el entorno quedó operativo — valida la sintaxis del
 
   | Servicio | Desde la app | Desde el host | Usuario / clave | Espacio lógico | Cadena de conexión / var | Consola / UI |
   |---|---|---|---|---|---|---|
-  | postgres | `postgres:5432` | `localhost:5432` | `app` / `.env.local` | DB `miproyecto`, schema `public` | `DATABASE_URL=postgres://…` | — |
+  | postgres | `postgres:5432` | `localhost:5432` | `app` / `env/.env.local` | DB `miproyecto`, schema `public` | `DATABASE_URL=postgres://…` | — |
   | redis | `redis:6379` | `localhost:6380` | — | base `2` | `REDIS_URL=redis://redis:6379/2` | — |
-  | rabbitmq | `rabbitmq:5672` | `localhost:5672` | `dev` / `.env.local` | vhost `/miproyecto` | `AMQP_URL=amqp://…` | http://localhost:15672 |
+  | rabbitmq | `rabbitmq:5672` | `localhost:5672` | `dev` / `env/.env.local` | vhost `/miproyecto` | `AMQP_URL=amqp://…` | http://localhost:15672 |
 
   Cierra recordando que cualquiera de esos nombres (DB, schema, vhost, bucket,
   base de Redis, puertos) se puede renombrar y tú lo propagas a compose,
-  `.env*`, `ENVIRONMENT.md` y scripts.
+  `.env*`, `ENVIRONMENT.md` y scripts, todos dentro de `env/`.
 - ⚠️ Pendientes: variables que faltan, servicios en modo mock, credenciales
   externas no provistas, migraciones no corridas, etc.
 - Comando para levantar y para apagar (recuerda: `down` sin `-v`).

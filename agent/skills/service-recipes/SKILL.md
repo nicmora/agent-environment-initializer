@@ -1,13 +1,13 @@
 ---
 name: env-service-recipes
-description: Recetas de configuración por tipo de servicio de infraestructura (PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, MinIO, Elasticsearch/OpenSearch, LocalStack, Keycloak, Mailpit). Define qué preguntar y qué bloque de docker-compose + variables generar para cada uno. Usar cuando hay que crear un servicio desde cero y se necesitan los detalles de configuración.
+description: Recetas de configuración por tipo de servicio de infraestructura (PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, MinIO, Elasticsearch/OpenSearch, LocalStack, Keycloak, Mailpit). Define qué decide el agente solo, qué sigue preguntando y qué bloque de docker-compose + variables generar para cada uno. Usar cuando hay que crear un servicio desde cero y se necesitan los detalles de configuración.
 ---
 
 # Skill: service-recipes
 
-Para cada servicio: **preguntas mínimas** (con defaults) y **bloque de compose**.
-Siempre incluir healthcheck y volumen nombrado. Versiones: sugiere una
-LTS/estable reciente y confirma.
+Para cada servicio: **valores que el agente decide solo** (imagen, versión,
+memoria, puerto), **datos que sigue preguntando** (nombres/credenciales) y
+**bloque de compose**. Siempre incluir healthcheck y volumen nombrado.
 
 > Los bloques de abajo muestran la forma del servicio. Al materializar,
 > `compose-builder` aplica sobre ellos: **imagen/tag por variable con default**
@@ -31,54 +31,58 @@ LTS/estable reciente y confirma.
 | Keycloak | `quay.io/keycloak/keycloak:25` | — | |
 | Mailpit | `axllent/mailpit:latest` → fija versión | — | imagen ya mínima |
 
-## Antes de generar: proponer y confirmar valores
+## Qué decide el agente solo, y qué sigue preguntando
 
-Los defaults de cada receta son **propuestas**, no decisiones. Presenta una
-tabla de "valores propuestos" y ofrece editarlos antes de crear nada:
+No preguntes imagen/variante, versión/tag, memoria ni puerto uno por uno — eso
+frena el wizard con detalles técnicos que el agente puede resolver mejor que
+haciendo preguntas. Decidilos vos con el criterio de abajo (ver también "Lo que
+el agente decide solo" en `AGENT.md`) y déjalos, junto con una línea del
+porqué, en el **resumen final del plan** de `brownfield-wizard`/
+`greenfield-wizard`, donde recién ahí la persona puede pedir cambiarlos.
 
-| Dato | Propuesto | ¿Cambiar? |
-|---|---|---|
-| nombre de DB / schema / bucket / vhost | `<default>` | |
-| usuario / contraseña de dev | `<default>` | |
-| puerto en el host | `<default>` | |
-| nombre de contenedor / volumen / red | `<prefijo-proyecto>_…` | |
-| imagen y tag | `<repo:tag-alpine>` (variable `<SVC>_IMAGE`) | |
-| variante base | `alpine` | `slim` / `full` |
-| límite de memoria | `<perfil s = 512m>` (variable `<SVC>_MEM`) | `xs/s/m/l` |
-| memoria reservada | `<perfil s = 128m>` (variable `<SVC>_MEM_RES`) | |
+Lo que **sí** seguís preguntando de forma explícita para cada servicio nuevo
+(son decisiones de la persona, no técnicas): nombre de DB/schema/bucket/vhost,
+usuario y contraseña de dev, y nombre de contenedor/volumen/red si hay
+preferencia.
 
-### Preguntas obligatorias por servicio (no las saltees)
+| Dato | Quién decide |
+|---|---|
+| nombre de DB / schema / bucket / vhost | la persona (pregunta) |
+| usuario / contraseña de dev | la persona (pregunta) |
+| nombre de contenedor / volumen / red | la persona, con default `<prefijo-proyecto>_…` |
+| imagen y variante (`<SVC>_IMAGE`) | el agente (ver criterio) |
+| versión / tag | el agente (ver criterio) |
+| puerto en el host | el agente (ver criterio) |
+| límite y reserva de memoria (`<SVC>_MEM`, `<SVC>_MEM_RES`) | el agente (perfil por defecto de la receta) |
 
-Para **cada** servicio que se cree desde cero, antes de pasar a
-`compose-builder` tienes que hacer estas tres preguntas de forma explícita. No
-alcanza con aplicar el default en silencio: propón el default marcándolo como
-recomendado y **ofrece las alternativas concretas**. Si el asistente tiene
-selector interactivo (en Claude Code, `AskUserQuestion`), úsalo; puedes agrupar
-las tres en una sola tanda porque son de la misma dependencia.
+### Criterio para decidir imagen, versión, memoria y puerto
 
-1. **Variante / imagen base.** Opciones: `alpine` (recomendada cuando la imagen
-   la soporta), `slim` / `-bookworm-slim`, `full` / `-bookworm`, u **otra
-   imagen** (p. ej. MariaDB en vez de MySQL, OpenSearch en vez de Elasticsearch).
-   Muestra el repo:tag resultante de cada opción y por qué se recomienda la
-   pequeña.
-2. **Versión / tag.** Opciones: la versión estable/LTS sugerida por la receta
-   (recomendada), una o dos versiones alternativas que publique esa imagen, o
-   una versión a elección (entrada de texto). Nunca fijes `latest` ni un tag sin
-   número.
-3. **Presupuesto de memoria.** Ofrece la tabla de perfiles (`xs` 256m / `s`
-   512m / `m` 1g / `l` 2g) con el default de la receta marcado como recomendado,
-   y una opción **"personalizado"** que pida `mem_limit` y `mem_reservation` a
-   mano. Aclara que ambos valores quedan como variables (`<SVC>_MEM` y
-   `<SVC>_MEM_RES`) pisables desde `.env.local`.
+1. **Variante / imagen base.** Si `inspect-local-resources` detectó una imagen
+   de este servicio ya pulleada o corriendo localmente y sirve (misma familia,
+   versión compatible con lo que necesita el proyecto), usá esa — ahorra la
+   descarga y mantiene consistencia con lo que ya hay. Si no hay nada
+   reutilizable, elegí la variante más chica que soporte el stack: `alpine`
+   (default de la tabla de abajo) → `slim`/`-bookworm-slim` si la imagen no
+   publica alpine o el stack necesita glibc/extensiones nativas → `full` como
+   último recurso.
+2. **Versión / tag.** Si el proyecto ya fija una versión (driver/cliente con
+   versión mínima, otro contenedor de ese motor ya corriendo), alineate a esa.
+   Si no hay pista, usá la estable/LTS que sugiere la receta. Nunca `latest` ni
+   un tag sin número.
+3. **Presupuesto de memoria.** Usá el perfil por defecto de la receta (`xs`
+   256m / `s` 512m / `m` 1g / `l` 2g según el tipo de servicio).
+4. **Puerto en el host.** Usá el puerto estándar del servicio. Si
+   `inspect-local-resources` reporta que ya está ocupado, elegí vos el
+   siguiente puerto libre.
 
-Recién con esas tres respuestas (más los nombres/credenciales/puerto de la
-tabla de arriba) haces el handoff a `compose-builder`.
+Con estos cuatro resueltos (más los nombres/credenciales que sí preguntaste)
+hacés el handoff a `compose-builder`.
 
 ## Después de crear: ficha de conexión
 
 Al terminar cada servicio, muestra su **ficha de conexión** (ver "Resumen de
 conexión y valores editables" en `AGENT.md`): host/puerto desde la app y desde
-el host, credenciales (`.env.local`), espacio lógico, cadena de conexión lista
+el host, credenciales (`env/.env.local`), espacio lógico, cadena de conexión lista
 para pegar, variable/s de entorno, URL de consola/UI y comando de cliente
 rápido.
 
@@ -105,7 +109,7 @@ postgres:
     timeout: 5s
     retries: 10
 ```
-`.env.example`: `# POSTGRES_IMAGE=postgres:16-alpine (default) | 16-bookworm | 16`
+`env/.env.example`: `# POSTGRES_IMAGE=postgres:16-alpine (default) | 16-bookworm | 16`
 y `# POSTGRES_MEM=512m (perfil s) | 256m | 1g`.
 Vars: `DATABASE_URL=postgres://user:pass@postgres:5432/db`.
 
@@ -179,5 +183,6 @@ mailpit:
 Vars: `SMTP_HOST=mailpit`, `SMTP_PORT=1025`.
 
 ## Regla general
-Toda credencial generada va a `.env.local`, con su equivalente de ejemplo en
-`.env.example`. Nunca escribas secretos fijos en el compose versionado.
+Toda credencial generada va a `env/.env.local`, con su equivalente de
+ejemplo en `env/.env.example`. Nunca escribas secretos fijos en el
+compose.

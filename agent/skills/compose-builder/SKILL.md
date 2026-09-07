@@ -7,28 +7,43 @@ description: Genera o actualiza archivos docker-compose (base, override o dev) y
 
 ## Entrada
 
-La tabla de decisiones de `brownfield-wizard` o `greenfield-wizard`, la lista de
-puertos ocupados de `inspect-local-resources`, y las recetas de
-`service-recipes`.
+El **plan ya confirmado** (con la persona habiendo tenido la oportunidad de
+cambiar algo, ver "Resumen final" en `brownfield-wizard`/`greenfield-wizard`):
+la tabla de decisiones, la lista de puertos ocupados de
+`inspect-local-resources` (si se ejecutó), y las recetas de `service-recipes`.
+No materialices nada si ese resumen final todavía no se mostró y confirmó.
 
-## Reglas de archivos
+## Todo vive en `env/`
 
-- **Greenfield sin compose previo** → crea `docker-compose.yml` + `.env.example`
-  + `.env.local`.
-- **Brownfield con compose previo** → NO lo toques. Crea
-  `docker-compose.override.yml` (se aplica automático) o
-  `docker-compose.dev.yml` (se aplica con `-f`). Prefiere `override` salvo que ya
-  exista uno con otro propósito.
+Todo lo que esta skill genera va **dentro de una carpeta `env/` en la
+raíz del proyecto**, nunca en la raíz junto al código. Es la carpeta 3 de las
+reglas invariables de `AGENT.md`: personal, no versionada.
+
+- Primera vez que se crea `env/` en el proyecto: agrega la línea
+  `env/` a `.gitignore` (créalo si no existe) y muéstraselo a la persona.
+  No hace falta ignorar archivo por archivo — la carpeta entera queda afuera de
+  git.
+- **Greenfield sin compose previo** → crea `env/docker-compose.yml` +
+  `env/.env.example` + `env/.env.local`.
+- **Brownfield con `docker-compose*.yml` en la raíz del repo** → **NO lo
+  toques.** Crea `env/docker-compose.override.yml` o
+  `env/docker-compose.dev.yml`. Como ya no vive al lado del compose base,
+  Docker Compose **no lo va a mezclar solo**: el comando de arranque (script en
+  `env/`, ver más abajo) tiene que pasar ambos con `-f` explícito, p. ej.
+  `docker compose -f docker-compose.yml -f env/docker-compose.override.yml
+  --env-file env/.env.local up`. Documenta ese comando exacto en el
+  resumen y en `ENVIRONMENT.md`.
+- **Brownfield sin compose previo** → igual que greenfield: todo el compose vive
+  en `env/docker-compose.yml`.
 - Muestra siempre el archivo completo o el *diff* y pide confirmación antes de
   escribir.
-- Actualiza `.gitignore`: agrega `.env.local`, `.env.*.local`,
-  `docker-compose.dev.yml` si contiene datos sensibles (si no, versiónalo).
 
 ## Construcción
 
 1. **Servicios de la app.** Si la app corre en contenedor, define `build:` o
-   `image:`, `env_file: [.env, .env.local]`, `ports`, `depends_on` con
-   `condition: service_healthy`, `develop.watch` o bind mounts para hot reload.
+   `image:`, `env_file: [env/.env.example, env/.env.local]`,
+   `ports`, `depends_on` con `condition: service_healthy`, `develop.watch` o
+   bind mounts para hot reload.
 2. **Servicios de infra creados desde cero.** Toma la definición de
    `service-recipes` (imagen+versión, env, volumen nombrado, healthcheck).
    Ponlos bajo un `profiles: ["infra"]` si la persona quiere poder omitirlos.
@@ -36,7 +51,7 @@ puertos ocupados de `inspect-local-resources`, y las recetas de
 3. **Conexión a pila compartida.** No redefinas la infra; declara la red externa
    y apunta las variables al nombre de servicio de la pila (ver `shared-infra`).
 4. **Conexión a recurso local / externo.** No agregues servicio; solo define las
-   variables en `.env.local`. Para servicios del host desde un contenedor usa
+   variables en `env/.env.local`. Para servicios del host desde un contenedor usa
    `host.docker.internal` (agrega `extra_hosts: ["host.docker.internal:host-gateway"]`
    en Linux).
 5. **Mocks.** Agrega los servicios de mock bajo `profiles: ["mock"]` (ver
@@ -86,7 +101,8 @@ services:
     mem_limit: ${POSTGRES_MEM:-512m}   # compat con `docker compose up` sin swarm
 ```
 
-Presupuestos sugeridos por tipo (ofrécelos como tabla y deja elegir):
+Presupuestos por tipo — el agente elige el perfil, no lo pregunta (ver
+`service-recipes`):
 
 | Perfil | Límite mem | Uso |
 |---|---|---|
@@ -101,17 +117,27 @@ Presupuestos sugeridos por tipo (ofrécelos como tabla y deja elegir):
   ficha de conexión.
 - Si la persona no quiere límites, déjalos comentados con una nota, no los
   borres.
-- **No materialices ningún servicio sin haber confirmado con la persona el
-  perfil de recursos y los valores concretos de `mem_limit` y `mem_reservation`**
-  (default marcado como recomendado + alternativas + opción personalizada). Eso
-  se pregunta en `service-recipes`; si llegaste acá sin esa respuesta, vuelve a
-  preguntar antes de escribir el archivo. Lo mismo vale para la variante de
-  imagen y la versión/tag.
+- La imagen/variante, la versión/tag, el perfil de memoria y el puerto ya
+  vienen decididos por el agente cuando llegás a esta skill (`service-recipes`
+  los resolvió con su criterio automático y los mostró en el resumen final). No
+  hace falta volver a preguntarlos acá; si la persona pidió cambiar alguno en
+  ese resumen, materializa con el valor que confirmó.
 
 ## Dockerfile de desarrollo
 
 Cuando la app necesita contenedor propio y no hay Dockerfile:
 
+- Va a `env/Dockerfile.dev`. El contexto de build sigue siendo la raíz
+  del proyecto (para que los `COPY` vean el código), solo cambia dónde vive el
+  Dockerfile:
+  ```yaml
+  build:
+    context: .
+    dockerfile: env/Dockerfile.dev
+    args:
+      NODE_VERSION: ${NODE_VERSION:-20}
+      NODE_VARIANT: ${NODE_VARIANT:-alpine}
+  ```
 - Base como `ARG` con default pequeño y pisable en build:
   ```dockerfile
   ARG NODE_VERSION=20
@@ -120,45 +146,47 @@ Cuando la app necesita contenedor propio y no hay Dockerfile:
   ```
 - Elige la variante igual que para infra: alpine → slim → full, según lo que
   tolere el stack (paquetes nativos, Prisma, `sharp`, `puppeteer`, etc.).
-- Expón los `ARG` en el compose para no editar el Dockerfile:
-  ```yaml
-  build:
-    context: .
-    args:
-      NODE_VERSION: ${NODE_VERSION:-20}
-      NODE_VARIANT: ${NODE_VARIANT:-alpine}
-  ```
-- Multi-stage: deps → build → runtime pequeño. Usuario no-root. `.dockerignore`.
+- Multi-stage: deps → build → runtime pequeño. Usuario no-root.
+  `env/.dockerignore` (o el `.dockerignore` de la raíz si ya existe; no lo
+  dupliques).
 
 ## Variables de entorno
 
-- `.env.example`: todas las claves con valores de ejemplo/dev **no sensibles**.
-  Versionado. Incluye `SHARED_INFRA_DIR=` (vacío o `../docker-environment`) si el
-  proyecto usa una pila compartida por ruta.
-- **Sin rutas absolutas de máquina** en `.env.example`, compose ni scripts
-  versionados. La ruta real de la pila compartida vive en `.env.local`.
-- `.env.local`: valores reales/secretos. Ignorado por git. Genera los que
-  correspondan a conexiones externas o credenciales creadas.
+- `env/.env.example`: todas las claves con valores de ejemplo/dev. Incluye
+  `SHARED_INFRA_DIR=` (vacío o `../docker-environment`) si el proyecto usa una
+  pila compartida por ruta.
+- **Sin rutas absolutas de máquina** en ningún archivo de `env/`, aunque
+  no se versionen: si la persona regenera el entorno en otra máquina o desde
+  otra carpeta, tiene que volver a armarse sin fricción.
+- `env/.env.local`: valores reales/secretos. Genera los que correspondan a
+  conexiones externas o credenciales creadas.
 - Documenta cada variable con un comentario de una línea.
 
 ## Scripts de conveniencia
 
-Crea (si la persona quiere) en `scripts/`:
-- `dev-up` → `docker compose --profile infra up -d && docker compose up`
-- `dev-down` → `docker compose down` (SIN `-v`)
-- `dev-logs` → `docker compose logs -f`
-O los targets equivalentes en `Makefile` / `Taskfile.yml`.
+Crea (si la persona quiere) en `env/scripts/` (o directo en `env/`
+si son pocos):
+- `dev-up` → arma el comando completo con los `-f` que correspondan, p. ej.
+  `docker compose -f docker-compose.yml -f env/docker-compose.override.yml
+  --env-file env/.env.local --profile infra up -d && docker compose -f
+  docker-compose.yml -f env/docker-compose.override.yml --env-file
+  env/.env.local up` (en greenfield/sin compose previo, sin el primer
+  `-f`, usando solo `env/docker-compose.yml`).
+- `dev-down` → el mismo comando con `down` (SIN `-v`).
+- `dev-logs` → el mismo comando con `logs -f`.
+O los targets equivalentes en `env/Makefile` / `env/Taskfile.yml`.
 
 ## Salida
 
-Lista de archivos creados/modificados y el comando de arranque. Handoff a
-`verify-environment`.
+Lista de archivos creados/modificados dentro de `env/` (y la línea
+agregada a `.gitignore`), y el comando de arranque completo con sus `-f`.
+Handoff a `verify-environment`.
 
 ## Renombrar valores
 
 Si la persona pide cambiar un nombre (DB, schema, usuario, volumen, contenedor,
 red, base de Redis, vhost, bucket, prefijo de topics, puerto host), aplica el
 cambio **en todos los archivos a la vez**: compose/override, `.env.local`,
-`.env.example`, scripts y `ENVIRONMENT.md` (deriva a `document-environment`).
-Muestra el diff completo. Si el recurso viejo ya se había creado, no lo borres
-sin permiso: acláralo entre los pendientes.
+`.env.example`, scripts y `ENVIRONMENT.md` (todos dentro de `env/`; deriva
+a `document-environment`). Muestra el diff completo. Si el recurso viejo ya se
+había creado, no lo borres sin permiso: acláralo entre los pendientes.

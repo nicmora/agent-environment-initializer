@@ -22,34 +22,48 @@ Reglas de oro:
 - **Nunca borres ni sobrescribas recursos o datos existentes.** Ante la duda,
   detente y pregunta.
 - **No asumas decisiones que le corresponden a la persona.** A qué base de datos
-  conectar, qué nombre darle a la DB / schema, qué credenciales, qué puerto,
-  reutilizar vs. crear: presenta las opciones y espera que elija. Encontrar una
-  DB en Docker que "sirve" no te habilita a usarla sin preguntar.
-- **Por cada servicio que crees desde cero, pregunta siempre** —con
-  `AskUserQuestion`, agrupando estas tres por ser de la misma dependencia— la
-  variante/imagen base (alpine/slim/full/otra imagen), la versión/tag y el
-  presupuesto de memoria (perfil `xs/s/m/l` o `mem_limit` + `mem_reservation`
-  personalizados). Propón el default como "(recomendada)" pero nunca lo
-  apliques en silencio. Ver `env-service-recipes`.
+  conectar, qué nombre darle a la DB / schema, qué credenciales, reutilizar vs.
+  crear: presenta las opciones y espera que elija. Encontrar una DB en Docker
+  que "sirve" no te habilita a usarla sin preguntar.
+- **Por cada servicio que crees desde cero, decidí vos** la variante/imagen
+  base, la versión/tag, el presupuesto de memoria y el puerto en el host — no
+  los preguntes uno por uno. Priorizá una imagen ya pulleada/corriendo
+  localmente si sirve; si no, la variante más chica que soporte el stack
+  (alpine → slim → full), versión estable/LTS, perfil de memoria por defecto de
+  la receta, y el siguiente puerto libre si el estándar choca. Mostrá el
+  resultado (con el porqué) recién en el resumen final del plan, donde la
+  persona puede pedir cambiarlo. Ver `env-service-recipes` y "Lo que el agente
+  decide solo" en `AGENT.md`.
 - **Aunque te invoquen directo con "levanta el proyecto", sigue el flujo:**
-  primero inspeccionas (`env-detect-environment`, `env-inspect-local-resources`),
-  después muestras hallazgos y opciones, y recién actúas con la decisión de la
-  persona. Ver "Checkpoints de decisión" en `AGENT.md`.
+  primero analizas el repo con `env-detect-environment` y muestras el resumen
+  (stack, dependencias, config); recién después preguntas cómo arrancar la app
+  y la estrategia por dependencia. **No corras `env-inspect-local-resources`
+  (chequeo de Docker) de entrada** — solo cuando una estrategia elegida
+  realmente dependa de Docker. Antes de materializar nada, muestra el resumen
+  completo del plan y ofrece cambiarlo. Ver "Flujo general" y "Checkpoints de
+  decisión" en `AGENT.md`.
+- **Todo lo que generes va a `env/`** en la raíz del proyecto (compose,
+  `.env*`, Dockerfile de desarrollo, scripts, mocks, `ENVIRONMENT.md`), y esa
+  carpeta completa se agrega a `.gitignore` la primera vez: es un entorno
+  personal, no se commitea. Nunca toques un compose o Dockerfile existente
+  fuera de `env/`.
 
 ## Cómo preguntar
 
 Siempre que la decisión tenga un conjunto acotado de opciones (estrategia por
-dependencia, a qué instancia conectar, sí/no, versión de imagen, apagar o dejar
-corriendo, etc.), pregunta con la herramienta **`AskUserQuestion`** (el menú
-clickeable), no con texto libre.
+dependencia, a qué instancia conectar, sí/no, apagar o dejar corriendo, etc.),
+pregunta con la herramienta **`AskUserQuestion`** (el menú clickeable), no con
+texto libre. La variante/imagen, versión, memoria y puerto de un servicio
+nuevo **no** entran en esta lista: esas las decidís vos y las mostrás recién en
+el resumen final (ver arriba).
 
 - **Una dependencia por vez.** No mezcles decisiones de dependencias distintas
   en la misma invocación de `AskUserQuestion` (p. ej. la estrategia de la DB
   junto con si mockear un servicio externo). Trata cada dependencia por
   separado: presentas sus hallazgos, preguntas su estrategia, resuelves su
-  configuración (nombres, credenciales, puerto) y recién ahí pasas a la
-  siguiente. Está bien agrupar en una sola invocación varias decisiones **de la
-  misma dependencia** (hasta 4), nunca de varias.
+  configuración (nombres, credenciales) y recién ahí pasas a la siguiente. Está
+  bien agrupar en una sola invocación varias decisiones **de la misma
+  dependencia** (hasta 4), nunca de varias.
 - Pon la opción recomendada primera y márcala "(recomendada)".
 - La opción "Other" ya la agrega la herramienta sola: no hace falta que la
   incluyas.

@@ -17,7 +17,7 @@ con perfiles de compose (`--profile mock`) y/o una variable
 
 ## Conexión real
 
-- Credenciales y endpoints en `.env.local`.
+- Credenciales y endpoints en `env/.env.local`.
 - Verifica conectividad (`curl`/ping desde donde corre la app).
 - Si es un microservicio propio en otro repo: ofrece clonarlo y sumarlo al
   compose, o apuntar a su instancia de staging.
@@ -30,24 +30,24 @@ con perfiles de compose (`--profile mock`) y/o una variable
   payments-mock:
     image: stoplight/prism:4
     command: mock -h 0.0.0.0 /specs/payments.yaml
-    volumes: ["./mocks/payments:/specs:ro"]
+    volumes: ["env/mocks/payments:/specs:ro"]
     ports: ["4010:4010"]
     profiles: ["mock"]
   ```
-- **Sin spec** → WireMock o Mockoon con stubs a mano en `./mocks/<servicio>/`.
+- **Sin spec** → WireMock o Mockoon con stubs a mano en `env/mocks/<servicio>/`.
   Documenta cómo agregar/editar respuestas.
 - Apunta la variable de la app (`PAYMENTS_BASE_URL`) al mock cuando el perfil
   `mock` está activo.
 
 ### gRPC
 - WireMock gRPC extension o un stub server generado del `.proto`. Guarda los
-  `.proto` en `./mocks/`.
+  `.proto` en `env/mocks/`.
 
 ### Colas / eventos
 - Usa el broker local (real, de la pila) + un **productor de eventos de ejemplo**
   (script o pequeño servicio que publica mensajes de muestra) y/o un
   **consumidor simulado** que solo loguea. Guarda los payloads de ejemplo en
-  `./mocks/events/`.
+  `env/mocks/events/`.
 
 ### Servicios cloud (AWS/Azure/GCP)
 - LocalStack / Azurite / emuladores. Ver `service-recipes`.

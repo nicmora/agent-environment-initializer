@@ -12,19 +12,30 @@ sobrescribe** recursos o datos existentes.
 
 ## Qué hace
 
-- **Brownfield:** escanea el repo, detecta dependencias con evidencia, revisa qué
-  tienes ya en tu máquina (contenedores, servicios del SO, puertos) y te propone,
-  por cada dependencia: **reutilizar**, **conectar a una instancia externa**,
-  **crear desde cero** o **mockear**.
+- **Analiza primero.** Escanea el repo (o, si es un proyecto nuevo, te
+  pregunta) para detectar stack tecnológico, dependencias y configuración, y te
+  muestra un resumen **antes** de preguntar nada ni tocar tu máquina.
+- **Brownfield:** con ese resumen sobre la mesa, te propone por cada
+  dependencia: **reutilizar**, **conectar a una instancia externa**, **crear
+  desde cero** o **mockear**. Solo revisa qué tienes en Docker/tu máquina
+  (contenedores, servicios del SO, puertos) si alguna de esas estrategias
+  realmente depende de Docker.
 - **Greenfield:** te pregunta qué necesita el proyecto (monorepo/multirepo, tipo
   de app, persistencia, caché, mensajería, storage, integraciones) y arma el
   entorno.
+- **Antes de crear nada,** te muestra el plan completo y te deja cambiar o
+  personalizar cualquier cosa.
 - **Infra compartida:** te ofrece una pila de servicios centralizada del equipo
   (`dev-infra`) para ahorrar recursos, aislando cada proyecto por
   schema / base numerada / vhost / bucket / prefijo — sin pisar a los demás.
 - **Servicios externos:** conexión real o simulación (WireMock / Mockoon / Prism
   / LocalStack / OIDC falso), con modo mixto y perfiles de compose.
-- **Verifica** que todo levante y **documenta** el resultado en `ENVIRONMENT.md`.
+- **Verifica** que todo levante y **documenta** el resultado en
+  `env/ENVIRONMENT.md`.
+- **Todo queda en `env/`.** Compose, `.env*`, Dockerfile de desarrollo,
+  scripts y documentación se generan dentro de una carpeta `env/` en la
+  raíz de tu proyecto, que se agrega a `.gitignore`: es tu entorno personal, no
+  se commitea ni se comparte con el equipo por git.
 
 Contexto y decisiones de diseño completos: [`context.md`](context.md).
 
@@ -101,11 +112,18 @@ El agente detecta (o te pregunta) si el proyecto es *greenfield* o *brownfield* 
 arranca el flujo:
 
 ```
-detect-environment ─┐
-                    ├─> brownfield-wizard ─> compose-builder ─> verify-environment ─> document-environment
-inspect-local-resources ┘        │  ▲                ▲
-greenfield-wizard ───────────────┘  └─ shared-infra ─┴─ service-recipes ─ external-mocks
+detect-environment ─> brownfield-wizard ──┬─> (si hace falta) inspect-local-resources ─┐
+                            │  ▲           │                                            │
+greenfield-wizard ──────────┘  └─ shared-infra ─┴─ service-recipes ─ external-mocks    │
+                                                                                         ▼
+                                          resumen del plan + ajustes ─> compose-builder ─> verify-environment ─> document-environment
 ```
+
+`inspect-local-resources` (el chequeo de Docker y de la máquina) solo se ejecuta
+si alguna dependencia va a reutilizar un contenedor local o crear un servicio
+desde cero; si todo se resuelve con conexión externa o mock, se salta. Antes de
+`compose-builder`, siempre hay un resumen del plan completo con la posibilidad
+de cambiar algo.
 
 Puedes hablarle en cualquier momento, aunque el entorno esté a medio configurar.
 
@@ -115,7 +133,12 @@ Puedes hablarle en cualquier momento, aunque el entorno esté a medio configurar
 - No ejecuta `docker compose down -v`, `docker volume rm`, `DROP`, `TRUNCATE`,
   `rm -rf` sobre recursos existentes sin que se lo pidas de forma explícita.
 - Muestra el diff de cada archivo antes de escribirlo.
-- Las credenciales van a `.env.local` (fuera de git), nunca al repo.
+- Analiza el proyecto y te muestra el resumen **antes** de preguntar nada, y
+  revisa Docker recién si una estrategia elegida lo necesita.
+- Antes de escribir un solo archivo, te muestra el plan completo y te deja
+  cambiarlo.
+- Todo lo que genera vive en `env/`, que agrega a `.gitignore`: es tu
+  entorno personal, nunca se commitea.
 - Ofrece siempre reutilizar / conectar / crear / mockear, y prioriza la infra
   compartida.
 
