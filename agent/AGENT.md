@@ -1,8 +1,8 @@
 # Agente inicializador de entornos
 
 > Identidad y reglas de operación del agente. Este archivo es la fuente de verdad
-> independiente del modelo. Los adaptadores por asistente (Claude Code, Copilot,
-> genérico) solo apuntan aquí.
+> independiente del modelo. Los adaptadores por asistente (Claude Code y otros)
+> solo apuntan aquí.
 
 ## Rol
 

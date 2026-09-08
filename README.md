@@ -58,8 +58,6 @@ agent/
     document-environment/SKILL.md Generación de ENVIRONMENT.md
 adapters/
   claude-code/                    Skills + subagente nativos de Claude Code
-  copilot/                        .github/copilot-instructions.md
-  generic/PROMPT.md               System prompt para GPT / Gemini / Cursor / otros
 ```
 
 Las *skills* son **archivos Markdown con un procedimiento paso a paso**. Cada una
@@ -91,20 +89,13 @@ Luego, en cualquier repo:
 
 Detalle y opción por-proyecto: [`adapters/claude-code/README.md`](adapters/claude-code/README.md).
 
-### GitHub Copilot
-
-1. Copia la carpeta `agent/` a la raíz del proyecto (o a `.agent/`).
-2. Copia [`adapters/copilot/copilot-instructions.md`](adapters/copilot/copilot-instructions.md)
-   a `.github/copilot-instructions.md`.
-3. Pídele en el chat: *"configura el entorno de desarrollo de este proyecto"*.
-
 ### GPT / ChatGPT / Gemini / Cursor / otros
 
 1. Copia la carpeta `agent/` a la raíz del proyecto.
-2. Pega [`adapters/generic/PROMPT.md`](adapters/generic/PROMPT.md) como *system
-   prompt* / instrucciones del proyecto.
-3. Si el asistente no puede leer archivos, pega también el contenido de
-   `agent/AGENT.md` y de las skills a medida que el flujo las pida.
+2. Pega el contenido de [`agent/AGENT.md`](agent/AGENT.md) como *system prompt* /
+   instrucciones del proyecto.
+3. Si el asistente no puede leer archivos, pega también el contenido de las
+   skills (`agent/skills/<nombre>/SKILL.md`) a medida que el flujo las pida.
 
 ## Cómo empieza una sesión
 

@@ -19,7 +19,7 @@ Compose**, que permita ejecutar la aplicación en un equipo local.
 ### 2.1. Independencia de modelo y de herramienta
 
 El agente debe poder utilizarse con distintos asistentes de programación —entre
-otros, Claude (Claude Code), GitHub Copilot, GPT/ChatGPT y Cursor—. En
+otros, Claude (Claude Code), GPT/ChatGPT y Cursor—. En
 consecuencia:
 
 - Las instrucciones se redactan en **Markdown plano**, sin dependencias respecto
@@ -414,7 +414,7 @@ agrega íntegramente a `.gitignore`: ninguno de estos archivos se versiona.
 - `skills/verify-environment/`: comprobaciones de salud y arranque de prueba.
 - `skills/document-environment/`: generación y actualización de `ENVIRONMENT.md`.
 - `adapters/`: correspondencias opcionales con los formatos nativos de cada
-  asistente (skills de Claude Code, Copilot y otros), que remiten a estos mismos
+  asistente (skills de Claude Code y otros), que remiten a estos mismos
   documentos.
 
 ## 10. Criterios de éxito
@@ -431,5 +431,5 @@ agrega íntegramente a `.gitignore`: ninguno de estos archivos se versiona.
 - Cuando existe una pila de infraestructura compartida, los servicios nuevos se
   conectan a esta mediante espacios lógicos aislados, sin duplicar instancias ni
   afectar a los servicios que ya la utilizan.
-- El agente funciona de manera equivalente, con adaptadores mínimos, en al menos
-  dos asistentes distintos.
+- El agente funciona de manera equivalente, leyendo los mismos documentos, en
+  distintos asistentes.
