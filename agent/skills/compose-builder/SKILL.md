@@ -54,8 +54,17 @@ reglas invariables de `AGENT.md`: personal, no versionada.
    `service-recipes` (imagen+versión, env, volumen nombrado, healthcheck).
    Ponlos bajo un `profiles: ["infra"]` si la persona quiere poder omitirlos.
    Parametriza imagen/tag y límites de recursos (ver secciones siguientes).
-3. **Conexión a pila compartida.** No redefinas la infra; declara la red externa
-   y apunta las variables al nombre de servicio de la pila (ver `shared-infra`).
+3. **Conexión a un contenedor de dependencias compartido** (si la persona eligió
+   reutilizar uno, según `inspect-local-resources`). No redefinas esos servicios:
+   declará su red de Docker como externa
+   (`networks: { <red>: { external: true } }`), conectá los servicios de la app a
+   esa red y apuntá las variables al nombre de servicio del contenedor
+   compartido (`DB_HOST=postgres`, `REDIS_URL=redis://redis:6379/<n>`). El
+   espacio lógico (DB/schema, base numerada, vhost, bucket) se crea de forma
+   aditiva, nunca con `DROP`. Si la app corre nativa, no hay red que unir: apuntá
+   las variables a los puertos publicados en `localhost`. La ruta/nombre del
+   contenedor de otra máquina no se hardcodea; lo estable es el nombre de la red
+   y los nombres de servicio.
 4. **Conexión a recurso local / externo.** No agregues servicio; solo define las
    variables en `env/.env.local`. Para servicios del host desde un contenedor usa
    `host.docker.internal` (agrega `extra_hosts: ["host.docker.internal:host-gateway"]`
@@ -158,9 +167,7 @@ Cuando la app necesita contenedor propio y no hay Dockerfile:
 
 ## Variables de entorno
 
-- `env/.env.example`: todas las claves con valores de ejemplo/dev. Incluye
-  `SHARED_INFRA_DIR=` (vacío o `../docker-environment`) si el proyecto usa una
-  pila compartida por ruta.
+- `env/.env.example`: todas las claves con valores de ejemplo/dev.
 - **Sin rutas absolutas de máquina** en ningún archivo de `env/`, aunque
   no se versionen: si la persona regenera el entorno en otra máquina o desde
   otra carpeta, tiene que volver a armarse sin fricción.

@@ -84,10 +84,15 @@ código quedan en inglés cuando es lo idiomático.
    cada una, qué necesita, qué deja instalado) y **dejá que la persona elija**.
    No marques una opción como "recomendada". La única excepción son los detalles
    técnicos de lo que se crea desde cero (ver "Lo que el agente decide solo").
-8. **Prioriza ofrecer la infraestructura compartida.** Antes de crear un servicio
-   dedicado, ofrecé —sin empujarla— conectar a la pila compartida del equipo
-   (ver skill `shared-infra`) usando un espacio lógico aislado (schema, base
-   numerada, vhost, bucket, prefijo).
+8. **El contenedor de dependencias compartido es solo para reutilizar.** Algunas
+   personas mantienen, por fuera de todo proyecto, un contenedor de Docker con
+   varios servicios de infraestructura (Postgres, Redis, RabbitMQ…) y una red de
+   Docker propia que reutilizan en todos sus repos. Si elegís Docker para una
+   dependencia, `inspect-local-resources` lo detecta y lo ofrecés como **una
+   opción más de reutilización** (ni primera ni recomendada), con un espacio
+   lógico aislado (schema, base numerada, vhost, bucket, prefijo). **Nunca lo
+   crees, no lo recomiendes y no lo priorices**: si la persona no tiene uno, esa
+   opción no existe.
 9. **Actúa de forma incremental.** Es posible que te invoquen con el entorno a
    medio configurar. Primero inspecciona el estado actual, después actúa sobre lo
    que falta.
@@ -132,7 +137,7 @@ código quedan en inglés cuando es lo idiomático.
      el runtime nativo, u otra forma que el proyecto ya tenga.
    - Dependencia por dependencia: si se reutiliza, se conecta a externo, se crea
      desde cero (en Docker o instalada/nativa) o se simula.
-   Consulta `shared-infra` cuando aplique y `external-mocks` para terceros.
+   Consulta `external-mocks` para servicios de terceros.
 3. **Recién si algo depende de la máquina, revisala.** Si alguna decisión
    implica reutilizar un contenedor o servicio local, crear un servicio en
    Docker, instalar algo nativo o depender de una versión de runtime concreta,
@@ -287,8 +292,7 @@ borres el viejo sin permiso: explica qué implica el rename.
 | `detect-environment` | Analizar un repo existente: stack tecnológico, versión de runtime, cómo arranca hoy, dependencias y configuración, con evidencia. Primer paso siempre. |
 | `greenfield-wizard` | Proyecto nuevo: cuestionario para definir el entorno y el medio de ejecución. |
 | `brownfield-wizard` | Proyecto existente: elegir el medio de ejecución de la app y la estrategia de cada dependencia detectada. |
-| `inspect-local-resources` | Ver contenedores Docker, servicios del SO, gestores de paquetes, versiones de runtime y puertos ocupados en la máquina. Solo cuando una decisión elegida lo necesita. |
-| `shared-infra` | Crear/detectar/usar la pila de infraestructura compartida del equipo. |
+| `inspect-local-resources` | Ver contenedores Docker, servicios del SO, gestores de paquetes, versiones de runtime y puertos ocupados en la máquina — y, si la persona mantiene uno, un contenedor de dependencias compartido. Solo cuando una decisión elegida lo necesita. |
 | `compose-builder` | Materializar el camino **Docker**: generar o actualizar, dentro de `env/`, `docker-compose*.yml` y overrides sin romper lo existente fuera de esa carpeta. |
 | `native-setup` | Materializar el camino **nativo**: scripts de arranque, archivo de versiones de runtime, `Procfile` local, notas de instalación de servicios del SO, `.env` para arranque nativo — todo dentro de `env/`. |
 | `service-recipes` | Recetas de configuración por tipo de servicio (Postgres, Redis, Kafka, MinIO, …), tanto el bloque de compose como la instalación nativa. |

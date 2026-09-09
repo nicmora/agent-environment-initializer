@@ -76,8 +76,13 @@ sin recomendar ninguna**; en cada una explicá qué implica de forma objetiva.
    y "Lo que el agente decide solo" en `AGENT.md`). Esto no se pregunta
    dependencia por dependencia: se resuelve y se muestra recién en el resumen
    final del punto 3.
-2. Para cada dependencia de infra: pregunta si se prefiere **pila compartida**
-   (deriva a `shared-infra`) o **instancia dedicada al proyecto**.
+2. Para cada dependencia de infra que vaya en Docker: si
+   `inspect-local-resources` detectó un contenedor de dependencias compartido de
+   la persona (un contenedor con varios servicios, o una red de Docker propia
+   que los agrupe), ofrecelo como opción de reutilización —con espacio lógico
+   aislado y de forma aditiva— frente a crear un contenedor nuevo. **No ofrezcas
+   crear una pila compartida ni la priorices**; si no se detectó ninguno, no lo
+   menciones.
 3. **Resumen final y ajustes.** Antes del handoff, presenta el plan completo
    (medio de ejecución, servicios, estrategia, imágenes o versiones, puertos,
    memoria, archivos a crear dentro de `env/`) y pregunta si algo se quiere

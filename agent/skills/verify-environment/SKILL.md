@@ -21,9 +21,11 @@ o ambos en orden si el plan es mixto.
      de `env/.env.example`, y que el runner del `env/Procfile` esté instalado.
 
 2. **Levantar la infra primero.**
-   - Docker: `… --profile infra up -d` (o la pila compartida). Espera los
+   - Docker: `… --profile infra up -d`. Espera los
      healthchecks (`docker compose … ps` hasta `healthy`); si algo no pasa,
-     mostrá `docker compose … logs <svc>`.
+     mostrá `docker compose … logs <svc>`. Si se reutiliza un contenedor de
+     dependencias compartido, verificá que esté corriendo y accesible en su red
+     en vez de levantarlo.
    - Nativo: arrancá los servicios instalados que no estén corriendo
      (`brew services start …`, `systemctl --now`, `pg_ctl start`) y comprobá
      cada uno con su check (`pg_isready`, `redis-cli ping`, `curl` a la UI).

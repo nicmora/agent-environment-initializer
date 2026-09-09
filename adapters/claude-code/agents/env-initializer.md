@@ -9,14 +9,13 @@ Lee y sigue al pie de la letra `agent/AGENT.md` de este repo/instalación (si no
 encuentras en el proyecto, está en `~/.claude/skills/` junto a las skills `env-*`,
 o pide la ruta al usuario). Ese archivo define tu rol, el idioma (español
 latinoamericano), las reglas invariables (no destructivo, confirmar antes de
-escribir, no recomendar, priorizar infra compartida) y el flujo general.
+escribir, no recomendar) y el flujo general.
 
 Las skills `env-detect-environment`, `env-greenfield-wizard`,
-`env-brownfield-wizard`, `env-inspect-local-resources`, `env-shared-infra`,
-`env-compose-builder`, `env-native-setup`, `env-service-recipes`,
-`env-external-mocks`, `env-verify-environment` y `env-document-environment`
-están disponibles como skills nativas: se activan solas o puedes invocarlas por
-nombre.
+`env-brownfield-wizard`, `env-inspect-local-resources`, `env-compose-builder`,
+`env-native-setup`, `env-service-recipes`, `env-external-mocks`,
+`env-verify-environment` y `env-document-environment` están disponibles como
+skills nativas: se activan solas o puedes invocarlas por nombre.
 
 Reglas de oro:
 

@@ -82,10 +82,10 @@ resolver una incidencia. Ante un conflicto, su proceder es el siguiente:
 Para cada dependencia detectada o requerida, el agente ofrece de manera
 sistemática el siguiente conjunto de opciones, **sin recomendar ninguna**:
 
-- **Reutilización** de un recurso ya disponible en el equipo: la pila de
-  infraestructura compartida (véase la sección 2.6), un contenedor Docker en
-  ejecución, un servicio instalado en el sistema operativo o una instancia
-  alojada en la nube.
+- **Reutilización** de un recurso ya disponible en la máquina: un contenedor
+  Docker en ejecución, un contenedor de dependencias compartido si la persona
+  mantiene uno (véase la sección 2.6), un servicio instalado en el sistema
+  operativo o una instancia alojada en la nube.
 - **Conexión a un servicio externo** (entornos de *staging*, servicios en la nube
   o infraestructura de otro equipo).
 - **Creación del recurso desde cero**, ya sea como nuevo servicio en una
@@ -109,33 +109,40 @@ configuración existente o diagnosticar por qué un servicio no se inicia
 correctamente. En todos los casos, el agente inspecciona primero el estado actual
 y actúa de forma incremental.
 
-### 2.6. Infraestructura local compartida y centralizada
+### 2.6. Reutilización de un contenedor de dependencias compartido (si existe)
 
-Siempre que sea posible, el agente promueve el uso de una **única pila de
-servicios de infraestructura compartida** en el equipo —bases de datos, sistemas
-de mensajería, caché, almacenamiento de objetos y componentes análogos— en lugar
-de una instancia dedicada por cada proyecto o servicio. El criterio es el
-siguiente:
+Algunas personas mantienen, por fuera de cualquier proyecto, un **contenedor de
+dependencias compartido**: un contenedor de Docker (o un proyecto de Compose
+propio) con varios servicios de infraestructura —base de datos, caché,
+mensajería, almacenamiento de objetos— y una red de Docker reutilizable, que
+emplean en todos sus proyectos para no levantar una instancia por proyecto. El
+nombre del contenedor y de la red son arbitrarios.
 
-- Si en el equipo ya existe una pila centralizada (creada por este agente o por
-  otro medio), el agente ofrece reutilizarla y conectar la aplicación a esta,
-  con el fin de ahorrar recursos.
-- Si no existe, el agente propone crearla como un proyecto de Compose
-  independiente y reutilizable (por ejemplo, `dev-infra` o `shared-infra`), con
-  su propia red de Docker a la que las aplicaciones puedan adherirse.
-- El aislamiento entre servicios que comparten la misma pila se logra por
-  espacios lógicos, no por instancias separadas: una base de datos o un *schema*
-  por servicio dentro del mismo motor, un *prefijo* de claves o una base
-  numerada distinta en Redis, un *virtual host* o un espacio de nombres de
-  *topics*/colas propio en el sistema de mensajería, un *bucket* propio en el
-  almacenamiento de objetos, y equivalentes.
-- La pila compartida es opcional. Si la persona usuaria prefiere una instancia
-  dedicada al proyecto, o no desea crear la pila centralizada, el agente procede
-  conforme a las demás estrategias descritas en este documento (reutilización de
-  otro recurso, conexión externa, creación dedicada o simulación).
-- El agente no destruye ni reconfigura una pila compartida existente. Cualquier
-  incorporación se realiza de forma aditiva (un nuevo *schema*, una nueva cola,
-  un nuevo *bucket*) y previa confirmación.
+El agente contempla este recurso **únicamente como un caso de reutilización**, no
+como una práctica que promueva:
+
+- **No lo crea.** El agente nunca genera un contenedor de dependencias
+  compartido ni un proyecto de Compose centralizado, ni propone hacerlo. Si la
+  persona no tiene uno, esta opción sencillamente no aparece.
+- **No lo recomienda ni lo prioriza.** No se presenta antes que las demás
+  estrategias ni con etiqueta de preferencia.
+- **Solo lo ofrece si lo detecta.** Cuando la persona elige crear o reutilizar
+  una dependencia **en Docker**, la inspección de la máquina (sección 2.7)
+  busca, además de los contenedores individuales, un contenedor que exponga
+  varios servicios de infraestructura o una red de Docker creada por la persona
+  que agrupe contenedores de infraestructura. Si encuentra un candidato, lo
+  ofrece como una opción más de reutilización, junto a la de crear un contenedor
+  nuevo con las dependencias elegidas.
+- **Aislamiento lógico y aditivo.** Al conectar el proyecto a ese contenedor, el
+  agente crea un espacio lógico propio —una base de datos o un *schema* con su
+  usuario, una base numerada o un prefijo de claves en Redis, un *virtual host*
+  en la mensajería, un *bucket* en el almacenamiento de objetos, un prefijo de
+  *topics*— sin alterar los datos ni la configuración de los demás proyectos que
+  usan ese contenedor. Nunca ejecuta operaciones destructivas sobre él.
+- **Portabilidad.** El agente no fija en los archivos de `env/` la ruta ni el
+  nombre del contenedor de otra máquina: se apoya en el nombre de la red externa
+  y en los nombres de servicio, y deja las credenciales y puertos en
+  `env/.env.local`.
 
 ### 2.7. Orden de la interacción: analizar antes de preguntar, revisar la máquina solo si hace falta
 
@@ -293,13 +300,12 @@ Para cada servicio nuevo, formula las preguntas de configuración necesarias
 (nombre de la base de datos, credenciales de desarrollo, volumen o directorio de
 datos persistente, puerto en el equipo anfitrión, entre otras); el detalle
 técnico (versión de la imagen o del paquete, variante, memoria) lo resuelve el
-propio agente. Antes de crear servicios de infraestructura dedicados, el agente
-ofrece —sin recomendarla— adherir la aplicación a la pila compartida descrita en
-la sección 2.6, creando en ella el espacio lógico correspondiente. Solo si se
-decide crear algún servicio en Docker o instalar algo nativo, el agente
-inspecciona antes la máquina (sección 2.7) para evitar colisiones de puertos y
-comprobar lo ya instalado. Antes de generar los archivos, presenta el plan
-completo y ofrece ajustarlo.
+propio agente. Solo si se decide crear algún servicio en Docker o instalar algo
+nativo, el agente inspecciona antes la máquina (sección 2.7) para evitar
+colisiones de puertos y comprobar lo ya instalado; si en esa inspección aparece
+un contenedor de dependencias compartido (sección 2.6), lo ofrece como opción de
+reutilización. Antes de generar los archivos, presenta el plan completo y ofrece
+ajustarlo.
 
 ### 5.2. Escenario *brownfield* (proyecto preexistente)
 
@@ -325,14 +331,12 @@ completo y ofrece ajustarlo.
 3. **Cómo arranca la app y estrategia por dependencia.** El agente pregunta
    primero cómo se quiere levantar la aplicación (comando, contenedor propio o
    en el host). Después, para cada dependencia, consulta:
-   - Si existe una pila de infraestructura compartida en el equipo (véase la
-     sección 2.6), en cuyo caso se ofrece conectar la aplicación a esta y crear
-     en ella el espacio lógico correspondiente (*schema*, base numerada,
-     *virtual host*, *bucket* u otro), sin afectar a los demás servicios que la
-     utilizan.
-   - Si el recurso ya está disponible en el equipo: un contenedor Docker en
-     ejecución, en cuyo caso se ofrece la conexión a este mediante la detección
-     de su nombre, red, puerto y credenciales cuando sea posible; o un servicio
+   - Si el recurso ya está disponible en la máquina: un contenedor Docker en
+     ejecución —incluido un contenedor de dependencias compartido si la persona
+     mantiene uno (sección 2.6)—, en cuyo caso se ofrece la conexión mediante la
+     detección de su nombre, red, puerto y credenciales cuando sea posible y la
+     creación de un espacio lógico propio (*schema*, base numerada, *virtual
+     host*, *bucket* u otro) sin afectar a lo que ya contiene; o un servicio
      instalado en el sistema operativo, en cuyo caso se ofrece dirigir la
      aplicación a `localhost`. **Recién en este punto** —si la persona elige
      reutilizar un recurso local, crear uno desde cero (en Docker o nativo) o
@@ -410,12 +414,6 @@ Según el medio de ejecución elegido, algunos de los siguientes:
   los procesos de la app; `env/INSTALL.md` con los comandos exactos para
   instalar cada servicio del sistema operativo (brew/apt/winget) y arrancarlo;
   `env/scripts/` con el arranque, el apagado y los logs.
-- Definición de la pila de infraestructura compartida (por ejemplo, un proyecto
-  `dev-infra/docker-compose.yml` con su red reutilizable), cuando se opte por
-  crearla — esta pila es un proyecto de Compose aparte, independiente de
-  `env/`, y su propia gestión de versionado queda fuera del alcance de
-  este agente —, junto con la documentación de los espacios lógicos asignados a
-  cada servicio.
 - `env/Dockerfile.dev`, cuando la aplicación requiera un contenedor
   propio, con la imagen base y su variante (alpine/slim) como `ARG` con
   default; el contexto de build sigue siendo la raíz del proyecto.
@@ -465,9 +463,8 @@ Según el medio de ejecución elegido, algunos de los siguientes:
   dependencia.
 - `skills/inspect-local-resources/`: detección de contenedores Docker, servicios
   del sistema operativo, gestores de paquetes, versiones de runtime y puertos
-  ocupados, susceptibles de reutilización.
-- `skills/shared-infra/`: creación, detección y gobierno de la pila de
-  infraestructura compartida, y asignación de espacios lógicos por servicio.
+  ocupados, susceptibles de reutilización, incluida la detección de un contenedor
+  de dependencias compartido cuando la persona mantiene uno.
 - `skills/compose-builder/`: materialización del camino Docker — generación y
   actualización de definiciones de Compose y de sus *overrides* sin alterar lo
   existente.
@@ -497,8 +494,9 @@ Según el medio de ejecución elegido, algunos de los siguientes:
   (en Docker o nativa) o simular, sin que el agente empujara una opción.
 - El agente puede invocarse nuevamente para incorporar un componente adicional
   sin necesidad de rehacer la configuración previa.
-- Cuando existe una pila de infraestructura compartida, los servicios nuevos se
-  conectan a esta mediante espacios lógicos aislados, sin duplicar instancias ni
-  afectar a los servicios que ya la utilizan.
+- Cuando la persona mantiene un contenedor de dependencias compartido, el agente
+  lo detecta y ofrece conectar el proyecto mediante un espacio lógico aislado,
+  sin duplicar instancias ni afectar lo que ese contenedor ya contiene; nunca
+  propone crear uno.
 - El agente funciona de manera equivalente, leyendo los mismos documentos, en
   distintos asistentes.

@@ -1,6 +1,6 @@
 ---
 name: env-brownfield-wizard
-description: Para un proyecto existente, guía la elección del medio de ejecución de la app (contenedor Docker o runtime nativo en el host) y, para cada dependencia detectada, la estrategia — reutilizar un recurso local o la pila compartida, conectar a una instancia externa, crear el servicio desde cero (en Docker o instalado nativo), o simularlo (mock). Usar después de detect-environment, o cuando el usuario quiere decidir "cómo corro cada cosa".
+description: Para un proyecto existente, guía la elección del medio de ejecución de la app (contenedor Docker o runtime nativo en el host) y, para cada dependencia detectada, la estrategia — reutilizar un recurso local (incluido un contenedor de dependencias compartido si la persona mantiene uno), conectar a una instancia externa, crear el servicio desde cero (en Docker o instalado nativo), o simularlo (mock). Usar después de detect-environment, o cuando el usuario quiere decidir "cómo corro cada cosa".
 ---
 
 # Skill: brownfield-wizard
@@ -52,26 +52,31 @@ decide solo" en `AGENT.md`).
 
 Para cada dependencia, presentá las opciones y pedí una decisión:
 
-1. **Pila de infraestructura compartida.** ¿Existe o se quiere crear una pila
-   compartida del equipo? → deriva a `shared-infra`. Se crea un espacio lógico
-   aislado para este servicio (schema/DB, base numerada de Redis, vhost de
-   RabbitMQ, topic namespace de Kafka, bucket de MinIO, prefijo de claves).
-2. **Recurso ya presente en la máquina.** Recién acá hace falta mirar la
+1. **Recurso ya presente en la máquina.** Recién acá hace falta mirar la
    máquina: ejecutá `inspect-local-resources` (si todavía no la corriste en
    esta sesión).
    - Contenedor Docker corriendo o detenido → conectar a ese: detectá nombre,
      red, puerto publicado y credenciales. Configurá la app para usar ese
      host/puerto.
+   - **Contenedor de dependencias compartido** (un contenedor con varios
+     servicios de infraestructura, o una red de Docker propia que los agrupe),
+     si `inspect-local-resources` detectó uno y la persona eligió Docker para
+     esta dependencia → ofrecelo como una opción de reutilización más, ni
+     primera ni recomendada. Al conectar, creá un espacio lógico propio
+     (schema/DB + usuario, base numerada de Redis, vhost de RabbitMQ, prefijo de
+     topics de Kafka, bucket de MinIO) de forma aditiva, sin tocar lo que ya
+     contiene. Si no se detectó ninguno, no lo menciones. Nunca ofrezcas
+     *crear* un contenedor compartido.
    - Servicio instalado en el SO (Postgres, Redis, etc. en el host, o vía
      Homebrew/apt) → apuntá la app a `localhost:<puerto>` y, si hace falta, creá
      una DB/usuario nuevos **sin tocar** lo existente.
-   - En ambos casos: **no metas la app en una DB/schema/vhost/bucket existente
-     sin preguntar.** Ofrecé crear un espacio lógico propio y proponé un nombre
-     (editable) para él.
-3. **Instancia externa** (staging, cloud, otro equipo) → pedí host, puerto,
+   - En todos los casos: **no metas la app en una DB/schema/vhost/bucket
+     existente sin preguntar.** Ofrecé crear un espacio lógico propio y proponé
+     un nombre (editable) para él.
+2. **Instancia externa** (staging, cloud, otro equipo) → pedí host, puerto,
    credenciales y guardalas en `env/.env.local`. Verificá conectividad de red.
    No hace falta tocar la máquina para esta estrategia.
-4. **Crear desde cero.** Ofrecé las dos variantes cuando ambas sean viables:
+3. **Crear desde cero.** Ofrecé las dos variantes cuando ambas sean viables:
    - **En Docker** → requiere `inspect-local-resources` (Docker
      instalado/iniciado, puertos libres). El servicio va a
      `env/docker-compose.override.yml` o `env/docker-compose.dev.yml` (nunca al
@@ -86,7 +91,7 @@ Para cada dependencia, presentá las opciones y pedí una decisión:
    - En cualquiera de las dos: solo preguntás nombre de DB/schema/usuario/
      contraseña de dev si aplica. El detalle técnico (imagen o paquete, versión,
      memoria, puerto) lo decide el agente y aparece recién en el resumen final.
-5. **Servicio de terceros / de otro equipo** → deriva a `external-mocks`:
+4. **Servicio de terceros / de otro equipo** → deriva a `external-mocks`:
    conexión real vs. simulación. El mock puede correr como contenedor o como
    proceso nativo.
 

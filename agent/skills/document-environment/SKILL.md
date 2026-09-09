@@ -1,6 +1,6 @@
 ---
 name: env-document-environment
-description: Genera o actualiza env/ENVIRONMENT.md — medio de ejecución elegido, inventario de servicios, modo de conexión de cada dependencia (real/creada en Docker/instalada nativa/reutilizada/compartida/mock), variables de entorno, puertos, y procedimientos de arranque y apagado. Usar al cerrar cada sesión o cada vez que cambia algo del entorno.
+description: Genera o actualiza env/ENVIRONMENT.md — medio de ejecución elegido, inventario de servicios, modo de conexión de cada dependencia (real/creada en Docker/instalada nativa/reutilizada/mock), variables de entorno, puertos, y procedimientos de arranque y apagado. Usar al cerrar cada sesión o cada vez que cambia algo del entorno.
 ---
 
 # Skill: document-environment
@@ -28,12 +28,11 @@ tiene que seguir siendo útil sin editarlo a mano. Evita en este archivo (y en
 
 En su lugar:
 
-- **Pila compartida / infra externa:** referénciala por convención portable.
-  Opción A (preferida): repo hermano — `../docker-environment/docker-compose.yml`,
-  con un prerrequisito explícito ("clona `docker-environment` al lado de este
-  repo: `git clone <url>`"). Opción B: variable `SHARED_INFRA_DIR` que cada
-  persona define en su `env/.env.local` con la ruta de su máquina; en la
-  doc y los scripts usas `${SHARED_INFRA_DIR}`.
+- **Contenedor de dependencias compartido (si se reutiliza uno):** no anotes su
+  ruta ni su nombre de otra máquina. Documentá el **nombre de la red de Docker
+  externa** y los **nombres de servicio** (`postgres`, `redis`, …), que son
+  estables, y dejá credenciales y puertos en `env/.env.local`. Aclará como
+  prerrequisito que ese contenedor y esa red tienen que existir en la máquina.
 - **Credenciales de dev:** en `ENVIRONMENT.md` muestra el valor de ejemplo y
   aclara "definido en `env/.env.local`". El valor real vive solo ahí; en
   `env/.env.example` va un placeholder.
@@ -61,8 +60,8 @@ Según el medio:
   `.nvmrc`), gestor de versiones `<nvm/pyenv/asdf/mise>` si se usa, runner de
   procesos `<foreman/overmind>` si hay `env/Procfile`, y los servicios de
   `env/INSTALL.md` instalados.
-- <si aplica> Pila compartida `docker-environment` clonada como repo hermano
-  (`../docker-environment`), o `SHARED_INFRA_DIR` definido en `env/.env.local`.
+- <si aplica> Contenedor de dependencias compartido de la persona corriendo, con
+  su red de Docker (`<red>`) disponible.
 
 ## Cómo levantar
 
@@ -84,7 +83,7 @@ Según el medio:
 
 | Servicio | Estrategia | Medio | Endpoint (desde la app / desde el host) | Imagen o paquete (variable) | Mem límite | Perfil | Notas |
 |---|---|---|---|---|---|---|---|
-| postgres | pila compartida | Docker | postgres:5432 / localhost:5432 | `postgres:16-alpine` (`POSTGRES_IMAGE`) | 512m (`POSTGRES_MEM`) | — | schema `miproyecto` |
+| postgres | reutilizado (contenedor compartido) | Docker | postgres:5432 / localhost:5432 | — (contenedor externo) | — | — | schema `miproyecto` |
 | redis | creado | nativo | localhost:6379 / localhost:6379 | `redis` (brew, v7) | — | — | base `2`; arranca `brew services` |
 | payments-api | mock (Prism) | nativo | localhost:4010 | `npx @stoplight/prism-cli` | — | mock | stubs en env/mocks/payments |
 | ... | ... | ... | ... | ... | ... | ... | ... |
@@ -98,7 +97,7 @@ Anota que imagen/paquete y límite son defaults pisables desde `env/.env.local`.
 | DATABASE_URL | env/.env.local | postgres://... | conexión principal |
 | ... | ... | ... | ... |
 
-## Espacios lógicos usados en la pila compartida
+## Espacios lógicos usados en el contenedor compartido
 
 - Postgres: DB/schema `miproyecto`
 - Redis: base `2`
@@ -121,7 +120,5 @@ Anota que imagen/paquete y límite son defaults pisables desde `env/.env.local`.
    reemplázalos por la convención portable y avisa.
 3. Refleja siempre: medio de ejecución, estrategia y medio por dependencia,
    perfiles de compose o entradas del `Procfile`, comandos de instalación
-   pendientes, comandos de arranque/apagado, y espacios lógicos de la pila
-   compartida.
-4. Si tocaste la pila compartida, actualiza también su README
-   (`~/dev-infra/README.md`) con el espacio lógico asignado a este proyecto.
+   pendientes, comandos de arranque/apagado, y los espacios lógicos creados en un
+   contenedor de dependencias compartido si se reutilizó uno.

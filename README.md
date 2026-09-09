@@ -37,9 +37,12 @@ recursos o datos existentes, ni desinstala nada de tu SO.
   entorno.
 - **Antes de crear nada,** te muestra el plan completo y te deja cambiar o
   personalizar cualquier cosa.
-- **Infra compartida:** te ofrece —sin empujarla— una pila de servicios
-  centralizada del equipo (`dev-infra`) para ahorrar recursos, aislando cada
-  proyecto por schema / base numerada / vhost / bucket / prefijo.
+- **Contenedor de dependencias compartido:** si vos mantenés un contenedor de
+  Docker con varios servicios (Postgres, Redis, RabbitMQ…) y su red, y elegís
+  Docker para una dependencia, el agente lo detecta y te ofrece reutilizarlo con
+  un espacio lógico aislado (schema / base numerada / vhost / bucket / prefijo).
+  No te ofrece crearlo ni lo prioriza: es solo para reaprovecharlo si ya lo
+  tenés.
 - **Servicios externos:** conexión real o simulación (WireMock / Mockoon / Prism
   / LocalStack / OIDC falso), como contenedor o como proceso nativo, con modo
   mixto.
@@ -63,8 +66,7 @@ agent/
     detect-environment/SKILL.md   Escaneo de repo brownfield
     greenfield-wizard/SKILL.md    Cuestionario de proyecto nuevo
     brownfield-wizard/SKILL.md    Medio de ejecución + estrategia por dependencia
-    inspect-local-resources/…     Qué hay en la máquina (Docker, SO, paquetes, runtimes)
-    shared-infra/SKILL.md         Pila de infraestructura compartida
+    inspect-local-resources/…     Qué hay en la máquina (Docker, SO, paquetes, runtimes, contenedor de deps compartido)
     compose-builder/SKILL.md      Materializar el camino Docker
     native-setup/SKILL.md         Materializar el camino nativo (scripts, Procfile, instalación)
     service-recipes/SKILL.md      Recetas por servicio (compose + instalación nativa)
@@ -121,7 +123,7 @@ arranca el flujo:
 ```
 detect-environment ─> brownfield-wizard ──┬─> (si hace falta) inspect-local-resources ─┐
                             │  ▲           │                                            │
-greenfield-wizard ──────────┘  └─ shared-infra ─┴─ service-recipes ─ external-mocks    │
+greenfield-wizard ──────────┘              └─ service-recipes ─ external-mocks          │
                                                                                          ▼
              resumen del plan + ajustes ─> compose-builder y/o native-setup ─> verify-environment ─> document-environment
 ```
@@ -152,8 +154,9 @@ Puedes hablarle en cualquier momento, aunque el entorno esté a medio configurar
   cambiarlo.
 - Todo lo que genera vive en `env/`, que agrega a `.gitignore`: es tu
   entorno personal, nunca se commitea.
-- Ofrece siempre reutilizar / conectar / crear / mockear, y ofrece la infra
-  compartida.
+- Ofrece siempre reutilizar / conectar / crear / mockear. Si detecta un
+  contenedor de dependencias compartido tuyo, lo suma como opción de
+  reutilización; nunca ofrece crear uno.
 
 ## Qué NO cubre (por ahora)
 

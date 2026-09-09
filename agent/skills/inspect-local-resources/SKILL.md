@@ -1,6 +1,6 @@
 ---
 name: env-inspect-local-resources
-description: Inspecciona la máquina para descubrir contenedores Docker (con sus redes y volúmenes), servicios de infraestructura instalados en el sistema operativo, gestores de paquetes disponibles (brew/apt/winget/scoop), gestores de versiones de runtime (nvm/pyenv/asdf/mise) y versiones instaladas, y puertos ocupados. Sirve para ofrecer reutilizar recursos existentes, saber cómo instalar lo que falte y evitar colisiones de puertos. Usar recién cuando una decisión va a reutilizar un recurso local, crear un servicio en Docker, instalar algo nativo o depender de una versión de runtime concreta, o cuando el usuario dice "ya tengo una base de datos" / "fíjate qué tengo instalado".
+description: Inspecciona la máquina para descubrir contenedores Docker (con sus redes y volúmenes), un contenedor de dependencias compartido si la persona mantiene uno (un contenedor con varios servicios de infraestructura, o una red de Docker propia que los agrupe), servicios de infraestructura instalados en el sistema operativo, gestores de paquetes disponibles (brew/apt/winget/scoop), gestores de versiones de runtime (nvm/pyenv/asdf/mise) y versiones instaladas, y puertos ocupados. Sirve para ofrecer reutilizar recursos existentes, saber cómo instalar lo que falte y evitar colisiones de puertos. Usar recién cuando una decisión va a reutilizar un recurso local, crear un servicio en Docker, instalar algo nativo o depender de una versión de runtime concreta, o cuando el usuario dice "ya tengo una base de datos" / "fíjate qué tengo instalado".
 ---
 
 # Skill: inspect-local-resources
@@ -62,6 +62,26 @@ Con el daemon arriba:
 - Detecta si hay un proyecto de Compose ya corriendo
   (`docker compose ls`).
 
+### Contenedor de dependencias compartido
+
+Algunas personas mantienen un solo contenedor (o proyecto de Compose propio) con
+varios servicios de infraestructura y una red de Docker reutilizable, y lo usan
+en todos sus proyectos. Búscalo **solo cuando la persona ya eligió Docker para
+crear o reutilizar alguna dependencia** (si no, no aporta):
+
+- Un contenedor que publique varios puertos de infraestructura a la vez
+  (5432 + 6379 + 5672…), o cuya imagen agrupe varios servicios.
+- Una red de Docker creada por la persona (no `bridge`/`host`/`none` ni la
+  `*_default` de un compose del propio proyecto) a la que estén conectados
+  contenedores de Postgres, Redis, RabbitMQ, etc.: `docker network inspect <red>`
+  para ver qué contenedores agrupa.
+
+Si encontrás un candidato, anotá: nombre de la red, nombres de servicio /
+contenedor, puertos publicados y credenciales por defecto (`docker inspect`). Se
+ofrece como **una opción más de reutilización** frente a crear un contenedor
+nuevo — nunca como recomendación, y nunca se ofrece crearlo. Si no hay ninguno,
+seguí sin mencionarlo.
+
 ### Servicios del sistema operativo
 - Windows: `Get-Service | Where-Object {$_.Status -eq 'Running'}` y filtra por
   `postgres`, `mysql`, `redis`, `mongodb`, `rabbitmq`; `Get-NetTCPConnection
@@ -93,6 +113,9 @@ Con el daemon arriba:
 
 Más:
 
+- **Contenedor de dependencias compartido**, si se detectó: red, servicios,
+  puertos publicados y credenciales conocidas, para que los wizards lo ofrezcan
+  como reutilización con espacio lógico aislado (nunca como creación).
 - **Puertos ocupados** (relevante para `compose-builder` y `native-setup`).
 - **Gestor de paquetes** a usar en este SO para el camino nativo.
 - **Runtime instalado vs. requerido** y gestor de versiones disponible.
@@ -104,7 +127,9 @@ optó por no levantarlo, no se pudo inspeccionar Docker".
 ## Reglas
 
 - Nunca **borres, reinicies, desinstales ni reconfigures** contenedores o
-  servicios existentes.
+  servicios existentes. Un contenedor de dependencias compartido tampoco se
+  recrea ni se modifica: cualquier uso posterior es aditivo (una DB/schema/vhost/
+  bucket nuevo).
 - Esta skill es **solo lectura**: no instala nada. Descubrir el gestor de
   paquetes sirve para que `native-setup` escriba el comando; la instalación la
   decide la persona más adelante, con permiso.
