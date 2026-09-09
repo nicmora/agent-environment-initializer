@@ -5,6 +5,12 @@ description: Genera o actualiza archivos docker-compose (base, override o dev) y
 
 # Skill: compose-builder
 
+Esta skill materializa el **camino Docker**. Si la app o alguna dependencia se
+resolvió de forma **nativa** (runtime en el host, servicio instalado en el SO),
+esa parte la maneja `native-setup`; cuando el plan es mixto, las dos skills
+generan sus artefactos en `env/` y un mismo script de arranque en `env/scripts/`
+los orquesta.
+
 ## Entrada
 
 El **plan ya confirmado** (con la persona habiendo tenido la oportunidad de
@@ -176,11 +182,18 @@ si son pocos):
 - `dev-logs` → el mismo comando con `logs -f`.
 O los targets equivalentes en `env/Makefile` / `env/Taskfile.yml`.
 
+**Plan mixto (parte Docker + parte nativa):** el script de `env/scripts/dev-up`
+hace las dos cosas en orden — primero levanta lo de Docker (`docker compose …
+up -d` para la infra en contenedor), después delega en el arranque nativo de
+`native-setup` (fijar runtime, levantar servicios del SO, `foreman`/`overmind`
+sobre `env/Procfile`). Coordiná los nombres con `native-setup` para no duplicar.
+
 ## Salida
 
 Lista de archivos creados/modificados dentro de `env/` (y la línea
 agregada a `.gitignore`), y el comando de arranque completo con sus `-f`.
-Handoff a `verify-environment`.
+Si el plan es mixto, hacé también el handoff a `native-setup` antes de
+`verify-environment`; si es solo Docker, handoff directo a `verify-environment`.
 
 ## Renombrar valores
 

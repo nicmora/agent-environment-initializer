@@ -8,8 +8,13 @@ description: Crea, detecta y gobierna una pila de infraestructura compartida del
 ## Concepto
 
 Una sola pila de servicios de infraestructura por máquina/equipo, compartida por
-todos los proyectos. El aislamiento entre proyectos es **lógico, no por
-instancia**:
+todos los proyectos. Se **ofrece** como una opción más (no se recomienda ni se
+asume): la persona puede preferir una instancia dedicada, servicios nativos o
+conexión externa. La pila suele correr en Docker Compose, pero un proyecto que se
+conecta a ella puede correr su **propia app de forma nativa** en el host y solo
+apuntar las variables a los puertos publicados de la pila (`localhost:5432`, …).
+
+El aislamiento entre proyectos es **lógico, no por instancia**:
 
 | Servicio | Espacio lógico por proyecto |
 |---|---|
@@ -48,13 +53,16 @@ instancia**:
   asignados** (se va completando a medida que cada proyecto se suma).
 
 ### 3. Conectar el proyecto actual a la pila compartida
-- En `env/docker-compose.override.yml` (o `.dev.yml`) del proyecto, **no**
-  redefinas los servicios de infra; en su lugar:
+- **Si la app corre en Docker:** en `env/docker-compose.override.yml` (o
+  `.dev.yml`) del proyecto, **no** redefinas los servicios de infra; en su lugar:
   - conecta los servicios de la app a la red externa compartida:
     `networks: { devnet: { external: true } }`.
-  - define las variables de conexión de la app apuntando al **nombre de
-    servicio** de la pila compartida (p. ej. `DB_HOST=postgres`,
-    `REDIS_URL=redis://redis:6379/3`).
+  - define las variables de conexión apuntando al **nombre de servicio** de la
+    pila (p. ej. `DB_HOST=postgres`, `REDIS_URL=redis://redis:6379/3`).
+- **Si la app corre nativa en el host:** no hay red compartida que unir; apuntá
+  las variables de `env/.env.local` a los **puertos publicados** de la pila en
+  `localhost` (p. ej. `DB_HOST=localhost`, `DB_PORT=5432`). El resto (espacio
+  lógico, credenciales) es igual.
 - Crea el **espacio lógico** de este proyecto de forma aditiva:
   - Postgres: `CREATE DATABASE <proj>;` o `CREATE SCHEMA <proj>; CREATE ROLE
     <proj>_user LOGIN PASSWORD '...';` — nunca `DROP` nada.

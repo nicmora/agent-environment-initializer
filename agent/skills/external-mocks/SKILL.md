@@ -12,8 +12,15 @@ Pregunta:
 2. ¿O prefieres simularlo para poder levantar la app sin depender de él?
 
 Se puede elegir distinto por servicio (**modo mixto**). La elección se controla
-con perfiles de compose (`--profile mock`) y/o una variable
-(`PAYMENTS_MODE=real|mock`), para poder alternar sin reconfigurar.
+con perfiles de compose (`--profile mock`), una línea en el `env/Procfile`
+(camino nativo) y/o una variable (`PAYMENTS_MODE=real|mock`), para poder alternar
+sin reconfigurar.
+
+**El mock corre según el medio del entorno:** como contenedor si el resto va en
+Docker, o como proceso nativo (npx/binario) agregado al `env/Procfile` si el
+entorno es nativo. Las herramientas de abajo tienen las dos formas: imagen y
+paquete/CLI (`prism` vía `npx @stoplight/prism-cli`, WireMock como `.jar`,
+Mockoon CLI, LocalStack vía `pip`/`localstack` CLI).
 
 ## Conexión real
 
@@ -64,5 +71,6 @@ Tabla:
 | Servicio externo | Modo (real/mock) | Cómo se activa | Endpoint | Archivos de stubs |
 |---|---|---|---|---|
 
-Handoff a `compose-builder` (servicios bajo `profiles: ["mock"]`) y a
-`document-environment`.
+Handoff a `compose-builder` (servicios bajo `profiles: ["mock"]`) o a
+`native-setup` (entrada en `env/Procfile`, comando en `env/INSTALL.md`), según el
+medio del entorno, y a `document-environment`.

@@ -1,13 +1,45 @@
 ---
 name: env-service-recipes
-description: Recetas de configuración por tipo de servicio de infraestructura (PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, MinIO, Elasticsearch/OpenSearch, LocalStack, Keycloak, Mailpit). Define qué decide el agente solo, qué sigue preguntando y qué bloque de docker-compose + variables generar para cada uno. Usar cuando hay que crear un servicio desde cero y se necesitan los detalles de configuración.
+description: Recetas de configuración por tipo de servicio de infraestructura (PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, MinIO, Elasticsearch/OpenSearch, LocalStack, Keycloak, Mailpit). Define qué decide el agente solo, qué sigue preguntando, qué bloque de docker-compose + variables generar, y cómo instalar cada servicio de forma nativa (brew/apt/winget). Usar cuando hay que crear un servicio desde cero — en Docker o nativo — y se necesitan los detalles de configuración.
 ---
 
 # Skill: service-recipes
 
-Para cada servicio: **valores que el agente decide solo** (imagen, versión,
-memoria, puerto), **datos que sigue preguntando** (nombres/credenciales) y
-**bloque de compose**. Siempre incluir healthcheck y volumen nombrado.
+Para cada servicio: **valores que el agente decide solo** (imagen/paquete,
+versión, memoria, puerto), **datos que sigue preguntando** (nombres/credenciales),
+**bloque de compose** (camino Docker) e **instalación nativa** (camino nativo).
+Siempre incluir healthcheck/comprobación y almacenamiento persistente nombrado.
+
+## Instalación nativa por servicio (camino sin Docker)
+
+Cuando el servicio se resolvió como "instalar nativo", `native-setup` escribe en
+`env/INSTALL.md` el comando del gestor de paquetes que reportó
+`inspect-local-resources`. Nombres de paquete de referencia:
+
+| Servicio | Homebrew (macOS) | apt (Debian/Ubuntu) | winget / scoop (Windows) | Arranque | Comprobación |
+|---|---|---|---|---|---|
+| PostgreSQL | `postgresql@16` | `postgresql-16` | `PostgreSQL.PostgreSQL.16` / `scoop install postgresql` | `brew services start postgresql@16` · `systemctl --now enable postgresql` | `pg_isready` |
+| MySQL / MariaDB | `mysql` / `mariadb` | `mysql-server` / `mariadb-server` | `Oracle.MySQL` / `MariaDB.Server` | `brew services start mysql` | `mysqladmin ping` |
+| MongoDB | `mongodb-community` (tap) | repo oficial `mongodb-org` | `MongoDB.Server` | `brew services start mongodb-community` | `mongosh --eval "db.adminCommand('ping')"` |
+| Redis | `redis` | `redis-server` | `scoop install redis` / Memurai | `brew services start redis` | `redis-cli ping` |
+| RabbitMQ | `rabbitmq` | `rabbitmq-server` | `scoop install rabbitmq` | `brew services start rabbitmq` | `rabbitmq-diagnostics -q ping` |
+| Kafka | `kafka` | tarball de Apache | tarball de Apache | `brew services start kafka` | `kafka-topics --bootstrap-server localhost:9092 --list` |
+| MinIO | `minio` | binario oficial | `scoop install minio` | `minio server env/data/minio` | `curl localhost:9000/minio/health/live` |
+| Elasticsearch / OpenSearch | `elasticsearch` / `opensearch` | repo oficial | binario oficial | `brew services start …` | `curl localhost:9200` |
+| Keycloak | `keycloak` | tarball oficial | tarball oficial | `keycloak start-dev` | `curl localhost:8080/health/ready` |
+| Mailpit | `mailpit` | binario oficial | `scoop install mailpit` | `mailpit` | `curl localhost:8025` |
+
+- **Versión:** la que pida el proyecto o la ya instalada si sirve; si no, la
+  estable/LTS de la receta. Alineá el `@16` del paquete con esa decisión.
+- **Puerto:** el estándar; si `inspect-local-resources` lo reporta ocupado,
+  avisá y usá el flag del servicio para cambiarlo (`-p`, `--port`, `port=` en el
+  config), reflejándolo en `env/.env.local`.
+- **Datadir aislado (opcional):** `env/data/<servicio>/` en vez del datadir
+  global, pasado como flag al arrancar. Nunca toques el datadir por defecto.
+- Los comandos `install` se **muestran**; los ejecuta la persona o el agente con
+  permiso explícito, uno por uno.
+
+## Camino Docker
 
 > Los bloques de abajo muestran la forma del servicio. Al materializar,
 > `compose-builder` aplica sobre ellos: **imagen/tag por variable con default**
@@ -33,12 +65,14 @@ memoria, puerto), **datos que sigue preguntando** (nombres/credenciales) y
 
 ## Qué decide el agente solo, y qué sigue preguntando
 
-No preguntes imagen/variante, versión/tag, memoria ni puerto uno por uno — eso
-frena el wizard con detalles técnicos que el agente puede resolver mejor que
-haciendo preguntas. Decidilos vos con el criterio de abajo (ver también "Lo que
-el agente decide solo" en `AGENT.md`) y déjalos, junto con una línea del
-porqué, en el **resumen final del plan** de `brownfield-wizard`/
-`greenfield-wizard`, donde recién ahí la persona puede pedir cambiarlos.
+No preguntes imagen/variante o paquete, versión/tag, memoria ni puerto uno por
+uno — eso frena el wizard con detalles técnicos que el agente puede resolver
+mejor que haciendo preguntas. Decidilos vos con el criterio de abajo (ver
+también "Lo que el agente decide solo" en `AGENT.md`) y déjalos, junto con una
+línea del porqué, en el **resumen final del plan** de `brownfield-wizard`/
+`greenfield-wizard`, donde recién ahí la persona puede pedir cambiarlos. Esto
+vale tanto para el camino Docker (imagen/tag/memoria/puerto) como para el nativo
+(nombre de paquete, versión, puerto).
 
 Lo que **sí** seguís preguntando de forma explícita para cada servicio nuevo
 (son decisiones de la persona, no técnicas): nombre de DB/schema/bucket/vhost,

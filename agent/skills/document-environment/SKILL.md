@@ -1,6 +1,6 @@
 ---
 name: env-document-environment
-description: Genera o actualiza env/ENVIRONMENT.md — inventario de servicios, modo de conexión de cada dependencia (real/creada/reutilizada/compartida/mock), variables de entorno, puertos, y procedimientos de arranque y apagado. Usar al cerrar cada sesión o cada vez que cambia algo del entorno.
+description: Genera o actualiza env/ENVIRONMENT.md — medio de ejecución elegido, inventario de servicios, modo de conexión de cada dependencia (real/creada en Docker/instalada nativa/reutilizada/compartida/mock), variables de entorno, puertos, y procedimientos de arranque y apagado. Usar al cerrar cada sesión o cada vez que cambia algo del entorno.
 ---
 
 # Skill: document-environment
@@ -47,37 +47,49 @@ En su lugar:
 > Generado y mantenido por el agente inicializador de entornos.
 > Última actualización: <fecha>
 
+## Medio de ejecución
+
+<Docker / nativo en el host / mixto>. <Una línea de por qué se eligió, si la
+persona lo dijo.>
+
 ## Prerrequisitos
 
-- Docker + Docker Compose.
+Según el medio:
+
+- **Docker:** Docker + Docker Compose.
+- **Nativo:** runtime `<lenguaje> <versión>` (fijada en `env/.tool-versions` /
+  `.nvmrc`), gestor de versiones `<nvm/pyenv/asdf/mise>` si se usa, runner de
+  procesos `<foreman/overmind>` si hay `env/Procfile`, y los servicios de
+  `env/INSTALL.md` instalados.
 - <si aplica> Pila compartida `docker-environment` clonada como repo hermano
-  (`../docker-environment`), o `SHARED_INFRA_DIR` definido en
-  `env/.env.local`.
+  (`../docker-environment`), o `SHARED_INFRA_DIR` definido en `env/.env.local`.
 
 ## Cómo levantar
 
 ```bash
-<comando de arranque completo con -f>   # p. ej. ./env/scripts/dev-up  o
-# docker compose -f docker-compose.yml -f env/docker-compose.override.yml --env-file env/.env.local --profile infra up -d
-# docker compose -f docker-compose.yml -f env/docker-compose.override.yml --env-file env/.env.local up
+<comando de arranque completo>   # p. ej. ./env/scripts/dev-up
+# Docker:  docker compose -f docker-compose.yml -f env/docker-compose.override.yml --env-file env/.env.local --profile infra up -d && docker compose ... up
+# Nativo:  brew services start postgresql@16 redis && nvm use && set -a && . env/.env.local && set +a && overmind start -f env/Procfile
 ```
 
 ## Cómo apagar
 
 ```bash
-docker compose -f docker-compose.yml -f env/docker-compose.override.yml down   # NUNCA con -v (borraría los datos)
+<comando de apagado>   # ./env/scripts/dev-down
+# Docker:  docker compose ... down   # NUNCA con -v (borraría los datos)
+# Nativo:  detener solo lo que arrancó dev-up; los servicios que ya estaban NO se bajan
 ```
 
 ## Servicios
 
-| Servicio | Estrategia | Endpoint (desde la app / desde el host) | Imagen (variable) | Mem límite (variable) | Perfil | Notas |
-|---|---|---|---|---|---|---|
-| postgres | pila compartida (~/dev-infra) | postgres:5432 / localhost:5432 | `postgres:16-alpine` (`POSTGRES_IMAGE`) | 512m (`POSTGRES_MEM`) | — | schema `miproyecto` |
-| redis | creado (override) | redis:6379/2 / localhost:6380 | `redis:7-alpine` (`REDIS_IMAGE`) | 256m (`REDIS_MEM`) | infra | — |
-| payments-api | mock (Prism) | payments-mock:4010 | `stoplight/prism:5` | 256m | mock | stubs en env/mocks/payments |
-| ... | ... | ... | ... | ... | ... | ... |
+| Servicio | Estrategia | Medio | Endpoint (desde la app / desde el host) | Imagen o paquete (variable) | Mem límite | Perfil | Notas |
+|---|---|---|---|---|---|---|---|
+| postgres | pila compartida | Docker | postgres:5432 / localhost:5432 | `postgres:16-alpine` (`POSTGRES_IMAGE`) | 512m (`POSTGRES_MEM`) | — | schema `miproyecto` |
+| redis | creado | nativo | localhost:6379 / localhost:6379 | `redis` (brew, v7) | — | — | base `2`; arranca `brew services` |
+| payments-api | mock (Prism) | nativo | localhost:4010 | `npx @stoplight/prism-cli` | — | mock | stubs en env/mocks/payments |
+| ... | ... | ... | ... | ... | ... | ... | ... |
 
-Anota que imagen y límite son defaults pisables desde `env/.env.local`.
+Anota que imagen/paquete y límite son defaults pisables desde `env/.env.local`.
 
 ## Variables de entorno
 
@@ -107,7 +119,9 @@ Anota que imagen y límite son defaults pisables desde `env/.env.local`.
 2b. **Antes de escribir, revisa que no haya rutas absolutas con usuario, nombres
    de carpeta personales ni secretos reales** (ver "Portabilidad"). Si los hay,
    reemplázalos por la convención portable y avisa.
-3. Refleja siempre: estrategia por dependencia, perfiles de compose, comandos, y
-   espacios lógicos de la pila compartida.
+3. Refleja siempre: medio de ejecución, estrategia y medio por dependencia,
+   perfiles de compose o entradas del `Procfile`, comandos de instalación
+   pendientes, comandos de arranque/apagado, y espacios lógicos de la pila
+   compartida.
 4. Si tocaste la pila compartida, actualiza también su README
    (`~/dev-infra/README.md`) con el espacio lógico asignado a este proyecto.

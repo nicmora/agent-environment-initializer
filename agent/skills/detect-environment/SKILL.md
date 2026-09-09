@@ -46,7 +46,19 @@ evidencia (archivo y línea) y nivel de confianza (confirmado / inferido).
 6. **Migraciones de esquema.** Detecta Flyway/Liquibase/Alembic/Prisma
    Migrate/Knex/EF Core y su ubicación. No las ejecutes todavía.
 
-7. **Documentación.** Lee `README*`, `CONTRIBUTING*`, `docs/` buscando la sección
+7. **Cómo arranca hoy y con qué runtime.** Busca la evidencia de cómo se corre
+   la app actualmente y qué versión de runtime pide:
+   - Scripts de arranque: `scripts` de `package.json`, `Makefile`, `Taskfile`,
+     `Procfile`, `foreman`/`overmind`, `docker-compose*.yml`, `.devcontainer/`,
+     comandos en el `README`.
+   - Versión de runtime declarada: `.nvmrc`, `.node-version`, `engines` de
+     `package.json`, `.python-version`, `pyproject.toml` (`requires-python`),
+     `go.mod` (`go 1.x`), `<java.version>`/`<release>` en `pom.xml`,
+     `.tool-versions` (asdf/mise), `.sdkmanrc`, `rust-toolchain*`.
+   - Anota si el proyecto **ya trae** un camino de arranque en contenedor, uno
+     nativo, o ambos.
+
+8. **Documentación.** Lee `README*`, `CONTRIBUTING*`, `docs/` buscando la sección
    de "cómo correr localmente".
 
 ## Salida
@@ -55,11 +67,12 @@ Este es siempre el **primer paso** del flujo: la persona todavía no tomó
 ninguna decisión y en la máquina no se tocó nada (ni Docker). Presenta, en este
 orden:
 
-1. **Resumen del stack tecnológico**, en prosa corta: lenguaje(s) y versión,
-   framework principal, gestor de paquetes, tipo de aplicación
-   (backend/frontend/worker/CLI/full-stack), estructura del repo
-   (monorepo/servicio único) y cómo arranca hoy (script de `package.json`,
-   `Makefile`, comando en el README) si ya hay evidencia de eso.
+1. **Resumen del stack tecnológico**, en prosa corta: lenguaje(s) y versión de
+   runtime requerida, framework principal, gestor de paquetes, tipo de
+   aplicación (backend/frontend/worker/CLI/full-stack), estructura del repo
+   (monorepo/servicio único) y **cómo arranca hoy** (script de `package.json`,
+   `Makefile`, `Procfile`, `docker-compose`, comando en el README), aclarando si
+   ya hay un camino en contenedor, uno nativo, o ambos.
 2. **Tabla de dependencias de entorno detectadas**:
 
    | Dependencia | Tipo | Evidencia (archivo:línea) | Versión sugerida | Confianza | Variables de entorno relacionadas |
@@ -71,11 +84,10 @@ orden:
 4. Lista de **variables referenciadas sin valor** y de **puertos** que el
    proyecto espera.
 
-Con ese resumen mostrado, pasa directo a preguntar cómo arrancar la app y la
-estrategia de cada dependencia (`brownfield-wizard`). **No ejecutes
-`inspect-local-resources` todavía** — Docker y la máquina se revisan recién si
-alguna estrategia elegida más adelante realmente lo necesita (ver `AGENT.md`,
-regla 11).
+Con ese resumen mostrado, pasa directo a preguntar el medio de ejecución de la
+app y la estrategia de cada dependencia (`brownfield-wizard`). **No ejecutes
+`inspect-local-resources` todavía** — la máquina se revisa recién si alguna
+decisión elegida más adelante realmente lo necesita (ver `AGENT.md`, regla 12).
 
 ## Reglas
 

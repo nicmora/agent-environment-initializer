@@ -1,6 +1,6 @@
 ---
 name: env-inspect-local-resources
-description: Inspecciona la máquina para descubrir contenedores Docker en ejecución, redes y volúmenes, servicios de infraestructura instalados en el sistema operativo, y puertos ocupados. Sirve para ofrecer reutilizar recursos existentes y evitar colisiones de puertos. Usar recién cuando una dependencia va a reutilizar un contenedor local o crear un servicio en Docker, o cuando el usuario dice "ya tengo una base de datos en un contenedor" / "fíjate qué tengo instalado".
+description: Inspecciona la máquina para descubrir contenedores Docker (con sus redes y volúmenes), servicios de infraestructura instalados en el sistema operativo, gestores de paquetes disponibles (brew/apt/winget/scoop), gestores de versiones de runtime (nvm/pyenv/asdf/mise) y versiones instaladas, y puertos ocupados. Sirve para ofrecer reutilizar recursos existentes, saber cómo instalar lo que falte y evitar colisiones de puertos. Usar recién cuando una decisión va a reutilizar un recurso local, crear un servicio en Docker, instalar algo nativo o depender de una versión de runtime concreta, o cuando el usuario dice "ya tengo una base de datos" / "fíjate qué tengo instalado".
 ---
 
 # Skill: inspect-local-resources
@@ -14,16 +14,19 @@ de crear.
 
 Esta skill **no** se ejecuta como parte del análisis inicial del proyecto
 (`detect-environment` no la dispara). Se invoca recién cuando, dependencia por
-dependencia en `brownfield-wizard`/`greenfield-wizard`, la persona elige una
-estrategia que realmente toca Docker o la máquina:
+dependencia en `brownfield-wizard`/`greenfield-wizard`, la persona elige algo que
+realmente toca la máquina:
 
 - Quiere **reutilizar** un recurso local (contenedor Docker o servicio del SO).
-- Quiere **crear desde cero** un servicio nuevo (hay que saber si Docker está
-  instalado/iniciado y qué puertos están libres antes de `service-recipes`).
+- Quiere **crear desde cero en Docker** (hay que saber si Docker está
+  instalado/iniciado y qué puertos están libres).
+- Quiere **instalar un servicio nativo** (hay que saber si ya está, con qué
+  gestor de paquetes se instala en este SO y qué puertos están libres).
+- La app va a correr **nativa** y hay que verificar la versión de runtime
+  instalada / el gestor de versiones disponible.
 
-Si todas las dependencias del proyecto se resuelven con **conexión externa** o
-**mock**, no hace falta ejecutar esta skill en absoluto: no hay nada que revisar
-en la máquina.
+Si todas las dependencias se resuelven con **conexión externa** o **mock** y la
+app corre con un runtime que ya está, no hace falta ejecutar esta skill.
 
 ## Procedimiento (solo lectura)
 
@@ -66,6 +69,19 @@ Con el daemon arriba:
 - Linux/macOS: `ss -tlnp` / `lsof -iTCP -sTCP:LISTEN`, `systemctl list-units
   --type=service --state=running`, `brew services list`.
 
+### Gestores de paquetes disponibles (para instalar lo que falte, camino nativo)
+- macOS: `brew --version`, `port version`.
+- Linux: `apt`/`apt-get`, `dnf`/`yum`, `pacman`, `apk`, `nix`.
+- Windows: `winget --version`, `scoop --version`, `choco --version`.
+- Anota cuál está disponible; es lo que `native-setup` va a usar en `INSTALL.md`.
+
+### Runtimes y gestores de versiones (para la app nativa)
+- Runtime instalado: `node -v`, `python --version`, `go version`, `java -version`,
+  `ruby -v`, `dotnet --version` — y si coincide con lo que pide el proyecto.
+- Gestores de versiones: `nvm`, `fnm`, `pyenv`, `rbenv`, `sdkman`, `asdf`,
+  `mise`, `volta`. Si hay uno, `native-setup` lo usa para fijar la versión sin
+  tocar la global.
+
 ### Puertos
 - Arma la lista de puertos en escucha para cruzar con los que el proyecto espera
   (de `detect-environment`) y detectar colisiones.
@@ -75,7 +91,11 @@ Con el daemon arriba:
 | Recurso | Origen (Docker / SO / —) | Estado (corriendo / detenido) | Endpoint | Credenciales conocidas | ¿Reutilizable para? |
 |---|---|---|---|---|---|
 
-Y una lista de **puertos ocupados** relevante para `compose-builder`.
+Más:
+
+- **Puertos ocupados** (relevante para `compose-builder` y `native-setup`).
+- **Gestor de paquetes** a usar en este SO para el camino nativo.
+- **Runtime instalado vs. requerido** y gestor de versiones disponible.
 
 Si el daemon de Docker estaba apagado, déjalo explícito en la salida: "Docker
 estaba apagado; lo levanté con permiso y encontré N contenedores" o "la persona
@@ -83,7 +103,11 @@ optó por no levantarlo, no se pudo inspeccionar Docker".
 
 ## Reglas
 
-- Nunca **borres ni reinicies** contenedores/servicios existentes.
+- Nunca **borres, reinicies, desinstales ni reconfigures** contenedores o
+  servicios existentes.
+- Esta skill es **solo lectura**: no instala nada. Descubrir el gestor de
+  paquetes sirve para que `native-setup` escriba el comando; la instalación la
+  decide la persona más adelante, con permiso.
 - Sí puedes, **con permiso explícito**, arrancar el daemon de Docker si está
   apagado y hacer `docker start <name>` de un contenedor detenido que la persona
   quiera reutilizar. Nada más.

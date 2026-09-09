@@ -4,15 +4,28 @@
 
 El presente documento define el propósito, los principios rectores y el alcance
 funcional de un **agente asistido por skills** cuya finalidad es facilitar la
-puesta en marcha de una aplicación junto con la totalidad de sus dependencias de
-entorno —bases de datos, cachés, sistemas de mensajería, almacenamiento de
-objetos, servicios externos y componentes análogos—, tanto en proyectos de nueva
-creación (*greenfield*) como en proyectos preexistentes (*brownfield*).
+puesta en marcha de una aplicación **en un entorno local**, junto con la
+totalidad de sus dependencias de entorno —bases de datos, cachés, sistemas de
+mensajería, almacenamiento de objetos, servicios externos y componentes
+análogos—, tanto en proyectos de nueva creación (*greenfield*) como en proyectos
+preexistentes (*brownfield*).
 
 El agente opera bajo un modelo de **asistente conversacional guiado** (*wizard*):
 formula preguntas, presenta alternativas y, como resultado, genera o completa un
-entorno de ejecución reproducible, basado principalmente en **Docker** y **Docker
-Compose**, que permita ejecutar la aplicación en un equipo local.
+entorno de ejecución reproducible que permita ejecutar la aplicación en un equipo
+local. **El medio de ejecución no se presupone**: según el proyecto y la
+preferencia de la persona usuaria, puede basarse en **Docker / Docker Compose**,
+en el **runtime nativo ejecutándose en el sistema anfitrión** (con su gestor de
+versiones), en **servicios de infraestructura instalados en el sistema operativo**
+o mediante un gestor de paquetes, en **binarios o emuladores nativos**, o en una
+**combinación** de estos enfoques. El objetivo no es que un comando concreto
+—como `docker compose up`— deje la aplicación operativa, sino que la aplicación
+**arranque y responda en el equipo local** por el medio que la persona elija, de
+manera reproducible y documentada.
+
+El agente **no formula recomendaciones** sobre el medio de ejecución ni sobre la
+estrategia de cada dependencia: expone las opciones disponibles con su
+implicancia objetiva y la persona usuaria decide.
 
 ## 2. Principios rectores
 
@@ -55,14 +68,19 @@ resolver una incidencia. Ante un conflicto, su proceder es el siguiente:
   de forma expresa y previa confirmación.
 - Generar los archivos nuevos de forma diferenciada, todos dentro de una
   carpeta `env/` (por ejemplo, `env/docker-compose.override.yml`,
-  `env/docker-compose.dev.yml` o `env/.env.local`; véase la sección
-  2.8) y, en caso de modificar archivos existentes, presentar el *diff*
-  correspondiente y solicitar aprobación.
+  `env/docker-compose.dev.yml`, `env/.env.local`, `env/scripts/dev-up`,
+  `env/.tool-versions` o `env/Procfile`; véase la sección 2.8) y, en caso de
+  modificar archivos existentes, presentar el *diff* correspondiente y solicitar
+  aprobación.
+- No desinstalar ni reconfigurar un servicio ya presente en el sistema
+  operativo. La instalación de software nuevo en la máquina (un servicio
+  mediante `brew`/`apt`/`winget`, una versión de runtime) se realiza únicamente
+  con autorización expresa y previa indicación del comando exacto.
 
 ### 2.4. Flexibilidad de elección
 
 Para cada dependencia detectada o requerida, el agente ofrece de manera
-sistemática el siguiente conjunto de opciones:
+sistemática el siguiente conjunto de opciones, **sin recomendar ninguna**:
 
 - **Reutilización** de un recurso ya disponible en el equipo: la pila de
   infraestructura compartida (véase la sección 2.6), un contenedor Docker en
@@ -70,10 +88,18 @@ sistemática el siguiente conjunto de opciones:
   alojada en la nube.
 - **Conexión a un servicio externo** (entornos de *staging*, servicios en la nube
   o infraestructura de otro equipo).
-- **Creación del recurso desde cero** como nuevo servicio en la definición de
-  Compose, en cuyo caso se formulan las preguntas de configuración pertinentes.
+- **Creación del recurso desde cero**, ya sea como nuevo servicio en una
+  definición de Compose o mediante instalación nativa en el sistema operativo
+  (gestor de paquetes o binario oficial). Cuando ambas variantes son viables, se
+  presentan las dos. En cualquier caso se formulan las preguntas de
+  configuración pertinentes.
 - **Simulación** (*mock*) del servicio cuando se trate de una dependencia externa
-  que no resulte conveniente o posible ejecutar de forma real.
+  que no resulte conveniente o posible ejecutar de forma real; el simulador
+  puede correr como contenedor o como proceso nativo.
+
+Análogamente, el modo de ejecución de la **propia aplicación** —en contenedor o
+con el runtime nativo en el sistema anfitrión— se presenta como una elección de
+la persona usuaria, con indicación de lo que implica cada alternativa.
 
 ### 2.5. Disponibilidad conversacional permanente
 
@@ -111,29 +137,34 @@ siguiente:
   incorporación se realiza de forma aditiva (un nuevo *schema*, una nueva cola,
   un nuevo *bucket*) y previa confirmación.
 
-### 2.7. Orden de la interacción: analizar antes de preguntar, Docker solo si hace falta
+### 2.7. Orden de la interacción: analizar antes de preguntar, revisar la máquina solo si hace falta
 
 El agente sigue siempre el mismo orden, sin importar cómo se lo invoque:
 
-1. **Analiza el proyecto y muestra un resumen** — stack tecnológico,
-   dependencias detectadas y configuración existente — antes de formular
-   ninguna pregunta y sin tocar la máquina ni Docker.
-2. **Pregunta cómo arrancar la aplicación y, dependencia por dependencia, qué
-   estrategia usar** (reutilizar, conectar a externo, crear o simular).
-3. **Inspecciona Docker y la máquina únicamente si alguna estrategia elegida lo
-   requiere** (reutilizar un contenedor local, o crear un servicio desde cero).
-   Si el proyecto se resuelve enteramente con conexiones externas o
-   simulaciones, este paso se omite por completo.
+1. **Analiza el proyecto y muestra un resumen** — stack tecnológico, versión de
+   runtime, cómo arranca hoy, dependencias detectadas y configuración
+   existente — antes de formular ninguna pregunta y sin tocar la máquina.
+2. **Pregunta el medio de ejecución de la aplicación** (contenedor, runtime
+   nativo en el host, u otra forma que el proyecto ya use) **y, dependencia por
+   dependencia, qué estrategia usar** (reutilizar, conectar a externo, crear
+   —en Docker o nativo— o simular).
+3. **Inspecciona la máquina únicamente si alguna decisión elegida lo requiere**
+   (reutilizar un contenedor o servicio local, crear un servicio en Docker,
+   instalar algo nativo, o verificar una versión de runtime). Si el proyecto se
+   resuelve enteramente con conexiones externas o simulaciones y la aplicación
+   corre con un runtime ya instalado, este paso se omite por completo.
 4. **Presenta el plan completo y ofrece ajustarlo** antes de generar un solo
-   archivo: servicios, estrategia por dependencia, imágenes, puertos, memoria y
-   la lista de archivos que va a crear.
+   archivo: medio de ejecución, estrategia y medio por dependencia, imágenes o
+   versiones, puertos, memoria y la lista de archivos que va a crear.
 5. Recién entonces materializa los archivos.
 
 ### 2.8. Artefactos generados en una carpeta local, no versionada
 
 Todo archivo que el agente agrega para poner en marcha el proyecto —
 definiciones de Compose y sus *overrides*, `Dockerfile` de desarrollo, archivos
-`.env` de ejemplo y locales, scripts de conveniencia, *stubs* de simulación y el
+`.env` de ejemplo y locales, archivo de versiones de runtime (`.tool-versions` o
+equivalente), scripts de arranque (con o sin Docker), `Procfile` local, notas de
+instalación de servicios del sistema operativo, *stubs* de simulación y el
 documento `ENVIRONMENT.md`— se ubica dentro de una carpeta `env/` en la
 raíz del proyecto, nunca sueltos junto al código ni mezclados con
 infraestructura preexistente. La primera vez que el agente crea esa carpeta,
@@ -146,40 +177,46 @@ igualmente rutas absolutas con usuario o nombres de carpeta propios de una
 máquina, de modo que la persona pueda regenerar `env/` sin fricción si
 cambia de equipo o reclona el repositorio.
 
-Cuando el proyecto ya tiene un `docker-compose.yml` u otra infraestructura
-versionada en la raíz, el agente no la toca: la referencia desde
-`env/` (por ejemplo, un *override* que se combina con `-f` explícito en
-el comando de arranque, ya que Docker Compose solo mezcla automáticamente un
-`docker-compose.override.yml` que esté en el mismo directorio que el archivo
-base).
+Cuando el proyecto ya tiene un `docker-compose.yml`, un `Procfile`, un `Makefile`
+u otra infraestructura o scripts versionados en la raíz, el agente no los toca:
+los referencia desde `env/` (por ejemplo, un *override* de Compose que se combina
+con `-f` explícito en el comando de arranque, ya que Docker Compose solo mezcla
+automáticamente un `docker-compose.override.yml` que esté en el mismo directorio
+que el archivo base; o un script en `env/` que invoca el `Makefile` existente).
 
 ### 2.9. Reproducibilidad y trazabilidad
 
 Toda configuración aplicada por el agente queda documentada: los servicios
-disponibles, el modo de conexión de la aplicación, las variables de entorno
-utilizadas y los procedimientos de arranque y de detención. El objetivo final es
-invariable: que la ejecución de `docker compose up` —o el comando equivalente—
-deje la aplicación operativa.
+disponibles, el medio de ejecución elegido, el modo de conexión de la
+aplicación, las variables de entorno utilizadas y los procedimientos de arranque
+y de detención. El objetivo final es invariable: que la aplicación arranque y
+responda en el equipo local mediante un procedimiento único y reproducible
+—`docker compose up`, un script de arranque nativo, o el comando que corresponda
+al medio elegido—.
 
 ## 3. Alcance
 
 ### 3.1. Funcionalidades incluidas
 
-- Descubrimiento de las dependencias de entorno de un repositorio.
-- Cuestionario guiado para los escenarios *greenfield* y *brownfield*.
-- Generación de definiciones de `docker-compose` y de sus *overrides*, de un
-  `Dockerfile` de desarrollo cuando sea necesario, de archivos `.env` de ejemplo
-  y locales, de scripts de arranque y de un documento explicativo
-  `ENVIRONMENT.md`.
+- Descubrimiento de las dependencias de entorno de un repositorio, de su versión
+  de runtime y de cómo se arranca actualmente.
+- Cuestionario guiado para los escenarios *greenfield* y *brownfield*, incluida
+  la elección del medio de ejecución.
+- Generación, según el medio elegido, de: definiciones de `docker-compose` y sus
+  *overrides* y un `Dockerfile` de desarrollo; o scripts de arranque nativo, un
+  archivo de versiones de runtime y un `Procfile` local con notas de instalación
+  de servicios del sistema operativo. En ambos casos, archivos `.env` de ejemplo
+  y locales y un documento explicativo `ENVIRONMENT.md`.
 - Parametrización de imágenes, versiones y variantes (alpine/slim/otras) y de
-  los límites de recursos (memoria/CPU) de cada servicio, con un default
-  razonable y la posibilidad de ajustarlo por variables de entorno.
+  los límites de recursos (memoria/CPU) de cada servicio en contenedor, o de las
+  versiones de cada servicio nativo, con un default razonable y la posibilidad
+  de ajustarlo por variables de entorno o por el archivo de versiones.
 - Determinación de la estrategia de conexión por dependencia: reutilización,
-  conexión externa, creación o simulación.
+  conexión externa, creación (en Docker o nativa) o simulación.
 - Configuración de simuladores para servicios externos (HTTP, colas de mensajes y
-  similares).
+  similares), como contenedor o como proceso nativo.
 - Verificación final mediante comprobaciones de salud y confirmación del arranque
-  de la aplicación.
+  de la aplicación, con el comando del medio elegido.
 
 ### 3.2. Funcionalidades excluidas (en esta etapa)
 
@@ -229,6 +266,8 @@ ejes de indagación son, entre otros:
 2. **Tipo de aplicación.** *Backend*, *frontend*, proceso de trabajo o por lotes,
    herramienta de línea de comandos, biblioteca o aplicación integral; lenguaje y
    *framework* principal, gestor de paquetes y versión del entorno de ejecución.
+   Medio de ejecución previsto para la propia aplicación: en contenedor o con el
+   runtime nativo en el sistema anfitrión.
 3. **Persistencia.** Necesidad de una o varias bases de datos, su tipo y su
    justificación; existencia de migraciones o de datos de inicialización y la
    herramienta empleada.
@@ -246,17 +285,21 @@ ejes de indagación son, entre otros:
 9. **Puertos y red.** Puertos expuestos por cada servicio, evitando colisiones
    con los servicios ya en ejecución en el equipo.
 
-A partir de las respuestas, el agente propone una definición base de
-`env/docker-compose.yml` acompañada de un documento
-`env/ENVIRONMENT.md`. Para cada servicio nuevo, formula las preguntas de
-configuración necesarias (nombre de la base de datos, credenciales de
-desarrollo, versión de la imagen, volumen persistente, puerto en el equipo
-anfitrión, entre otras). Antes de crear servicios de infraestructura dedicados,
-el agente ofrece adherir la aplicación a la pila compartida descrita en la
-sección 2.6, creando en ella el espacio lógico correspondiente. Solo si se
-decide crear algún servicio en Docker, el agente inspecciona antes la máquina
-(sección 2.7) para evitar colisiones de puertos. Antes de generar los archivos,
-presenta el plan completo y ofrece ajustarlo.
+A partir de las respuestas, y según el medio de ejecución elegido, el agente
+propone: una definición base de `env/docker-compose.yml`; o un conjunto de
+scripts de arranque nativo con su archivo de versiones de runtime y sus notas de
+instalación. En ambos casos lo acompaña de un documento `env/ENVIRONMENT.md`.
+Para cada servicio nuevo, formula las preguntas de configuración necesarias
+(nombre de la base de datos, credenciales de desarrollo, volumen o directorio de
+datos persistente, puerto en el equipo anfitrión, entre otras); el detalle
+técnico (versión de la imagen o del paquete, variante, memoria) lo resuelve el
+propio agente. Antes de crear servicios de infraestructura dedicados, el agente
+ofrece —sin recomendarla— adherir la aplicación a la pila compartida descrita en
+la sección 2.6, creando en ella el espacio lógico correspondiente. Solo si se
+decide crear algún servicio en Docker o instalar algo nativo, el agente
+inspecciona antes la máquina (sección 2.7) para evitar colisiones de puertos y
+comprobar lo ya instalado. Antes de generar los archivos, presenta el plan
+completo y ofrece ajustarlo.
 
 ### 5.2. Escenario *brownfield* (proyecto preexistente)
 
@@ -292,23 +335,30 @@ presenta el plan completo y ofrece ajustarlo.
      de su nombre, red, puerto y credenciales cuando sea posible; o un servicio
      instalado en el sistema operativo, en cuyo caso se ofrece dirigir la
      aplicación a `localhost`. **Recién en este punto** —si la persona elige
-     reutilizar un recurso local o crear uno desde cero— el agente inspecciona
-     Docker y la máquina (sección 2.7); si todas las dependencias se resuelven
-     por conexión externa o simulación, esa inspección no llega a ejecutarse.
+     reutilizar un recurso local, crear uno desde cero (en Docker o nativo) o
+     depender de una versión de runtime concreta— el agente inspecciona la
+     máquina (sección 2.7); si todas las dependencias se resuelven por conexión
+     externa o simulación y la app corre con un runtime ya instalado, esa
+     inspección no llega a ejecutarse.
    - Si se desea la conexión a una instancia externa (*staging* o nube), en cuyo
      caso se solicitan el *host*, el puerto y las credenciales, que se almacenan
      en `env/.env.local`.
-   - Si se desea la creación del recurso desde cero en Docker, en cuyo caso se
-     formulan las preguntas de configuración y el servicio se incorpora,
-     preferentemente, a un archivo `env/docker-compose.override.yml` o
-     `env/docker-compose.dev.yml`, sin alterar la definición existente.
+   - Si se desea la creación del recurso desde cero, se ofrece hacerlo **en
+     Docker** —incorporándolo a un archivo `env/docker-compose.override.yml` o
+     `env/docker-compose.dev.yml`, sin alterar la definición existente— **o de
+     forma nativa** —instalándolo con el gestor de paquetes del sistema
+     operativo o un binario oficial, con las notas correspondientes en `env/`—.
+     Cuando ambas variantes son viables se presentan las dos. En cualquier caso
+     se formulan las preguntas de configuración pertinentes.
    - Si se trata de un servicio de un tercero o de otro equipo, se ofrece la
      conexión real o la simulación, conforme a la sección 6.
-4. **Preservación de lo existente.** Cuando exista un `docker-compose.yml` en la
-   raíz del repositorio, el agente no lo reescribe, sino que trabaja mediante
-   *overrides* ubicados en `env/` (combinados con `-f` explícito al
-   arrancar). Si un puerto está ocupado, propone otro. Si existe un volumen con
-   datos, no lo recrea.
+4. **Preservación de lo existente.** Cuando exista un `docker-compose.yml`, un
+   `Procfile`, un `Makefile` o scripts de arranque en la raíz del repositorio, el
+   agente no los reescribe: trabaja mediante *overrides* o scripts propios
+   ubicados en `env/` (los *overrides* de Compose se combinan con `-f` explícito
+   al arrancar; los scripts de `env/` invocan a los existentes cuando
+   corresponde). Si un puerto está ocupado, propone otro. Si existe un volumen o
+   un directorio con datos, no lo recrea.
 5. **Resumen del plan y ajustes.** Antes de generar un solo archivo, el agente
    presenta el plan consolidado (servicios, estrategia, imágenes, puertos,
    memoria, archivos a crear en `env/`) y pregunta si algo se quiere
@@ -349,10 +399,17 @@ Todos los artefactos de esta sección se ubican dentro de una carpeta
 `env/` en la raíz del proyecto (véase la sección 2.8) y esa carpeta se
 agrega íntegramente a `.gitignore`: ninguno de estos archivos se versiona.
 
-- `env/docker-compose.yml` en el escenario *greenfield*, o
+Según el medio de ejecución elegido, algunos de los siguientes:
+
+- **Camino Docker:** `env/docker-compose.yml` en el escenario *greenfield*, o
   `env/docker-compose.override.yml` y `env/docker-compose.dev.yml`
   en el escenario *brownfield* (sin tocar un `docker-compose.yml` preexistente
   fuera de `env/`).
+- **Camino nativo:** `env/.tool-versions` (o `.nvmrc`/`.python-version`
+  equivalente) con la versión de runtime; `env/Procfile` local para orquestar
+  los procesos de la app; `env/INSTALL.md` con los comandos exactos para
+  instalar cada servicio del sistema operativo (brew/apt/winget) y arrancarlo;
+  `env/scripts/` con el arranque, el apagado y los logs.
 - Definición de la pila de infraestructura compartida (por ejemplo, un proyecto
   `dev-infra/docker-compose.yml` con su red reutilizable), cuando se opte por
   crearla — esta pila es un proyecto de Compose aparte, independiente de
@@ -366,8 +423,10 @@ agrega íntegramente a `.gitignore`: ninguno de estos archivos se versiona.
 - Alta de la línea `env/` en `.gitignore` (creándolo si no existe).
 - Scripts de conveniencia (`env/scripts/dev-up`,
   `env/scripts/dev-down`, `env/scripts/dev-logs`) o los *targets*
-  equivalentes en `env/Makefile` o `env/Taskfile`, que arman el
-  comando completo de Compose con los `-f` que correspondan.
+  equivalentes en `env/Makefile` o `env/Taskfile`, que arman el comando
+  completo del medio elegido: el `docker compose` con los `-f` que correspondan,
+  o el arranque nativo (seleccionar versión de runtime, levantar los servicios
+  del SO, `foreman`/`overmind start` sobre el `env/Procfile`).
 - Configuración de los simuladores (directorios `env/mocks/`,
   `env/wiremock/` o `env/stubs/`).
 - `env/ENVIRONMENT.md`: inventario de servicios, modo de conexión,
@@ -379,6 +438,10 @@ agrega íntegramente a `.gitignore`: ninguno de estos archivos se versiona.
 
 - No ejecutar `docker compose down -v`, `docker volume rm`, `DROP DATABASE`,
   `TRUNCATE` ni `rm -rf` sobre recursos existentes sin una solicitud expresa.
+- No desinstalar, detener de forma permanente ni reconfigurar un servicio que ya
+  estaba instalado en el sistema operativo.
+- No instalar software en la máquina (servicios, versiones de runtime) sin
+  autorización expresa y sin haber mostrado antes el comando exacto.
 - No sobrescribir un archivo existente sin presentar el *diff* y obtener
   confirmación.
 - No incorporar secretos al control de versiones.
@@ -400,12 +463,17 @@ agrega íntegramente a `.gitignore`: ninguno de estos archivos se versiona.
 - `skills/greenfield-wizard/`: cuestionario para proyectos de nueva creación.
 - `skills/brownfield-wizard/`: cuestionario de determinación de estrategia por
   dependencia.
-- `skills/inspect-local-resources/`: detección de contenedores Docker y de
-  servicios del sistema operativo susceptibles de reutilización.
+- `skills/inspect-local-resources/`: detección de contenedores Docker, servicios
+  del sistema operativo, gestores de paquetes, versiones de runtime y puertos
+  ocupados, susceptibles de reutilización.
 - `skills/shared-infra/`: creación, detección y gobierno de la pila de
   infraestructura compartida, y asignación de espacios lógicos por servicio.
-- `skills/compose-builder/`: generación y actualización de definiciones de
-  Compose y de sus *overrides* sin alterar lo existente.
+- `skills/compose-builder/`: materialización del camino Docker — generación y
+  actualización de definiciones de Compose y de sus *overrides* sin alterar lo
+  existente.
+- `skills/native-setup/`: materialización del camino nativo — scripts de
+  arranque, archivo de versiones de runtime, `Procfile` local y notas de
+  instalación de servicios del sistema operativo.
 - `skills/service-recipes/`: recetas de configuración por tipo de servicio
   (PostgreSQL, Redis, Kafka, MinIO, entre otros), con las preguntas y los
   artefactos correspondientes.
@@ -424,8 +492,9 @@ agrega íntegramente a `.gitignore`: ninguno de estos archivos se versiona.
   sesión, sin haber alterado datos ni configuración preexistentes.
 - En un proyecto *greenfield*, el agente produce un entorno coherente con las
   respuestas del cuestionario y debidamente documentado.
-- En todos los casos, la persona usuaria ha podido elegir, para cada
-  dependencia, entre reutilizar, conectar, crear o simular.
+- En todos los casos, la persona usuaria ha podido elegir el medio de ejecución
+  de la aplicación y, para cada dependencia, entre reutilizar, conectar, crear
+  (en Docker o nativa) o simular, sin que el agente empujara una opción.
 - El agente puede invocarse nuevamente para incorporar un componente adicional
   sin necesidad de rehacer la configuración previa.
 - Cuando existe una pila de infraestructura compartida, los servicios nuevos se
