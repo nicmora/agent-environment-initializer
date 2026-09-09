@@ -1,5 +1,5 @@
 ---
-name: env-document-environment
+name: document-environment
 description: Genera o actualiza env/ENVIRONMENT.md — medio de ejecución elegido, inventario de servicios, modo de conexión de cada dependencia (real/creada en Docker/instalada nativa/reutilizada/mock), variables de entorno, puertos, y procedimientos de arranque y apagado. Usar al cerrar cada sesión o cada vez que cambia algo del entorno.
 ---
 

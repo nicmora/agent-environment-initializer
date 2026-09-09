@@ -1,5 +1,5 @@
 ---
-name: env-verify-environment
+name: verify-environment
 description: Verifica que el entorno quedó operativo — según el medio elegido, valida la sintaxis del compose o los scripts de arranque, levanta los servicios (contenedores o nativos), espera los healthchecks/comprobaciones, corre migraciones de esquema si el proyecto las tiene y el usuario lo aprueba, y confirma que la aplicación arranca y responde. Reporta qué quedó pendiente. Usar como paso final después de compose-builder o native-setup, o cuando el usuario dice "prueba si levanta" / "por qué no arranca".
 ---
 

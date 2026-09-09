@@ -1,5 +1,5 @@
 ---
-name: env-service-recipes
+name: service-recipes
 description: Recetas de configuración por tipo de servicio de infraestructura (PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, MinIO, Elasticsearch/OpenSearch, LocalStack, Keycloak, Mailpit). Define qué decide el agente solo, qué sigue preguntando, qué bloque de docker-compose + variables generar, y cómo instalar cada servicio de forma nativa (brew/apt/winget). Usar cuando hay que crear un servicio desde cero — en Docker o nativo — y se necesitan los detalles de configuración.
 ---
 
@@ -61,7 +61,7 @@ Cuando el servicio se resolvió como "instalar nativo", `native-setup` escribe e
 | MinIO | `minio/minio` (release fija) | — | fija el tag `RELEASE.YYYY-…` |
 | Elasticsearch | `docker.elastic.co/elasticsearch/elasticsearch:8.x` | OpenSearch | pesada; límite ≥1g |
 | Keycloak | `quay.io/keycloak/keycloak:25` | — | |
-| Mailpit | `axllent/mailpit:latest` → fija versión | — | imagen ya mínima |
+| Mailpit | `axllent/mailpit:v1.x` (tag fijo, nunca `latest`) | — | imagen ya mínima |
 
 ## Qué decide el agente solo, y qué sigue preguntando
 
@@ -121,51 +121,63 @@ para pegar, variable/s de entorno, URL de consola/UI y comando de cliente
 rápido.
 
 ## PostgreSQL
-Preguntas: versión (default 16), nombre de DB, usuario/clave de dev, puerto host
-(default 5432), ¿volumen persistente? (default sí).
+Se pregunta: nombre de DB, usuario/clave de dev, ¿volumen persistente? (default sí).
+El agente fija: imagen/variante (`postgres:16-alpine`), versión, memoria (perfil
+`s`), puerto host (5432 o el siguiente libre).
 ```yaml
 postgres:
-  image: ${POSTGRES_IMAGE:-postgres:16-alpine}
+  image: postgres:16-alpine
   environment:
     POSTGRES_DB: ${POSTGRES_DB}
     POSTGRES_USER: ${POSTGRES_USER}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  ports: ["${POSTGRES_PORT:-5432}:5432"]
+  ports: ["5432:5432"]
   volumes: ["pgdata:/var/lib/postgresql/data"]
-  mem_limit: ${POSTGRES_MEM:-512m}
-  deploy:
-    resources:
-      limits: { cpus: "${POSTGRES_CPUS:-1}", memory: "${POSTGRES_MEM:-512m}" }
-      reservations: { memory: "${POSTGRES_MEM_RES:-128m}" }
+  mem_limit: 512m
   healthcheck:
     test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
     interval: 5s
     timeout: 5s
     retries: 10
 ```
-`env/.env.example`: `# POSTGRES_IMAGE=postgres:16-alpine (default) | 16-bookworm | 16`
-y `# POSTGRES_MEM=512m (perfil s) | 256m | 1g`.
+`compose-builder` parametriza la imagen y la memoria al materializar
+(`image: ${POSTGRES_IMAGE:-postgres:16-alpine}`, `mem_limit: ${POSTGRES_MEM:-512m}`)
+y documenta las alternativas en `env/.env.example`
+(`# POSTGRES_IMAGE=postgres:16-alpine (default) | 16-bookworm | 16`,
+`# POSTGRES_MEM=512m (perfil s) | 256m | 1g`).
 Vars: `DATABASE_URL=postgres://user:pass@postgres:5432/db`.
 
+> Nota: en los bloques, solo las credenciales quedan como `${VAR}` (salen de
+> `env/.env.local`); imagen, puerto y memoria van con el valor resuelto y los
+> parametriza `compose-builder`.
+
 ## MySQL / MariaDB
-Preguntas: versión (8.4 / 11), DB, usuario/clave, root pass, puerto (3306).
+Se pregunta: nombre de DB, usuario/clave de dev, root pass.
+El agente fija: imagen/versión (`mysql:8.4`, o `mariadb:11` si se necesita una
+variante más chica), memoria (perfil `s`), puerto (3306 o el siguiente libre).
 Healthcheck: `mysqladmin ping`. Volumen `/var/lib/mysql`.
 
 ## MongoDB
-Preguntas: versión (7), usuario/clave root, DB inicial, puerto (27017),
-¿replica set? (default no; sí si usa transacciones/change streams).
+Se pregunta: usuario/clave root, DB inicial, ¿replica set? (default no; sí si usa
+transacciones/change streams).
+El agente fija: imagen/versión (`mongo:7`), memoria (perfil `s`), puerto (27017 o
+el siguiente libre).
 Healthcheck: `mongosh --eval "db.adminCommand('ping')"`.
 
 ## Redis
-Preguntas: versión (7), ¿password? (default no en dev), ¿persistencia AOF?
-(default no), puerto (6379), base numerada a usar.
+Se pregunta: ¿password? (default no en dev), ¿persistencia AOF? (default no),
+base numerada a usar.
+El agente fija: imagen/versión (`redis:7-alpine`), memoria (perfil `xs`), puerto
+(6379 o el siguiente libre).
 Healthcheck: `redis-cli ping`. Vars: `REDIS_URL=redis://redis:6379/<n>`.
 
 ## RabbitMQ
-Preguntas: usuario/clave, vhost, puerto AMQP (5672), ¿UI de management? (15672).
+Se pregunta: usuario/clave de dev, vhost, ¿UI de management? (15672).
+El agente fija: imagen/versión (`rabbitmq:3-management-alpine`), memoria (perfil
+`s`), puerto AMQP (5672 o el siguiente libre).
 ```yaml
 rabbitmq:
-  image: rabbitmq:3-management
+  image: rabbitmq:3-management-alpine
   environment:
     RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
     RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS}
@@ -176,15 +188,18 @@ rabbitmq:
 ```
 
 ## Kafka (KRaft, sin Zookeeper)
-Preguntas: ¿imagen (bitnami/kafka o confluentinc)?, puerto externo (9092),
-¿schema registry? ¿kafka-ui?. Prefijo de topics del proyecto.
+Se pregunta: ¿schema registry? ¿kafka-ui? Prefijo de topics del proyecto.
+El agente fija: imagen/versión (`bitnami/kafka:3.7`; `confluentinc/cp-kafka` como
+alternativa), memoria (perfil `m`), puerto externo (9092 o el siguiente libre).
 Healthcheck: `kafka-topics.sh --bootstrap-server localhost:9092 --list`.
 
 ## MinIO (S3 local)
-Preguntas: usuario/clave root, puerto API (9000) y consola (9001), bucket inicial.
+Se pregunta: usuario/clave root, bucket inicial.
+El agente fija: imagen (`minio/minio` con tag `RELEASE.YYYY-…` fijo), memoria
+(perfil `s`), puerto API (9000) y consola (9001), o los siguientes libres.
 ```yaml
 minio:
-  image: minio/minio
+  image: minio/minio:RELEASE.2024-01-16T16-07-38Z   # fijar el release real al materializar
   command: server /data --console-address ":9001"
   environment:
     MINIO_ROOT_USER: ${MINIO_ROOT_USER}
@@ -194,24 +209,37 @@ minio:
   healthcheck:
     test: ["CMD", "mc", "ready", "local"]
 ```
+Comprobación: `mc ready local` en Docker (`mc` viene en la imagen);
+`curl -f localhost:9000/minio/health/live` en el camino nativo.
 Vars: `S3_ENDPOINT=http://minio:9000`, `S3_FORCE_PATH_STYLE=true`.
 
 ## Elasticsearch / OpenSearch
-Preguntas: versión, `discovery.type=single-node`, memoria (`ES_JAVA_OPTS=-Xms512m
--Xmx512m`), seguridad on/off (default off en dev), puerto (9200).
+Se pregunta: seguridad on/off (default off en dev).
+El agente fija: imagen/versión
+(`docker.elastic.co/elasticsearch/elasticsearch:8.x`; OpenSearch como
+alternativa), `discovery.type=single-node`, memoria (perfil `l`, con
+`ES_JAVA_OPTS=-Xms512m -Xmx512m` alineado al límite), puerto (9200 o el siguiente
+libre).
 
 ## LocalStack (AWS)
-Preguntas: qué servicios (`SERVICES=s3,sqs,sns,...`), puerto (4566).
+Se pregunta: qué servicios AWS se emulan (`SERVICES=s3,sqs,sns,...`).
+El agente fija: imagen/versión, memoria (perfil `l` si hay varios servicios),
+puerto (4566 o el siguiente libre).
 Vars de la app: `AWS_ENDPOINT_URL=http://localstack:4566`, credenciales dummy.
 
 ## Keycloak (OIDC)
-Preguntas: admin user/pass, realm del proyecto, puerto (8080), ¿import de realm?
+Se pregunta: admin user/pass, realm del proyecto, ¿import de realm?
+El agente fija: imagen/versión (`quay.io/keycloak/keycloak:25`), memoria (perfil
+`m`), puerto (8080 o el siguiente libre).
 `command: start-dev`. Healthcheck en `/health/ready`.
 
 ## Mailpit (SMTP de pruebas)
+Se pregunta: nada (no tiene credenciales ni espacio lógico).
+El agente fija: imagen/versión (`axllent/mailpit` con tag fijo), memoria (perfil
+`xs`), puertos SMTP (1025) y UI (8025), o los siguientes libres.
 ```yaml
 mailpit:
-  image: axllent/mailpit
+  image: axllent/mailpit:v1.21   # fijar el tag real al materializar
   ports: ["1025:1025", "8025:8025"]
 ```
 Vars: `SMTP_HOST=mailpit`, `SMTP_PORT=1025`.

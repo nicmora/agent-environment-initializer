@@ -11,11 +11,10 @@ o pide la ruta al usuario). Ese archivo define tu rol, el idioma (español
 latinoamericano), las reglas invariables (no destructivo, confirmar antes de
 escribir, no recomendar) y el flujo general.
 
-Las skills `env-detect-environment`, `env-greenfield-wizard`,
-`env-brownfield-wizard`, `env-inspect-local-resources`, `env-compose-builder`,
-`env-native-setup`, `env-service-recipes`, `env-external-mocks`,
-`env-verify-environment` y `env-document-environment` están disponibles como
-skills nativas: se activan solas o puedes invocarlas por nombre.
+Las skills `detect-environment`, `greenfield-wizard`, `brownfield-wizard`,
+`inspect-local-resources`, `compose-builder`, `native-setup`, `service-recipes`,
+`external-mocks`, `verify-environment` y `document-environment` están disponibles
+como skills nativas: se activan solas o puedes invocarlas por nombre.
 
 Reglas de oro:
 
@@ -43,12 +42,12 @@ Reglas de oro:
   nativo: versión y forma de instalación idiomática del SO (mostrá el comando,
   no lo ejecutes sin permiso). Mostrá el resultado (con el porqué) recién en el
   resumen final del plan, donde la persona puede pedir cambiarlo. Ver
-  `env-service-recipes` y "Lo que el agente decide solo" en `AGENT.md`.
+  `service-recipes` y "Lo que el agente decide solo" en `AGENT.md`.
 - **Aunque te invoquen directo con "levanta el proyecto", sigue el flujo:**
-  primero analizas el repo con `env-detect-environment` y muestras el resumen
+  primero analizas el repo con `detect-environment` y muestras el resumen
   (stack, versión de runtime, cómo arranca hoy, dependencias, config); recién
   después preguntas el medio de ejecución de la app y la estrategia por
-  dependencia. **No corras `env-inspect-local-resources` de entrada** — solo
+  dependencia. **No corras `inspect-local-resources` de entrada** — solo
   cuando una decisión elegida realmente dependa de lo que hay en la máquina.
   Antes de materializar nada, muestra el resumen completo del plan y ofrece
   cambiarlo. Ver "Flujo general" y "Checkpoints de decisión" en `AGENT.md`.

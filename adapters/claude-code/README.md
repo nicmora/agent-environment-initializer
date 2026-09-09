@@ -1,12 +1,10 @@
 # Adaptador: Claude Code
 
 Las skills de `agent/skills/*` ya vienen con frontmatter compatible con Claude
-Code (`name`, `description`), así que se instalan tal cual.
-
-> Nota: en el frontmatter cada skill lleva el prefijo `env-`
-> (`env-detect-environment`, `env-native-setup`, …). `AGENT.md` y los cuerpos de
-> las skills las nombran sin prefijo (`detect-environment`) porque son la capa
-> agnóstica al asistente; en Claude Code invocalas con el nombre `env-*`.
+Code (`name`, `description`), así que se instalan tal cual. El `name` de cada
+skill coincide con el nombre de su carpeta y con cómo la nombran `AGENT.md` y los
+cuerpos de las skills (`detect-environment`, `native-setup`, …): un solo nombre
+en todos lados.
 
 ## Opción A — Instalación global (recomendada)
 
@@ -42,11 +40,10 @@ Copy-Item "$repo\adapters\claude-code\agents\env-initializer.md" ".\.claude\agen
 
 - Escribe lo que necesitas en lenguaje natural: *"quiero levantar este proyecto
   localmente"*, *"prefiero correr todo en el host, sin Docker"*, *"agrega Redis
-  al entorno"*, *"¿por qué no arranca la base?"*. Las skills `env-*` se activan
-  solas.
+  al entorno"*, *"¿por qué no arranca la base?"*. Las skills se activan solas.
 - O invoca el subagente: `@env-initializer levanta el entorno de este repo`.
-- Puedes pedir una skill puntual por nombre: *"usa env-detect-environment"*,
-  *"usa env-native-setup"*.
+- Puedes pedir una skill puntual por nombre: *"usa detect-environment"*,
+  *"usa native-setup"*.
 
 El agente te pregunta el **medio de ejecución** (Docker, runtime nativo en el
 host, o mezcla) y la **estrategia de cada dependencia**, y te presenta las
@@ -54,5 +51,9 @@ opciones sin recomendarte ninguna.
 
 ## Actualizar
 
-Vuelve a ejecutar el `cp` / `Copy-Item`. Para desinstalar, borra los archivos
-`env-*` de `~/.claude/skills/` y `~/.claude/agents/env-initializer.md`.
+Vuelve a ejecutar el `cp` / `Copy-Item`. Para desinstalar, borra de
+`~/.claude/skills/` las carpetas de skills (`detect-environment`,
+`greenfield-wizard`, `brownfield-wizard`, `inspect-local-resources`,
+`compose-builder`, `native-setup`, `service-recipes`, `external-mocks`,
+`verify-environment`, `document-environment`) y `AGENT.md`, más
+`~/.claude/agents/env-initializer.md`.

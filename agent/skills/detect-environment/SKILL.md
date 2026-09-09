@@ -1,5 +1,5 @@
 ---
-name: env-detect-environment
+name: detect-environment
 description: Escanea un repositorio existente (brownfield) para detectar sus dependencias de entorno — bases de datos, caché, mensajería, storage, servicios externos — a partir de manifiestos, archivos de infraestructura, configuración y código, y produce un informe con evidencia. Usar al inicio de un proyecto brownfield o cuando el usuario pide "escanea el proyecto" / "detecta qué necesita para correr".
 ---
 

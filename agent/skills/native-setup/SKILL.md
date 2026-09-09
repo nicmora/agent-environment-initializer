@@ -1,5 +1,5 @@
 ---
-name: env-native-setup
+name: native-setup
 description: Materializa el camino de ejecución nativo (sin Docker o combinado con Docker) — dentro de env/ genera el archivo de versiones de runtime, los scripts de arranque/apagado/logs, un Procfile local para orquestar procesos, un INSTALL.md con los comandos exactos para instalar cada servicio de infraestructura en el sistema operativo, y el .env para arranque nativo. Usar cuando ya está decidido que la app o alguna dependencia corre nativa y hay que "crear los archivos" / "armar el arranque en el host".
 ---
 

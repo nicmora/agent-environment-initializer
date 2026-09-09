@@ -1,5 +1,5 @@
 ---
-name: env-greenfield-wizard
+name: greenfield-wizard
 description: Cuestionario guiado para proyectos nuevos (greenfield) sin dependencias de entorno todavía definidas. Determina forma del repo (monorepo/multirepo), tipo de aplicación, persistencia, caché, mensajería, storage, integraciones externas, configuración y puertos, y deja lista la decisión de estrategia por dependencia. Usar cuando el repo está vacío o casi vacío, o el usuario dice "proyecto nuevo" / "arrancamos de cero".
 ---
 
@@ -94,5 +94,8 @@ sin recomendar ninguna**; en cada una explicá qué implica de forma objetiva.
 ## Reglas
 
 - No generes archivos en esta skill; solo deja el plan acordado.
-- Ofrecé defaults concretos para no trabar a la persona ("puedo usar Postgres 16;
-  ¿te sirve?"), pero sin presentarlos como una recomendación entre alternativas.
+- Lo que le toca decidir a la persona (qué motor de base de datos, si necesita
+  caché, qué se mockea) se pregunta sin marcar una opción como recomendada. El
+  detalle técnico de cada servicio —imagen, versión/tag, memoria, puerto— **no se
+  pregunta**: lo fija el agente con el criterio de `service-recipes` y recién
+  aparece en el resumen final del punto 3, donde la persona puede pedir cambiarlo.

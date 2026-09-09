@@ -1,5 +1,5 @@
 ---
-name: env-external-mocks
+name: external-mocks
 description: Para servicios externos (APIs de terceros, microservicios de otro equipo, servicios cloud, OIDC), decide entre conexión real y simulación, y monta el mock correspondiente — WireMock/Mockoon/Prism para HTTP, emisor de tokens falso u OIDC, emuladores cloud, consumidores/productores de eventos de ejemplo. Permite modo mixto por dependencia y alternar con perfiles de compose. Usar cuando el usuario dice "mi servicio se conecta a otro externo" / "quiero mockear pagos" / "no puedo levantar el servicio X".
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: env-inspect-local-resources
+name: inspect-local-resources
 description: Inspecciona la máquina para descubrir contenedores Docker (con sus redes y volúmenes), un contenedor de dependencias compartido si la persona mantiene uno (un contenedor con varios servicios de infraestructura, o una red de Docker propia que los agrupe), servicios de infraestructura instalados en el sistema operativo, gestores de paquetes disponibles (brew/apt/winget/scoop), gestores de versiones de runtime (nvm/pyenv/asdf/mise) y versiones instaladas, y puertos ocupados. Sirve para ofrecer reutilizar recursos existentes, saber cómo instalar lo que falte y evitar colisiones de puertos. Usar recién cuando una decisión va a reutilizar un recurso local, crear un servicio en Docker, instalar algo nativo o depender de una versión de runtime concreta, o cuando el usuario dice "ya tengo una base de datos" / "fíjate qué tengo instalado".
 ---
 

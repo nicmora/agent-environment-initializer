@@ -1,5 +1,5 @@
 ---
-name: env-brownfield-wizard
+name: brownfield-wizard
 description: Para un proyecto existente, guía la elección del medio de ejecución de la app (contenedor Docker o runtime nativo en el host) y, para cada dependencia detectada, la estrategia — reutilizar un recurso local (incluido un contenedor de dependencias compartido si la persona mantiene uno), conectar a una instancia externa, crear el servicio desde cero (en Docker o instalado nativo), o simularlo (mock). Usar después de detect-environment, o cuando el usuario quiere decidir "cómo corro cada cosa".
 ---
 

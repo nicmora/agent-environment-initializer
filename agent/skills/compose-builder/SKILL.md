@@ -1,5 +1,5 @@
 ---
-name: env-compose-builder
+name: compose-builder
 description: Genera o actualiza archivos docker-compose (base, override o dev) y los .env asociados a partir de las decisiones del wizard, sin reescribir ni romper la infraestructura existente. Maneja redes, volúmenes, perfiles (--profile), depends_on con healthchecks y mapeo de puertos evitando colisiones. Usar cuando ya está decidida la estrategia por dependencia y hay que "crear los archivos" / "armar el compose".
 ---
 
