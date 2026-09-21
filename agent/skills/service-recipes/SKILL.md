@@ -1,43 +1,19 @@
 ---
 name: service-recipes
-description: Recetas de configuración por tipo de servicio de infraestructura (PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, MinIO, Elasticsearch/OpenSearch, LocalStack, Keycloak, Mailpit). Define qué decide el agente solo, qué sigue preguntando, qué bloque de docker-compose + variables generar, y cómo instalar cada servicio de forma nativa (brew/apt/winget). Usar cuando hay que crear un servicio desde cero — en Docker o nativo — y se necesitan los detalles de configuración.
+description: Recetas de configuración por tipo de servicio de infraestructura (PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, MinIO, Elasticsearch/OpenSearch, LocalStack, Keycloak, Mailpit). Define qué decide el agente solo, qué sigue preguntando y qué bloque de docker-compose + variables generar. Usar cuando hay que crear un servicio en Docker y se necesitan los detalles de configuración.
 ---
 
 # Skill: service-recipes
 
-Para cada servicio: **valores que el agente decide solo** (imagen/paquete,
-versión, memoria, puerto), **datos que sigue preguntando** (nombres/credenciales),
-**bloque de compose** (camino Docker) e **instalación nativa** (camino nativo).
-Siempre incluir healthcheck/comprobación y almacenamiento persistente nombrado.
+Para cada servicio que **se crea en Docker**: **valores que el agente decide
+solo** (imagen, versión, memoria, puerto), **datos que sigue preguntando**
+(nombres/credenciales) y **bloque de compose**. Siempre incluir healthcheck y
+volumen persistente nombrado.
 
-## Instalación nativa por servicio (camino sin Docker)
-
-Cuando el servicio se resolvió como "instalar nativo", `native-setup` escribe en
-`env/INSTALL.md` el comando del gestor de paquetes que reportó
-`inspect-local-resources`. Nombres de paquete de referencia:
-
-| Servicio | Homebrew (macOS) | apt (Debian/Ubuntu) | winget / scoop (Windows) | Arranque | Comprobación |
-|---|---|---|---|---|---|
-| PostgreSQL | `postgresql@16` | `postgresql-16` | `PostgreSQL.PostgreSQL.16` / `scoop install postgresql` | `brew services start postgresql@16` · `systemctl --now enable postgresql` | `pg_isready` |
-| MySQL / MariaDB | `mysql` / `mariadb` | `mysql-server` / `mariadb-server` | `Oracle.MySQL` / `MariaDB.Server` | `brew services start mysql` | `mysqladmin ping` |
-| MongoDB | `mongodb-community` (tap) | repo oficial `mongodb-org` | `MongoDB.Server` | `brew services start mongodb-community` | `mongosh --eval "db.adminCommand('ping')"` |
-| Redis | `redis` | `redis-server` | `scoop install redis` / Memurai | `brew services start redis` | `redis-cli ping` |
-| RabbitMQ | `rabbitmq` | `rabbitmq-server` | `scoop install rabbitmq` | `brew services start rabbitmq` | `rabbitmq-diagnostics -q ping` |
-| Kafka | `kafka` | tarball de Apache | tarball de Apache | `brew services start kafka` | `kafka-topics --bootstrap-server localhost:9092 --list` |
-| MinIO | `minio` | binario oficial | `scoop install minio` | `minio server env/data/minio` | `curl localhost:9000/minio/health/live` |
-| Elasticsearch / OpenSearch | `elasticsearch` / `opensearch` | repo oficial | binario oficial | `brew services start …` | `curl localhost:9200` |
-| Keycloak | `keycloak` | tarball oficial | tarball oficial | `keycloak start-dev` | `curl localhost:8080/health/ready` |
-| Mailpit | `mailpit` | binario oficial | `scoop install mailpit` | `mailpit` | `curl localhost:8025` |
-
-- **Versión:** la que pida el proyecto o la ya instalada si sirve; si no, la
-  estable/LTS de la receta. Alineá el `@16` del paquete con esa decisión.
-- **Puerto:** el estándar; si `inspect-local-resources` lo reporta ocupado,
-  avisá y usá el flag del servicio para cambiarlo (`-p`, `--port`, `port=` en el
-  config), reflejándolo en `env/.env.local`.
-- **Datadir aislado (opcional):** `env/data/<servicio>/` en vez del datadir
-  global, pasado como flag al arrancar. Nunca toques el datadir por defecto.
-- Los comandos `install` se **muestran**; los ejecuta la persona o el agente con
-  permiso explícito, uno por uno.
+Un servicio que se resolvió como **servicio existente** no usa estas recetas:
+solo se registran sus datos de conexión en `local/.env.local` (ver
+`plan-environment`). La "ficha de conexión" de abajo sí
+aplica a los dos casos.
 
 ## Camino Docker
 
@@ -65,14 +41,12 @@ Cuando el servicio se resolvió como "instalar nativo", `native-setup` escribe e
 
 ## Qué decide el agente solo, y qué sigue preguntando
 
-No preguntes imagen/variante o paquete, versión/tag, memoria ni puerto uno por
-uno — eso frena el wizard con detalles técnicos que el agente puede resolver
-mejor que haciendo preguntas. Decidilos vos con el criterio de abajo (ver
-también "Lo que el agente decide solo" en `AGENT.md`) y déjalos, junto con una
-línea del porqué, en el **resumen final del plan** de `brownfield-wizard`/
-`greenfield-wizard`, donde recién ahí la persona puede pedir cambiarlos. Esto
-vale tanto para el camino Docker (imagen/tag/memoria/puerto) como para el nativo
-(nombre de paquete, versión, puerto).
+No preguntes imagen/variante, versión/tag, memoria ni puerto uno por uno — eso
+frena el wizard con detalles técnicos que el agente puede resolver mejor que
+haciendo preguntas. Decidilos vos con el criterio de abajo (ver también "Lo que
+el agente decide solo" en `AGENT.md`) y déjalos, junto con una línea del porqué,
+en el **resumen final del plan** de `plan-environment`, donde recién ahí la
+persona puede pedir cambiarlos.
 
 Lo que **sí** seguís preguntando de forma explícita para cada servicio nuevo
 (son decisiones de la persona, no técnicas): nombre de DB/schema/bucket/vhost,
@@ -91,22 +65,17 @@ preferencia.
 
 ### Criterio para decidir imagen, versión, memoria y puerto
 
-1. **Variante / imagen base.** Si `inspect-local-resources` detectó una imagen
-   de este servicio ya pulleada o corriendo localmente y sirve (misma familia,
-   versión compatible con lo que necesita el proyecto), usá esa — ahorra la
-   descarga y mantiene consistencia con lo que ya hay. Si no hay nada
-   reutilizable, elegí la variante más chica que soporte el stack: `alpine`
-   (default de la tabla de abajo) → `slim`/`-bookworm-slim` si la imagen no
-   publica alpine o el stack necesita glibc/extensiones nativas → `full` como
+1. **Variante / imagen base.** Elegí la variante más chica que soporte el stack:
+   `alpine` (default de la tabla de abajo) → `slim`/`-bookworm-slim` si la imagen
+   no publica alpine o el stack necesita glibc/extensiones nativas → `full` como
    último recurso.
 2. **Versión / tag.** Si el proyecto ya fija una versión (driver/cliente con
-   versión mínima, otro contenedor de ese motor ya corriendo), alineate a esa.
-   Si no hay pista, usá la estable/LTS que sugiere la receta. Nunca `latest` ni
-   un tag sin número.
+   versión mínima), alineate a esa. Si no hay pista, usá la estable/LTS que
+   sugiere la receta. Nunca `latest` ni un tag sin número.
 3. **Presupuesto de memoria.** Usá el perfil por defecto de la receta (`xs`
    256m / `s` 512m / `m` 1g / `l` 2g según el tipo de servicio).
-4. **Puerto en el host.** Usá el puerto estándar del servicio. Si
-   `inspect-local-resources` reporta que ya está ocupado, elegí vos el
+4. **Puerto en el host.** Usá el puerto estándar del servicio. Si al levantar el
+   entorno resulta estar ocupado, `verify-environment` lo detecta y elige el
    siguiente puerto libre.
 
 Con estos cuatro resueltos (más los nombres/credenciales que sí preguntaste)
@@ -116,7 +85,7 @@ hacés el handoff a `compose-builder`.
 
 Al terminar cada servicio, muestra su **ficha de conexión** (ver "Resumen de
 conexión y valores editables" en `AGENT.md`): host/puerto desde la app y desde
-el host, credenciales (`env/.env.local`), espacio lógico, cadena de conexión lista
+el host, credenciales (`local/.env.local`), espacio lógico, cadena de conexión lista
 para pegar, variable/s de entorno, URL de consola/UI y comando de cliente
 rápido.
 
@@ -142,13 +111,13 @@ postgres:
 ```
 `compose-builder` parametriza la imagen y la memoria al materializar
 (`image: ${POSTGRES_IMAGE:-postgres:16-alpine}`, `mem_limit: ${POSTGRES_MEM:-512m}`)
-y documenta las alternativas en `env/.env.example`
+y documenta las alternativas en `local/.env.example`
 (`# POSTGRES_IMAGE=postgres:16-alpine (default) | 16-bookworm | 16`,
 `# POSTGRES_MEM=512m (perfil s) | 256m | 1g`).
 Vars: `DATABASE_URL=postgres://user:pass@postgres:5432/db`.
 
 > Nota: en los bloques, solo las credenciales quedan como `${VAR}` (salen de
-> `env/.env.local`); imagen, puerto y memoria van con el valor resuelto y los
+> `local/.env.local`); imagen, puerto y memoria van con el valor resuelto y los
 > parametriza `compose-builder`.
 
 ## MySQL / MariaDB
@@ -209,8 +178,7 @@ minio:
   healthcheck:
     test: ["CMD", "mc", "ready", "local"]
 ```
-Comprobación: `mc ready local` en Docker (`mc` viene en la imagen);
-`curl -f localhost:9000/minio/health/live` en el camino nativo.
+Comprobación: `mc ready local` (`mc` viene en la imagen).
 Vars: `S3_ENDPOINT=http://minio:9000`, `S3_FORCE_PATH_STYLE=true`.
 
 ## Elasticsearch / OpenSearch
@@ -245,6 +213,6 @@ mailpit:
 Vars: `SMTP_HOST=mailpit`, `SMTP_PORT=1025`.
 
 ## Regla general
-Toda credencial generada va a `env/.env.local`, con su equivalente de
-ejemplo en `env/.env.example`. Nunca escribas secretos fijos en el
+Toda credencial generada va a `local/.env.local`, con su equivalente de
+ejemplo en `local/.env.example`. Nunca escribas secretos fijos en el
 compose.

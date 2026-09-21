@@ -1,6 +1,6 @@
 ---
 name: detect-environment
-description: Escanea un repositorio existente (brownfield) para detectar sus dependencias de entorno — bases de datos, caché, mensajería, storage, servicios externos — a partir de manifiestos, archivos de infraestructura, configuración y código, y produce un informe con evidencia. Usar al inicio de un proyecto brownfield o cuando el usuario pide "escanea el proyecto" / "detecta qué necesita para correr".
+description: Escanea el repositorio actual para detectar sus dependencias de entorno — bases de datos, caché, mensajería, storage, servicios externos — a partir de manifiestos, archivos de infraestructura, configuración y código, y produce un informe con evidencia. Es siempre el primer paso, para cualquier proyecto y en cualquier estado (con dependencias, con una sola o con ninguna). Usar al inicio de cada sesión o cuando el usuario pide "escanea el proyecto" / "detecta qué necesita para correr".
 ---
 
 # Skill: detect-environment
@@ -9,6 +9,11 @@ description: Escanea un repositorio existente (brownfield) para detectar sus dep
 
 Producir un **inventario de dependencias de entorno** del repositorio actual, con
 evidencia (archivo y línea) y nivel de confianza (confirmado / inferido).
+
+Se corre para **cualquier** proyecto, sin importar su estado. Si el repo todavía
+no usa ninguna dependencia de entorno, el informe lo dice explícitamente y el
+flujo sigue igual: se elige el medio de ejecución de la app y se la levanta. No
+se cambia de modo ni se abre un cuestionario de dependencias hipotéticas.
 
 ## Procedimiento
 
@@ -64,8 +69,7 @@ evidencia (archivo y línea) y nivel de confianza (confirmado / inferido).
 ## Salida
 
 Este es siempre el **primer paso** del flujo: la persona todavía no tomó
-ninguna decisión y en la máquina no se tocó nada (ni Docker). Presenta, en este
-orden:
+ninguna decisión. Presenta, en este orden:
 
 1. **Resumen del stack tecnológico**, en prosa corta: lenguaje(s) y versión de
    runtime requerida, framework principal, gestor de paquetes, tipo de
@@ -84,10 +88,13 @@ orden:
 4. Lista de **variables referenciadas sin valor** y de **puertos** que el
    proyecto espera.
 
+Si **no se detectó ninguna dependencia de entorno**, decilo claramente en el
+resumen ("no se detectaron dependencias de entorno; el proyecto solo necesita su
+propio runtime") y no infieras dependencias que el código todavía no usa.
+
 Con ese resumen mostrado, pasa directo a preguntar el medio de ejecución de la
-app y la estrategia de cada dependencia (`brownfield-wizard`). **No ejecutes
-`inspect-local-resources` todavía** — la máquina se revisa recién si alguna
-decisión elegida más adelante realmente lo necesita (ver `AGENT.md`, regla 12).
+app y —si hay dependencias— el origen de cada una (crear en Docker o usar un
+servicio existente) con `plan-environment`.
 
 ## Reglas
 
