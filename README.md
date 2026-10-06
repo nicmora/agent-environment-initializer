@@ -139,7 +139,10 @@ resultado queda así (en OpenCode, igual pero con `.opencode/`):
 con archivos de otros agentes que tenga el proyecto. No lo pongas dentro de
 `agents/`: las dos herramientas tratan cada `.md` de esa carpeta como un agente.
 
-Si después actualizás este repo, volvé a copiar los mismos archivos encima.
+Si después actualizás este repo, volvé a copiar los mismos archivos encima. Si
+tenés instalada una versión anterior (cuando el agente se llamaba
+`env-initializer`), primero borrá los archivos viejos: el detalle está en
+[INSTALL.md › Actualizar](INSTALL.md#actualizar).
 
 ### Claude Code
 
@@ -161,9 +164,8 @@ así que funciona con cualquier proveedor o gateway.
 2. Apretá **Tab** hasta que aparezca el agente `envinit`.
 3. Pedile lo que necesitás: *"quiero levantar este proyecto localmente"*.
 
-> En versiones viejas de OpenCode las carpetas se llamaban en singular
-> (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, probá con
-> esos nombres.
+> En versiones viejas de OpenCode las carpetas tienen nombres en singular
+> (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, renombralas.
 
 ### Otros asistentes (GPT / ChatGPT / Gemini / Cursor)
 

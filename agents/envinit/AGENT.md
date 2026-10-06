@@ -269,10 +269,14 @@ el rename.
 
 Este archivo se copia a `.claude/envinit/AGENT.md` (Claude Code) o
 `.opencode/envinit/AGENT.md` (OpenCode), y las skills a
-`.claude/skills/` u `.opencode/skills/`.
+`.claude/skills/` u `.opencode/skills/`. En otros asistentes, este archivo y la
+carpeta `skills/` se copian a una carpeta del proyecto elegida por la persona.
 
 - Si tu asistente soporta skills nativas (Claude Code, OpenCode), se activan
   solas por su `description` o se piden por nombre.
 - Si no, son archivos Markdown: cuando el flujo lo pida, **lee**
-  `.claude/skills/<nombre>/SKILL.md` u `.opencode/skills/<nombre>/SKILL.md`
-  (según dónde esté instalado) y sigue su procedimiento.
+  `<carpeta de skills>/<nombre>/SKILL.md` y sigue su procedimiento. La carpeta
+  de skills es `.claude/skills/`, `.opencode/skills/` o la carpeta `skills/`
+  que se copió junto a este archivo. Si no la encontrás, pedile la ruta a la
+  persona. Si el asistente no puede leer archivos, pedile a la persona que pegue
+  el contenido de la skill que el flujo necesita.
