@@ -43,8 +43,8 @@ reglas invariables de `AGENT.md`: personal, no versionada.
   --env-file local/.env.local up`. Documenta ese comando exacto en el
   resumen y en `ENVIRONMENT.md`.
 - Pide confirmación antes de escribir, diciendo en lenguaje simple qué archivos
-  vas a crear o cambiar y para qué (regla 2 de `AGENT.md`). Ofrecé mostrar el
-  archivo completo o el *diff*, y mostralo si la persona lo pide.
+  vas a crear o cambiar y para qué (regla 2 de `AGENT.md`). Ofrece mostrar el
+  archivo completo o el *diff*, y muéstralo si la persona lo pide.
 
 ## Construcción
 
@@ -84,9 +84,15 @@ postgres:
 
 - En `.env.example` documenta la variable, el default y las alternativas
   reales de esa imagen (`# postgres:16-alpine (default) | 16-bookworm | 16`).
+- **Reutiliza las imágenes ya descargadas.** Antes de escribir el default de
+  cada `image:` (servicios, mocks y la base del `Dockerfile.dev`), revisa
+  `docker image ls --format "{{.Repository}}:{{.Tag}}"`. Si hay una imagen
+  compatible del mismo repositorio con tag numerado, ese es el default (ver
+  criterio en `envinit-recipes`). Solo si no hay ninguna, aplica la regla
+  siguiente.
 - **Prefiere variantes pequeñas**: `-alpine` primero; si la imagen no tiene
   alpine o rompe (glibc, extensiones nativas, `mongo`/`mssql` que no publican
-  alpine), cae a `-slim` / `-bookworm-slim`; recién después a la full. Anota en
+  alpine), cae a `-slim` / `-bookworm-slim`; solo después a la full. Anota en
   `.env.example` por qué se eligió esa base.
 - El tag siempre lleva versión explícita (`16-alpine`, no `alpine` ni `latest`).
 - Mismo criterio para el `build:` de la app: pasa la base como `ARG`
@@ -128,9 +134,9 @@ Presupuestos por tipo — el agente elige el perfil, no lo pregunta (ver
 - Si la persona no quiere límites, déjalos comentados con una nota, no los
   borres.
 - La imagen/variante, la versión/tag, el perfil de memoria y el puerto ya
-  vienen decididos por el agente cuando llegás a esta skill (`envinit-recipes`
+  vienen decididos por el agente cuando llegas a esta skill (`envinit-recipes`
   los resolvió con su criterio automático y los mostró en el resumen final). No
-  hace falta volver a preguntarlos acá; si la persona pidió cambiar alguno en
+  hace falta volver a preguntarlos aquí; si la persona pidió cambiar alguno en
   ese resumen, materializa con el valor que confirmó.
 
 ## Dockerfile de desarrollo
@@ -188,14 +194,14 @@ O los targets equivalentes en `local/Makefile` / `local/Taskfile.yml`.
 `local/scripts/dev-up` hace las dos cosas en orden — primero levanta la infra en
 contenedor (`docker compose … --profile infra up -d`), después delega en el
 arranque nativo de la app de `envinit-native` (fijar runtime, `foreman`/`overmind`
-sobre `local/Procfile`, o el comando directo). Coordiná los nombres con
+sobre `local/Procfile`, o el comando directo). Coordina los nombres con
 `envinit-native` para no duplicar.
 
 ## Salida
 
 Lista de archivos creados/modificados dentro de `local/` (y la línea
 agregada a `.gitignore`), y el comando de arranque completo con sus `-f`.
-Si el plan es mixto, hacé también el handoff a `envinit-native` antes de
+Si el plan es mixto, haz también el handoff a `envinit-native` antes de
 `envinit-verify`; si es solo Docker, handoff directo a `envinit-verify`.
 
 ## Renombrar valores
@@ -204,5 +210,5 @@ Si la persona pide cambiar un nombre (DB, schema, usuario, volumen, contenedor,
 red, base de Redis, vhost, bucket, prefijo de topics, puerto host), aplica el
 cambio **en todos los archivos a la vez**: compose/override, `.env.local`,
 `.env.example`, scripts y `ENVIRONMENT.md` (todos dentro de `local/`; deriva
-a `envinit-document`). Contá en una línea qué cambia y ofrecé mostrar el diff. Si el recurso viejo ya se
+a `envinit-document`). Cuenta en una línea qué cambia y ofrece mostrar el diff. Si el recurso viejo ya se
 había creado, no lo borres sin permiso: acláralo entre los pendientes.

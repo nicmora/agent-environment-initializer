@@ -5,7 +5,7 @@ description: Verifica que el entorno quedó operativo — valida la sintaxis del
 
 # Skill: envinit-verify
 
-Usá el **comando del medio elegido**: el `docker compose … up` con sus `-f` (que
+Usa el **comando del medio elegido**: el `docker compose … up` con sus `-f` (que
 arma `envinit-compose`), el script `local/scripts/dev-up` (que arma `envinit-native`),
 o ambos en orden si el plan es mixto.
 
@@ -17,22 +17,22 @@ o ambos en orden si el plan es mixto.
      `local/docker-compose.override.yml` + `--env-file local/.env.local` si hay
      compose previo; solo `local/docker-compose.yml` si no hay compose propio
      fuera de `local/`).
-   - App nativa: revisá que la versión de runtime activa coincida con
+   - App nativa: revisa que la versión de runtime activa coincida con
      `local/.nvmrc`/`.tool-versions`, que `local/.env.local` tenga todas las claves
      de `local/.env.example`, y que el runner del `local/Procfile` esté instalado.
 
 2. **Levantar la infra en Docker primero.**
    - `… --profile infra up -d`. Espera los healthchecks
-     (`docker compose … ps` hasta `healthy`); si algo no pasa, mostrá
+     (`docker compose … ps` hasta `healthy`); si algo no pasa, muestra
      `docker compose … logs <svc>`.
    - **Colisión de puerto** (`bind: address already in use` / `port is already
-     allocated`): elegí el siguiente puerto libre del host, actualizá el mapeo en
+     allocated`): elige el siguiente puerto libre del host, actualiza el mapeo en
      `local/docker-compose*.yml` y la variable en `local/.env.local`/`.env.example`,
-     mostrá el diff y volvé a levantar. Nunca mates el proceso que ocupa el
+     muestra el diff y vuelve a levantar. Nunca mates el proceso que ocupa el
      puerto.
 
 3. **Comprobar los servicios existentes.**
-   Para cada dependencia resuelta como "servicio existente", verificá
+   Para cada dependencia resuelta como "servicio existente", verifica
    conectividad con las credenciales de `local/.env.local` (`pg_isready -h <host>`,
    `redis-cli -u <url> ping`, `curl` al endpoint). Si falla, es un pendiente: no
    toques ese servicio.
@@ -58,20 +58,21 @@ o ambos en orden si el plan es mixto.
 Seguí "Cómo comunicarte" de `AGENT.md`. **En el chat**, un cierre corto y en
 lenguaje simple, por ejemplo:
 
-> ✅ Listo, la app está funcionando: abrila en http://localhost:3000
+> ✅ Listo, la app está funcionando: ábrela en http://localhost:3000
 > ✅ La base de datos está andando.
 > ⚠️ Falta: la clave del servicio de pagos (por ahora está simulado).
 >
 > Para levantar todo de nuevo: `local/scripts/dev-up`
 > Para apagarlo: `local/scripts/dev-down`
 >
-> Todos los datos de conexión quedaron en `local/ENVIRONMENT.md`. Si querés, te
-> los muestro acá.
+> Todos los datos de conexión quedaron en `local/ENVIRONMENT.md`. Si quieres, te
+> los muestro aquí.
 
-Después preguntá si dejás los servicios corriendo o los apagás.
+Después pregunta si dejas los servicios corriendo o los apagas.
 
-**Solo si la persona lo pide** (y siempre en `local/ENVIRONMENT.md`), el
-detalle completo:
+**Solo si la persona lo pide**, el detalle completo, **escrito en el chat** (no
+la derives a `local/ENVIRONMENT.md`; ahí también queda, pero eso no reemplaza
+mostrarlo):
 
 - **Ficha de conexión por dependencia** (ver "Resumen de conexión y valores
   editables" en `AGENT.md`). Una fila por servicio:
@@ -93,7 +94,7 @@ detalle completo:
 
 - Si algo falla, **diagnostica** (logs, puertos, variables, versión de runtime)
   y propón el arreglo; no borres volúmenes ni recrees servicios para "destrabar".
-  Contale el problema y el arreglo en una o dos frases simples; los logs y el
+  Cuéntale el problema y el arreglo en una o dos frases simples; los logs y el
   detalle técnico, solo si los pide.
 - Las colisiones de puerto se explican sin jerga ("ese lugar ya estaba ocupado
   en tu máquina, así que usé otro").

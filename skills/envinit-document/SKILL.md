@@ -29,7 +29,7 @@ tiene que seguir siendo útil sin editarlo a mano. Evita en este archivo (y en
 En su lugar:
 
 - **Servicios existentes (a los que la app se conecta):** no anotes host,
-  puerto ni credenciales en `ENVIRONMENT.md`. Dejá esos valores en
+  puerto ni credenciales en `ENVIRONMENT.md`. Deja esos valores en
   `local/.env.local` y en el documento solo la variable de conexión
   (`DATABASE_URL`, `REDIS_URL`, …) y una nota de que el servicio tiene que estar
   disponible como prerrequisito.
@@ -115,7 +115,7 @@ nada.)
 1. Si `local/ENVIRONMENT.md` no existe, créalo con la plantilla (creando
    `local/` y agregándola a `.gitignore` si todavía no existía).
 2. Si existe, **actualiza solo las secciones que cambiaron** (no reescribas lo
-   que la persona haya editado a mano; ofrecé mostrar el diff).
+   que la persona haya editado a mano; ofrece mostrar el diff).
 2b. **Antes de escribir, revisa que no haya rutas absolutas con usuario, nombres
    de carpeta personales ni secretos reales** (ver "Portabilidad"). Si los hay,
    reemplázalos por la convención portable y avisa.

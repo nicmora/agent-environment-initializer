@@ -18,7 +18,7 @@ nunca asume:
   el host** (Node/Python/JVM/Go y su gestor de versiones).
 - **De dónde sale cada dependencia:** se **crea en Docker** (un contenedor por
   servicio) o tu app **se conecta a un servicio existente** fuera del proyecto
-  —instalado en tu SO, en la nube o de otro equipo—, del que vos pasás los datos
+  —instalado en tu SO, en la nube o de otro equipo—, del que tú pasas los datos
   de conexión.
 
 El objetivo no es que corras un comando concreto: es que la app **arranque y
@@ -33,7 +33,7 @@ recursos o datos existentes, ni instala servicios de infra en tu SO.
 Está pensado para **cualquier perfil**, no solo para desarrolladores: gente de
 producto, QA o diseño también puede usarlo. Por eso habla en **lenguaje simple**:
 resúmenes cortos, preguntas sin jerga y sin detalle técnico, salvo que se lo
-pidas ("mostrame el detalle", "mostrame el archivo").
+pidas ("muéstrame el detalle", "muéstrame el archivo").
 
 ## Qué hace
 
@@ -41,12 +41,12 @@ pidas ("mostrame el detalle", "mostrame el archivo").
   de runtime, cómo arranca hoy, dependencias y configuración, y te muestra un
   resumen **antes** de preguntar nada ni tocar tu máquina. Si no hay
   dependencias de entorno, te lo dice y sigue igual.
-- **Elige el medio de ejecución de la app.** Te pregunta cómo querés correr la
+- **Elige el medio de ejecución de la app.** Te pregunta cómo quieres correr la
   app (contenedor Docker o runtime nativo en el host) y te explica qué implica
   cada opción, sin empujar una.
 - **Por cada dependencia, dos opciones:** **crearla en Docker** (un contenedor
   nuevo en `local/`, el agente elige imagen/versión/memoria/puerto) o **usar un
-  servicio existente** (le pasás host, puerto y credenciales de un servicio que
+  servicio existente** (le pasas host, puerto y credenciales de un servicio que
   ya corre en tu SO, en la nube o en la infra de otro equipo). Para servicios de
   terceros (pagos, OIDC, APIs): conexión real o **mock** en Docker.
 - **Antes de crear nada,** te muestra el plan completo y te deja cambiar o
@@ -105,7 +105,7 @@ la instrucción de leer `AGENT.md`, así las reglas no se duplican.
 
 El agente se **copia a mano en cada proyecto** donde lo quieras usar, dentro de
 la carpeta de la herramienta: `.claude/` para Claude Code u `.opencode/` para
-OpenCode. Copiá solo la de la herramienta que vayas a usar. Podés hacerlo con el
+OpenCode. Copiá solo la de la herramienta que vayas a usar. Puedes hacerlo con el
 explorador de archivos o con la terminal de tu sistema operativo.
 
 ### Qué se copia y adónde
@@ -144,40 +144,40 @@ resultado queda así (en OpenCode, igual pero con `.opencode/`):
 con archivos de otros agentes que tenga el proyecto. No lo pongas dentro de
 `agents/`: las dos herramientas tratan cada `.md` de esa carpeta como un agente.
 
-Si después actualizás este repo, volvé a copiar los mismos archivos encima. Si
-tenés instalada una versión anterior (cuando el agente se llamaba
-`env-initializer`), primero borrá los archivos viejos: el detalle está en
+Si después actualizas este repo, vuelve a copiar los mismos archivos encima. Si
+tienes instalada una versión anterior (cuando el agente se llamaba
+`env-initializer`), primero borra los archivos viejos: el detalle está en
 [INSTALL.md › Actualizar](INSTALL.md#actualizar).
 
 ### Claude Code
 
-Abrí Claude Code en la raíz del proyecto y pedíselo al agente:
+Abre Claude Code en la raíz del proyecto y pídeselo al agente:
 
 ```
 > @envinit quiero levantar este proyecto localmente
 ```
 
-También podés hablar sin mencionarlo (*"agregá Redis al entorno"*, *"ya tengo un
-Postgres corriendo, conectate a ese"*): las skills se activan solas.
+También puedes hablar sin mencionarlo (*"agrega Redis al entorno"*, *"ya tengo un
+Postgres corriendo, conéctate a ese"*): las skills se activan solas.
 
 ### OpenCode
 
 El agente **no fija ningún modelo**: usa el que tengas seleccionado en OpenCode,
 así que funciona con cualquier proveedor o gateway.
 
-1. Abrí `opencode` en la raíz del proyecto y elegí el modelo.
-2. Apretá **Tab** hasta que aparezca el agente `envinit`.
-3. Pedile lo que necesitás: *"quiero levantar este proyecto localmente"*.
+1. Abre `opencode` en la raíz del proyecto y elige el modelo.
+2. Presiona **Tab** hasta que aparezca el agente `envinit`.
+3. Pídele lo que necesitas: *"quiero levantar este proyecto localmente"*.
 
 > En versiones viejas de OpenCode las carpetas tienen nombres en singular
-> (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, renombralas.
+> (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, renómbralas.
 
 ### Otros asistentes (GPT / ChatGPT / Gemini / Cursor)
 
 1. Copiá `agents/envinit/AGENT.md` y `skills/` a una carpeta del proyecto.
-2. Pegá el contenido de `AGENT.md` como *system prompt* / instrucciones del
+2. Pega el contenido de `AGENT.md` como *system prompt* / instrucciones del
    proyecto.
-3. Si el asistente no puede leer archivos, pegá también el contenido de las
+3. Si el asistente no puede leer archivos, pega también el contenido de las
    skills (`skills/<nombre>/SKILL.md`) a medida que el flujo las pida.
 
 ## Cómo empieza una sesión
@@ -190,8 +190,8 @@ envinit-detect ─> envinit-plan ──> envinit-recipes ─ envinit-mocks ─�
    resumen del plan + ajustes ─> envinit-compose y/o envinit-native ─> envinit-verify ─> envinit-document
 ```
 
-Por cada dependencia elegís: **crearla en Docker** o **conectarte a un servicio
-existente** (le pasás los datos de conexión). Para servicios de terceros:
+Por cada dependencia eliges: **crearla en Docker** o **conectarte a un servicio
+existente** (le pasas los datos de conexión). Para servicios de terceros:
 conexión real o mock. Antes de materializar, siempre hay un resumen del plan
 completo con la posibilidad de cambiar algo.
 
@@ -199,21 +199,24 @@ Puedes hablarle en cualquier momento, aunque el entorno esté a medio configurar
 
 ## Reglas que el agente nunca rompe
 
-- Español latinoamericano en toda interacción.
+- Español latinoamericano neutro en toda interacción (tuteo, sin voseo ni
+  regionalismos).
 - Lenguaje simple: resúmenes cortos y preguntas sin jerga. El detalle técnico
-  queda en `local/ENVIRONMENT.md` o te lo muestra si se lo pedís.
+  queda en `local/ENVIRONMENT.md` o te lo muestra si se lo pides.
 - No recomienda un medio de ejecución ni el origen de una dependencia: presenta
-  las opciones y vos elegís.
+  las opciones y tú eliges.
 - No ejecuta `docker compose down -v`, `docker volume rm`, `DROP`, `TRUNCATE`,
   `rm -rf` sobre recursos existentes sin que se lo pidas de forma explícita, ni
-  toca la configuración o los datos de un servicio externo al que te conectás.
+  toca la configuración o los datos de un servicio externo al que te conectas.
 - No instala servicios de infra ni runtimes en tu máquina: los servicios se
   crean en Docker o ya existen.
 - Te dice qué archivos va a crear o cambiar y espera tu OK antes de escribirlos
-  (y te muestra el contenido o el diff si lo pedís).
+  (y te muestra el contenido o el diff si lo pides).
 - Analiza el proyecto y te muestra el resumen **antes** de preguntar nada.
 - Antes de escribir un solo archivo, te muestra el plan completo y te deja
   cambiarlo.
+- Reutiliza las imágenes de Docker que ya tienes descargadas; si no hay
+  ninguna que sirva, elige la variante más liviana (alpine, slim).
 - Todo lo que genera vive en `local/`, que agrega a `.gitignore`: es tu
   entorno personal, nunca se commitea.
 - Ofrece siempre las dos opciones por dependencia: crear en Docker o conectar a

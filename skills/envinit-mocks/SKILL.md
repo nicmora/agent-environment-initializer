@@ -9,7 +9,7 @@ description: Para servicios externos (APIs de terceros, microservicios de otro e
 
 Pregunta en lenguaje simple (ver "Cómo comunicarte" en `AGENT.md`), sin nombrar
 herramientas de mock salvo que la persona pida el detalle:
-1. **Conectarse al servicio real** — necesitás tener las credenciales de
+1. **Conectarse al servicio real** — necesitas tener las credenciales de
    desarrollo.
 2. **Simularlo** — la app funciona sin depender de él; las respuestas son de
    prueba.
@@ -21,7 +21,17 @@ con perfiles de compose (`--profile mock`) y/o una variable
 **El mock corre como contenedor Docker**, bajo `profiles: ["mock"]` en
 `local/docker-compose*.yml`. Todas las herramientas de abajo tienen imagen oficial
 (`stoplight/prism`, `wiremock/wiremock`, `mockoon/cli`, `localstack/localstack`,
-`ghcr.io/navikt/mock-oauth2-server`). Solo si el entorno **no usa Docker en
+`ghcr.io/navikt/mock-oauth2-server`).
+
+**Elección de la imagen del mock:** mismo criterio que la infraestructura (ver
+"Lo que el agente decide solo" en `AGENT.md` y `envinit-recipes`). Primero
+revisa `docker image ls`: si ya hay una imagen descargada de esa herramienta
+(p. ej. `wiremock/wiremock:3.9.1-alpine`), úsala. Si no, elige la variante más
+chica con tag numerado (p. ej. `wiremock/wiremock:3.x-alpine`), nunca la
+genérica ni `latest`. La imagen va por variable con default
+(`${PAYMENTS_MOCK_IMAGE:-…}`), como en `envinit-compose`.
+
+Solo si el entorno **no usa Docker en
 absoluto** (app nativa y todas las demás dependencias externas), el mock puede
 correr como proceso nativo (`npx @stoplight/prism-cli`, WireMock `.jar`) agregado
 al `local/Procfile`.

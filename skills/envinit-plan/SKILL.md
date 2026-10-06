@@ -13,27 +13,27 @@ Esta skill trabaja sobre lo que se detectó del proyecto, sea cual sea su estado
 — con muchas dependencias, con una, o con ninguna. **No hay un cuestionario de
 dependencias hipotéticas:** si el proyecto todavía no usa una base de datos, una
 caché o un broker, no se pregunta por ellos; la persona puede pedir agregarlos
-después ("agregá Redis al entorno").
+después ("agrega Redis al entorno").
 
 ## Regla de presentación
 
-Para cada decisión, **presentá las opciones sin recomendar ninguna**. En cada
-opción explicá en una línea y en lenguaje simple qué significa para la persona
+Para cada decisión, **presenta las opciones sin recomendar ninguna**. En cada
+opción explica en una línea y en lenguaje simple qué significa para la persona
 (qué necesita tener, si tarda más, si queda algo instalado), no cuál te parece
 mejor ni cómo funciona por dentro. No marques ninguna como "recomendada". Seguí
-"Cómo comunicarte" de `AGENT.md`. Usá el selector interactivo
+"Cómo comunicarte" de `AGENT.md`. Usa el selector interactivo
 (`AskUserQuestion`) cuando el asistente lo tenga.
 
 Las descripciones de cada opción de abajo son la referencia de lo que implica;
-al preguntar, resumilas en palabras simples (p. ej. "En Docker — necesitás
+al preguntar, resúmelas en palabras simples (p. ej. "En Docker — necesitas
 Docker abierto; no hace falta instalar nada más" / "En tu máquina — arranca más
-rápido; necesitás tener Node 20 instalado").
+rápido; necesitas tener Node 20 instalado").
 
 ## Procedimiento
 
 ### 0. Medio de ejecución de la app
 
-Antes de recorrer las dependencias, preguntá cómo se quiere levantar la
+Antes de recorrer las dependencias, pregunta cómo se quiere levantar la
 **aplicación misma**:
 
 - **En contenedor (Docker).** Necesita Docker instalado y el daemon corriendo;
@@ -48,42 +48,42 @@ Antes de recorrer las dependencias, preguntá cómo se quiere levantar la
   runtimes.
 
 El comando concreto (`npm run dev`, `./gradlew bootRun`, …) sale de
-`envinit-detect`; confirmalo. Esta decisión define si más adelante hace falta
+`envinit-detect`; confírmalo. Esta decisión define si más adelante hace falta
 un `Dockerfile` de desarrollo o un archivo de versiones de runtime.
 
 Si `envinit-detect` **no encontró ninguna dependencia de entorno**, esta es
-la única decisión: elegido el medio, pasás directo al resumen final del plan y de
+la única decisión: elegido el medio, pasas directo al resumen final del plan y de
 ahí a materializar (`envinit-compose` si la app va en Docker, `envinit-native` si
 va nativa) y `envinit-document`.
 
 ### 1. Origen de cada dependencia
 
-Recorré el inventario **de a una dependencia por vez**: presentás sus hallazgos,
-preguntás su origen y cerrás su configuración antes de pasar a la siguiente. No
+Recorre el inventario **de a una dependencia por vez**: presentas sus hallazgos,
+preguntas su origen y cierras su configuración antes de pasar a la siguiente. No
 juntes en una misma pregunta decisiones de dependencias distintas. El detalle
 técnico de lo que se crea en Docker (imagen/tag/memoria/puerto) **no** se
 pregunta: lo decide el agente (ver paso 3 y "Lo que el agente decide solo" en
 `AGENT.md`).
 
 Para cada **dependencia de infraestructura** (base de datos, caché, mensajería,
-storage, búsqueda), presentá dos opciones (al preguntar: "Crear una nueva en
-Docker — lista para usar, vacía" / "Usar una que ya tenés — me pasás los datos
+storage, búsqueda), presenta dos opciones (al preguntar: "Crear una nueva en
+Docker — lista para usar, vacía" / "Usar una que ya tienes — me pasas los datos
 para conectarme"):
 
 1. **Crear en Docker.** Se agrega un servicio nuevo a `local/docker-compose.yml`
    (o a `local/docker-compose.override.yml` / `local/docker-compose.dev.yml` si el
    repo ya tiene un compose propio fuera de `local/` — nunca al compose existente).
-   El agente elige imagen, versión, memoria y puerto (ver `envinit-recipes`); vos
-   solo preguntás los nombres de espacio lógico y credenciales de dev (nombre de
+   El agente elige imagen, versión, memoria y puerto (ver `envinit-recipes`); tú
+   solo preguntas los nombres de espacio lógico y credenciales de dev (nombre de
    DB/schema/bucket/vhost, usuario y contraseña, y nombre de
    contenedor/volumen/red si hay preferencia). Deriva a `envinit-compose` +
    `envinit-recipes`.
 2. **Usar un servicio existente.** La app se conecta a un servicio que ya corre
    fuera del proyecto: instalado en el sistema operativo (`localhost:<puerto>`),
-   en la nube o infraestructura de otro equipo. Pedí host, puerto, credenciales y
+   en la nube o infraestructura de otro equipo. Pide host, puerto, credenciales y
    el espacio lógico (base de datos / schema / vhost / bucket) **ya provisto por
    la persona** — el agente no crea nada en ese servicio ni toca su
-   configuración. Guardá los valores en `local/.env.local` y verificá
+   configuración. Guarda los valores en `local/.env.local` y verifica
    conectividad de red. No hace falta agregar ningún servicio al compose.
 
 Para cada **servicio de terceros o de otro equipo** (pagos, OIDC, APIs,
@@ -96,12 +96,12 @@ externo vs. mock (que corre como contenedor Docker bajo `--profile mock`).
   estándar; si al levantar el entorno `envinit-verify` detecta la colisión,
   ahí propone el siguiente libre y ajusta la variable. Nunca mates el proceso
   que lo usa sin permiso explícito.
-- **Nombre de contenedor/volumen/red en uso** → usá un nombre nuevo con prefijo
+- **Nombre de contenedor/volumen/red en uso** → usa un nombre nuevo con prefijo
   del proyecto.
-- **Ya existe una DB/schema con ese nombre en el servicio en Docker** → proponé
+- **Ya existe una DB/schema con ese nombre en el servicio en Docker** → propón
   un nombre alternativo; no la sobrescribas.
 - **Versión de runtime distinta** entre lo que pide el proyecto y lo instalado
-  (app nativa) → avisá; proponé el gestor de versiones (nvm/pyenv/asdf/mise) o
+  (app nativa) → avisa; propón el gestor de versiones (nvm/pyenv/asdf/mise) o
   correr la app en Docker. El agente no instala ni cambia el runtime global.
 
 ## Salida
@@ -113,29 +113,51 @@ skills; se muestra solo si la persona pide el detalle):
 |---|---|---|---|---|
 
 Los nombres de espacios lógicos de lo que se crea en Docker son **propuestas
-editables** que confirmás con la persona antes del handoff, en una sola pregunta
+editables** que confirmas con la persona antes del handoff, en una sola pregunta
 simple. Para un servicio existente, el espacio lógico lo aporta la persona. El
 detalle técnico de lo que se crea en Docker **no** va en esta confirmación
 por-dependencia: lo resuelve el agente y se muestra solo si la persona lo pide.
 
 ### Resumen final antes de materializar
 
-Con todas las dependencias resueltas (o directamente después del medio de
-ejecución, si no había ninguna), presentá un **resumen corto del plan** en
+**Este paso es obligatorio y nunca se omite** (paso 3 del flujo en
+`AGENT.md`), aunque haya una sola decisión o la persona pida ir directo. Con
+todas las dependencias resueltas (o directamente después del medio de
+ejecución, si no había ninguna), presenta un **resumen corto del plan** en
 lenguaje simple, por ejemplo:
 
 > Esto es lo que voy a armar:
 > - La app corre en tu máquina con Node 20.
 > - Base de datos: se crea una nueva en Docker.
-> - Pagos: se simula, así no necesitás credenciales reales.
+> - Pagos: se simula, así no necesitas credenciales reales.
 >
 > Todo queda en la carpeta `local/`, que no se sube al repo.
-> ¿Querés cambiar algo, o ver el detalle técnico antes de seguir?
 
-Si la persona pide el detalle técnico, mostrá la tabla de arriba, el detalle
-que decidió el agente para cada servicio creado en Docker (imagen/variante,
-tag, memoria y puerto) con una línea de por qué, y la lista de archivos que se
-van a crear en `local/` (compose y/o scripts, `Procfile`, `.nvmrc` o
-equivalente, `.env.example`, `.env.local`, `Dockerfile.dev`, mocks,
-`ENVIRONMENT.md`). Solo con el plan confirmado, hacé el handoff a
-`envinit-compose` y/o `envinit-native`, y a `envinit-document`.
+Y pregunta (con `AskUserQuestion` si el asistente lo tiene) con tres opciones:
+
+- **Continuar** — creo los archivos y levanto todo.
+- **Cambiar algo** — me dices qué quieres ajustar.
+- **Ver detalle técnico** — te muestro versiones, puertos y archivos.
+
+Si la persona elige **Ver detalle técnico**, escribe en el chat, en ese mismo
+mensaje (nunca lo derives a un archivo de `local/` ni lo dejes "para después";
+todavía no se creó ninguno):
+
+1. La tabla de decisiones de arriba.
+2. Para cada servicio creado en Docker (incluidos los mocks), una tabla con
+   imagen y tag, memoria, puerto y una línea de por qué (p. ej. "ya estaba
+   descargada", "variante alpine, la más liviana"):
+
+   | Servicio | Imagen:tag | Memoria | Puerto | Por qué |
+   |---|---|---|---|---|
+
+3. Si la app corre nativa, la versión de runtime y de dónde sale.
+4. La lista de archivos que se van a crear en `local/` (compose y/o scripts,
+   `Procfile`, `.nvmrc` o equivalente, `.env.example`, `.env.local`,
+   `Dockerfile.dev`, mocks, `ENVIRONMENT.md`), con una línea de para qué sirve
+   cada uno.
+
+Después vuelve a preguntar con las mismas tres opciones. Si pide
+cambiar algo, aplícalo y vuelve a mostrar el resumen. **Solo cuando elige
+"Continuar"** haz el handoff a `envinit-compose` y/o `envinit-native`, y a
+`envinit-document`.

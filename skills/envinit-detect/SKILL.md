@@ -79,14 +79,15 @@ en lenguaje simple, pensado para alguien que puede no ser técnico.
    lenguaje que necesita.
 2. **Qué necesita para funcionar**, como lista corta en palabras simples, una
    línea por dependencia: "Una base de datos (PostgreSQL)", "Un servicio de
-   pagos externo (Stripe)". Si algo es inferido, decilo en pocas palabras ("parece
+   pagos externo (Stripe)". Si algo es inferido, dilo en pocas palabras ("parece
    usar…").
 3. Si ya hay algo armado para correrlo (p. ej. "ya tiene un archivo de Docker"),
    en una línea.
-4. Una línea final: "Si querés, te muestro el detalle técnico de lo que
+4. Una línea final: "Si quieres, te muestro el detalle técnico de lo que
    encontré."
 
-**Lo que se muestra solo si la persona lo pide** (y se usa internamente para el
+**Lo que se muestra solo si la persona lo pide**, escrito en el chat en ese
+mismo mensaje (y se usa internamente para el
 resto del flujo):
 
 - Detalle del stack: framework, gestor de paquetes, estructura del repo
@@ -103,7 +104,7 @@ resto del flujo):
 - Lista de **variables referenciadas sin valor** y de **puertos** que el
   proyecto espera.
 
-Si **no se detectó ninguna dependencia de entorno**, decilo claramente en el
+Si **no se detectó ninguna dependencia de entorno**, dilo claramente en el
 resumen ("no necesita base de datos ni otros servicios; solo hay que levantar la
 app") y no infieras dependencias que el código todavía no usa.
 

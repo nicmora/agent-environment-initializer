@@ -1,7 +1,7 @@
 # Instalación en un proyecto
 
 Esta guía explica cómo agregar el agente `envinit` a un proyecto. Para
-saber qué hace el agente y cómo usarlo, mirá el [README](README.md).
+saber qué hace el agente y cómo usarlo, mira el [README](README.md).
 
 El agente se instala **copiando archivos a mano** en cada proyecto donde lo
 quieras usar. No hace falta instalar nada más. Copiá solo los archivos de la
@@ -49,11 +49,11 @@ skills, no pasa nada: las del agente se suman a las que ya están.
 
 ## Copiar con la terminal
 
-Podés copiar con el explorador de archivos o con estos comandos. En todos los
-casos, reemplazá las dos rutas del principio:
+Puedes copiar con el explorador de archivos o con estos comandos. En todos los
+casos, reemplaza las dos rutas del principio:
 
 - `REPO`: dónde clonaste este repo.
-- `PROYECTO`: la raíz del proyecto donde lo instalás.
+- `PROYECTO`: la raíz del proyecto donde lo instalas.
 
 Para OpenCode, cambiá `.claude` por `.opencode` y `claude-code` por `opencode`.
 
@@ -83,32 +83,32 @@ cp -R "$REPO/skills/." "$PROYECTO/.claude/skills/"
 
 ## Comprobar la instalación
 
-**Claude Code:** abrí Claude Code en la raíz del proyecto y escribí
+**Claude Code:** abre Claude Code en la raíz del proyecto y escribe
 `@envinit`. Si aparece en el autocompletado, quedó instalado.
 
-**OpenCode:** abrí `opencode` en la raíz del proyecto y apretá **Tab** hasta que
+**OpenCode:** abre `opencode` en la raíz del proyecto y presiona **Tab** hasta que
 aparezca el agente `envinit`.
 
 > En versiones viejas de OpenCode las carpetas tienen nombres en singular
-> (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, renombralas.
+> (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, renómbralas.
 
 ## Otros asistentes (ChatGPT, Gemini, Cursor, etc.)
 
 1. Copiá `agents/envinit/AGENT.md` y la carpeta `skills/` a una carpeta
    del proyecto.
-2. Pegá el contenido de `AGENT.md` como *system prompt* o como instrucciones del
+2. Pega el contenido de `AGENT.md` como *system prompt* o como instrucciones del
    proyecto.
-3. Si el asistente no puede leer archivos, pegá también el contenido de cada
+3. Si el asistente no puede leer archivos, pega también el contenido de cada
    skill (`skills/<nombre>/SKILL.md`) cuando el flujo la pida.
 
 ## Actualizar
 
-Cuando actualices este repo, volvé a copiar los mismos archivos encima de los
+Cuando actualices este repo, vuelve a copiar los mismos archivos encima de los
 anteriores. Los comandos de arriba sirven igual: sobrescriben los archivos del
 agente y no tocan nada más del proyecto.
 
 > **Si instalaste una versión anterior, cuando el agente se llamaba
-> `env-initializer`**, borrá primero lo viejo (con `.opencode/` si usás
+> `env-initializer`**, borra primero lo viejo (con `.opencode/` si usas
 > OpenCode). Si no, queda duplicado junto a lo nuevo:
 >
 > - `.claude/env-initializer/`
@@ -119,7 +119,7 @@ agente y no tocan nada más del proyecto.
 
 ## Desinstalar
 
-Borrá estos archivos y carpetas del proyecto (con `.opencode/` si usás
+Borra estos archivos y carpetas del proyecto (con `.opencode/` si usas
 OpenCode):
 
 - `.claude/envinit/`
@@ -127,5 +127,5 @@ OpenCode):
 - las carpetas `envinit-*` dentro de `.claude/skills/` (todas las skills del
   agente llevan ese prefijo)
 
-La carpeta `local/` que generó el agente es tu entorno. Borrala solo si ya no
-la necesitás.
+La carpeta `local/` que generó el agente es tu entorno. Bórrala solo si ya no
+la necesitas.

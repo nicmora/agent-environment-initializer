@@ -21,7 +21,7 @@ aplica a los dos casos.
 > `envinit-compose` aplica sobre ellos: **imagen/tag por variable con default**
 > (`image: ${SVC_IMAGE:-repo:tag-alpine}`), **variante pequeña primero** (alpine →
 > slim → full, según lo que soporte la imagen) y **límites de recursos**
-> (`deploy.resources.limits` + `mem_limit`). Acá se escriben con el default ya
+> (`deploy.resources.limits` + `mem_limit`). Aquí se escriben con el default ya
 > resuelto para que se lean; no los fijes así en el archivo final.
 
 ## Variantes de imagen recomendadas (default)
@@ -43,12 +43,12 @@ aplica a los dos casos.
 
 No preguntes imagen/variante, versión/tag, memoria ni puerto uno por uno — eso
 frena el wizard con detalles técnicos que el agente puede resolver mejor que
-haciendo preguntas. Decidilos vos con el criterio de abajo (ver también "Lo que
+haciendo preguntas. Decídelos tú con el criterio de abajo (ver también "Lo que
 el agente decide solo" en `AGENT.md`) y déjalos, junto con una línea del porqué,
-en el **resumen final del plan** de `envinit-plan`, donde recién ahí la
+en el **resumen final del plan** de `envinit-plan`, donde solo entonces la
 persona puede pedir cambiarlos.
 
-Lo que **sí** seguís preguntando de forma explícita para cada servicio nuevo
+Lo que **sí** sigues preguntando de forma explícita para cada servicio nuevo
 (son decisiones de la persona, no técnicas): nombre de DB/schema/bucket/vhost,
 usuario y contraseña de dev, y nombre de contenedor/volumen/red si hay
 preferencia.
@@ -65,21 +65,29 @@ preferencia.
 
 ### Criterio para decidir imagen, versión, memoria y puerto
 
-1. **Variante / imagen base.** Elegí la variante más chica que soporte el stack:
+0. **Imágenes ya descargadas primero.** Corre `docker image ls --format
+   "{{.Repository}}:{{.Tag}}"` y busca una imagen del mismo repositorio que el
+   servicio. Si hay una compatible (misma versión mayor que pide el proyecto, o
+   cualquiera si no pide ninguna, y con tag numerado), úsala como default en vez
+   de la de la tabla, para no descargar nada. Si hay varias, la variante más
+   chica y luego la versión más nueva. Anota en `.env.example` que se eligió
+   porque ya estaba descargada.
+1. **Variante / imagen base** (si no hay ninguna descargada que sirva). Elige la
+   variante más chica que soporte el stack:
    `alpine` (default de la tabla de abajo) → `slim`/`-bookworm-slim` si la imagen
    no publica alpine o el stack necesita glibc/extensiones nativas → `full` como
    último recurso.
 2. **Versión / tag.** Si el proyecto ya fija una versión (driver/cliente con
-   versión mínima), alineate a esa. Si no hay pista, usá la estable/LTS que
+   versión mínima), alinéate a esa. Si no hay pista, usa la estable/LTS que
    sugiere la receta. Nunca `latest` ni un tag sin número.
-3. **Presupuesto de memoria.** Usá el perfil por defecto de la receta (`xs`
+3. **Presupuesto de memoria.** Usa el perfil por defecto de la receta (`xs`
    256m / `s` 512m / `m` 1g / `l` 2g según el tipo de servicio).
-4. **Puerto en el host.** Usá el puerto estándar del servicio. Si al levantar el
+4. **Puerto en el host.** Usa el puerto estándar del servicio. Si al levantar el
    entorno resulta estar ocupado, `envinit-verify` lo detecta y elige el
    siguiente puerto libre.
 
 Con estos cuatro resueltos (más los nombres/credenciales que sí preguntaste)
-hacés el handoff a `envinit-compose`.
+haces el handoff a `envinit-compose`.
 
 ## Después de crear: ficha de conexión
 

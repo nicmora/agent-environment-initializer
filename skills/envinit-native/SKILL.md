@@ -25,7 +25,7 @@ Igual que `envinit-compose`: todo lo que esta skill genera va **dentro de una
 carpeta `local/` en la raíz del proyecto**, y `local/` se agrega a `.gitignore` la
 primera vez (créalo si no existe y muéstraselo a la persona). Nunca toques un
 `Procfile`, `Makefile`, `.nvmrc` o script que ya exista fuera de `local/`; si hay
-que apoyarse en ellos, referencialos desde `local/`.
+que apoyarse en ellos, referéncialos desde `local/`.
 
 ## Artefactos
 
@@ -100,6 +100,6 @@ versión pedida, instalar el runner de procesos). Handoff a `envinit-verify`.
 ## Renombrar valores
 
 Igual que `envinit-compose`: si la persona pide cambiar un nombre (variable de
-conexión, puerto), aplicá el cambio **en todos los archivos a la vez**
+conexión, puerto), aplica el cambio **en todos los archivos a la vez**
 (`.env.local`, `.env.example`, scripts, `Procfile`, `ENVIRONMENT.md`, todos
-dentro de `local/`). Contá en una línea qué cambia y ofrecé mostrar el diff.
+dentro de `local/`). Cuenta en una línea qué cambia y ofrece mostrar el diff.

@@ -146,7 +146,7 @@ El agente sigue siempre el mismo orden, sin importar cómo se lo invoque:
    archivo: medio de ejecución de la aplicación, origen de cada dependencia,
    imágenes y versiones de los servicios que se crean en Docker, puertos,
    memoria y la lista de archivos que va a crear.
-4. Recién entonces materializa los archivos.
+4. Solo entonces materializa los archivos.
 
 ### 2.7. Artefactos generados en la carpeta `local/`, no versionada
 
