@@ -18,9 +18,16 @@ después ("agregá Redis al entorno").
 ## Regla de presentación
 
 Para cada decisión, **presentá las opciones sin recomendar ninguna**. En cada
-opción explicá qué implica de forma objetiva (qué necesita, qué deja instalado,
-cómo se aísla), no cuál te parece mejor. No marques ninguna como "recomendada".
-Usá el selector interactivo (`AskUserQuestion`) cuando el asistente lo tenga.
+opción explicá en una línea y en lenguaje simple qué significa para la persona
+(qué necesita tener, si tarda más, si queda algo instalado), no cuál te parece
+mejor ni cómo funciona por dentro. No marques ninguna como "recomendada". Seguí
+"Cómo comunicarte" de `AGENT.md`. Usá el selector interactivo
+(`AskUserQuestion`) cuando el asistente lo tenga.
+
+Las descripciones de cada opción de abajo son la referencia de lo que implica;
+al preguntar, resumilas en palabras simples (p. ej. "En Docker — necesitás
+Docker abierto; no hace falta instalar nada más" / "En tu máquina — arranca más
+rápido; necesitás tener Node 20 instalado").
 
 ## Procedimiento
 
@@ -59,7 +66,9 @@ pregunta: lo decide el agente (ver paso 3 y "Lo que el agente decide solo" en
 `AGENT.md`).
 
 Para cada **dependencia de infraestructura** (base de datos, caché, mensajería,
-storage, búsqueda), presentá dos opciones:
+storage, búsqueda), presentá dos opciones (al preguntar: "Crear una nueva en
+Docker — lista para usar, vacía" / "Usar una que ya tenés — me pasás los datos
+para conectarme"):
 
 1. **Crear en Docker.** Se agrega un servicio nuevo a `local/docker-compose.yml`
    (o a `local/docker-compose.override.yml` / `local/docker-compose.dev.yml` si el
@@ -97,26 +106,36 @@ externo vs. mock (que corre como contenedor Docker bajo `--profile mock`).
 
 ## Salida
 
-Una tabla de decisiones:
+Una tabla de decisiones, de uso **interno** (para el handoff a las demás
+skills; se muestra solo si la persona pide el detalle):
 
 | Dependencia | Origen (Docker / servicio existente / mock) | Espacio lógico | Variables de entorno a setear | Archivo destino (dentro de `local/`) |
 |---|---|---|---|---|
 
 Los nombres de espacios lógicos de lo que se crea en Docker son **propuestas
-editables** que confirmás con la persona antes del handoff. Para un servicio
-existente, el espacio lógico lo aporta la persona. El detalle técnico de lo que
-se crea en Docker **no** va en esta confirmación por-dependencia: lo resuelve el
-agente y aparece por primera vez en el resumen final.
+editables** que confirmás con la persona antes del handoff, en una sola pregunta
+simple. Para un servicio existente, el espacio lógico lo aporta la persona. El
+detalle técnico de lo que se crea en Docker **no** va en esta confirmación
+por-dependencia: lo resuelve el agente y se muestra solo si la persona lo pide.
 
 ### Resumen final antes de materializar
 
 Con todas las dependencias resueltas (o directamente después del medio de
-ejecución, si no había ninguna), presentá un **resumen consolidado del plan
-completo**: el medio de ejecución de la app, la tabla de arriba, más — para cada
-servicio creado en Docker — el detalle técnico que decidió el agente (imagen/
-variante, tag, memoria y puerto), con una línea de por qué, más la lista de
-archivos que se van a crear en `local/` (compose y/o scripts, `Procfile`, `.nvmrc`
-o equivalente, `.env.example`, `.env.local`, `Dockerfile.dev`, mocks,
-`ENVIRONMENT.md`). Preguntá explícitamente si hay algo para cambiar. Solo con el
-plan confirmado, hacé el handoff a `envinit-compose` y/o `envinit-native`, y a
-`envinit-document`.
+ejecución, si no había ninguna), presentá un **resumen corto del plan** en
+lenguaje simple, por ejemplo:
+
+> Esto es lo que voy a armar:
+> - La app corre en tu máquina con Node 20.
+> - Base de datos: se crea una nueva en Docker.
+> - Pagos: se simula, así no necesitás credenciales reales.
+>
+> Todo queda en la carpeta `local/`, que no se sube al repo.
+> ¿Querés cambiar algo, o ver el detalle técnico antes de seguir?
+
+Si la persona pide el detalle técnico, mostrá la tabla de arriba, el detalle
+que decidió el agente para cada servicio creado en Docker (imagen/variante,
+tag, memoria y puerto) con una línea de por qué, y la lista de archivos que se
+van a crear en `local/` (compose y/o scripts, `Procfile`, `.nvmrc` o
+equivalente, `.env.example`, `.env.local`, `Dockerfile.dev`, mocks,
+`ENVIRONMENT.md`). Solo con el plan confirmado, hacé el handoff a
+`envinit-compose` y/o `envinit-native`, y a `envinit-document`.

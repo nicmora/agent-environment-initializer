@@ -30,6 +30,11 @@ opciones disponibles **sin recomendarte ninguna** y termina generando el entorno
 Habla siempre en **español latinoamericano** y **nunca borra ni sobrescribe**
 recursos o datos existentes, ni instala servicios de infra en tu SO.
 
+Está pensado para **cualquier perfil**, no solo para desarrolladores: gente de
+producto, QA o diseño también puede usarlo. Por eso habla en **lenguaje simple**:
+resúmenes cortos, preguntas sin jerga y sin detalle técnico, salvo que se lo
+pidas ("mostrame el detalle", "mostrame el archivo").
+
 ## Qué hace
 
 - **Analiza primero.** Escanea el repo para detectar stack tecnológico, versión
@@ -195,6 +200,8 @@ Puedes hablarle en cualquier momento, aunque el entorno esté a medio configurar
 ## Reglas que el agente nunca rompe
 
 - Español latinoamericano en toda interacción.
+- Lenguaje simple: resúmenes cortos y preguntas sin jerga. El detalle técnico
+  queda en `local/ENVIRONMENT.md` o te lo muestra si se lo pedís.
 - No recomienda un medio de ejecución ni el origen de una dependencia: presenta
   las opciones y vos elegís.
 - No ejecuta `docker compose down -v`, `docker volume rm`, `DROP`, `TRUNCATE`,
@@ -202,7 +209,8 @@ Puedes hablarle en cualquier momento, aunque el entorno esté a medio configurar
   toca la configuración o los datos de un servicio externo al que te conectás.
 - No instala servicios de infra ni runtimes en tu máquina: los servicios se
   crean en Docker o ya existen.
-- Muestra el diff de cada archivo antes de escribirlo.
+- Te dice qué archivos va a crear o cambiar y espera tu OK antes de escribirlos
+  (y te muestra el contenido o el diff si lo pedís).
 - Analiza el proyecto y te muestra el resumen **antes** de preguntar nada.
 - Antes de escribir un solo archivo, te muestra el plan completo y te deja
   cambiarlo.

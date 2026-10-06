@@ -7,9 +7,12 @@ description: Para servicios externos (APIs de terceros, microservicios de otro e
 
 ## Decisión por cada servicio externo
 
-Pregunta:
-1. ¿Tienes acceso real en desarrollo (credenciales + red)? ¿Quieres usarlo?
-2. ¿O prefieres simularlo para poder levantar la app sin depender de él?
+Pregunta en lenguaje simple (ver "Cómo comunicarte" en `AGENT.md`), sin nombrar
+herramientas de mock salvo que la persona pida el detalle:
+1. **Conectarse al servicio real** — necesitás tener las credenciales de
+   desarrollo.
+2. **Simularlo** — la app funciona sin depender de él; las respuestas son de
+   prueba.
 
 Se puede elegir distinto por servicio (**modo mixto**). La elección se controla
 con perfiles de compose (`--profile mock`) y/o una variable

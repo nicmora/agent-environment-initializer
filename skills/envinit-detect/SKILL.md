@@ -69,28 +69,43 @@ se cambia de modo ni se abre un cuestionario de dependencias hipotéticas.
 ## Salida
 
 Este es siempre el **primer paso** del flujo: la persona todavía no tomó
-ninguna decisión. Presenta, en este orden:
+ninguna decisión. Seguí "Cómo comunicarte" de `AGENT.md`: el resumen es corto y
+en lenguaje simple, pensado para alguien que puede no ser técnico.
 
-1. **Resumen del stack tecnológico**, en prosa corta: lenguaje(s) y versión de
-   runtime requerida, framework principal, gestor de paquetes, tipo de
-   aplicación (backend/frontend/worker/CLI/full-stack), estructura del repo
-   (monorepo/servicio único) y **cómo arranca hoy** (script de `package.json`,
-   `Makefile`, `Procfile`, `docker-compose`, comando en el README), aclarando si
-   ya hay un camino en contenedor, uno nativo, o ambos.
-2. **Tabla de dependencias de entorno detectadas**:
+**Lo que se muestra en el chat** (unas pocas líneas):
 
-   | Dependencia | Tipo | Evidencia (archivo:línea) | Versión sugerida | Confianza | Variables de entorno relacionadas |
-   |---|---|---|---|---|---|
+1. **Qué es el proyecto**, en una o dos frases: qué tipo de app es (p. ej. "una
+   API en Node.js", "una web en React con su backend en Python") y la versión de
+   lenguaje que necesita.
+2. **Qué necesita para funcionar**, como lista corta en palabras simples, una
+   línea por dependencia: "Una base de datos (PostgreSQL)", "Un servicio de
+   pagos externo (Stripe)". Si algo es inferido, decilo en pocas palabras ("parece
+   usar…").
+3. Si ya hay algo armado para correrlo (p. ej. "ya tiene un archivo de Docker"),
+   en una línea.
+4. Una línea final: "Si querés, te muestro el detalle técnico de lo que
+   encontré."
 
-3. **Configuración existente**: archivos de config relevantes encontrados
-   (`.env*`, `application.yml`, etc.) y si ya hay infraestructura declarada
-   (`docker-compose*.yml`, `Dockerfile`, `k8s/`, …) — sin modificarla.
-4. Lista de **variables referenciadas sin valor** y de **puertos** que el
-   proyecto espera.
+**Lo que se muestra solo si la persona lo pide** (y se usa internamente para el
+resto del flujo):
+
+- Detalle del stack: framework, gestor de paquetes, estructura del repo
+  (monorepo/servicio único) y **cómo arranca hoy** (script de `package.json`,
+  `Makefile`, `Procfile`, `docker-compose`, comando en el README).
+- **Tabla de dependencias de entorno detectadas**:
+
+  | Dependencia | Tipo | Evidencia (archivo:línea) | Versión sugerida | Confianza | Variables de entorno relacionadas |
+  |---|---|---|---|---|---|
+
+- **Configuración existente**: archivos de config relevantes encontrados
+  (`.env*`, `application.yml`, etc.) y si ya hay infraestructura declarada
+  (`docker-compose*.yml`, `Dockerfile`, `k8s/`, …) — sin modificarla.
+- Lista de **variables referenciadas sin valor** y de **puertos** que el
+  proyecto espera.
 
 Si **no se detectó ninguna dependencia de entorno**, decilo claramente en el
-resumen ("no se detectaron dependencias de entorno; el proyecto solo necesita su
-propio runtime") y no infieras dependencias que el código todavía no usa.
+resumen ("no necesita base de datos ni otros servicios; solo hay que levantar la
+app") y no infieras dependencias que el código todavía no usa.
 
 Con ese resumen mostrado, pasa directo a preguntar el medio de ejecución de la
 app y —si hay dependencias— el origen de cada una (crear en Docker o usar un
@@ -99,4 +114,4 @@ servicio existente) con `envinit-plan`.
 ## Reglas
 
 - Solo lectura. No escribas ni ejecutes servicios en esta skill.
-- Si algo es ambiguo, márcalo como "inferido" y explica por qué.
+- Si algo es ambiguo, márcalo como "inferido". El porqué, en el detalle técnico.

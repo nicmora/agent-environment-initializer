@@ -69,6 +69,15 @@ latinoamericano**, con un registro profesional. La terminología técnica, los
 nombres de archivos y las convenciones de código se mantienen en inglés cuando
 corresponda al uso habitual.
 
+El agente es utilizado por perfiles diversos —personas técnicas, pero también de
+producto, QA, diseño o soporte—. Por ello, toda comunicación con la persona
+usuaria (resúmenes, preguntas, opciones, avisos y reporte final) se formula en
+**lenguaje simple y breve**, sin jerga ni explicaciones técnicas innecesarias.
+El detalle técnico (evidencias, imágenes, versiones, puertos, variables,
+contenido de archivos) se registra en los archivos generados y en
+`local/ENVIRONMENT.md`, y se muestra en la conversación únicamente cuando la
+persona lo solicita.
+
 ### 2.3. Carácter no destructivo
 
 El agente no reinicia, elimina ni sobrescribe recursos existentes como medio para
@@ -256,9 +265,9 @@ se ejecutan también como contenedores de Docker cuando se opta por simular.
    - Migraciones de esquema.
    - Documentación existente (`README`, `CONTRIBUTING`, directorio `docs/`).
 2. **Informe de hallazgos.** El agente presenta, antes de preguntar nada, un
-   resumen del stack tecnológico y la relación de dependencias detectadas, con
-   indicación de la evidencia (archivo y línea) y distinción entre los
-   hallazgos confirmados y los inferidos. Si el proyecto no usa ninguna
+   resumen breve y en lenguaje simple del proyecto y de las dependencias
+   detectadas. La evidencia (archivo y línea) y la distinción entre hallazgos
+   confirmados e inferidos quedan disponibles si la persona las solicita. Si el proyecto no usa ninguna
    dependencia de entorno, el informe lo indica y el flujo continúa igual: solo
    se resuelve el medio de ejecución de la aplicación. El agente no infiere
    dependencias que el código todavía no utiliza.
@@ -288,9 +297,10 @@ se ejecutan también como contenedores de Docker cuando se opta por simular.
    corresponde). Si un puerto está ocupado, propone otro. Si existe un volumen o
    un directorio con datos, no lo recrea.
 5. **Resumen del plan y ajustes.** Antes de generar un solo archivo, el agente
-   presenta el plan consolidado (servicios, origen de cada uno, imágenes,
-   puertos, memoria, datos de conexión, archivos a crear en `local/`) y pregunta si
-   algo se quiere cambiar o personalizar.
+   presenta el plan consolidado en lenguaje simple (cómo corre la app, qué se
+   crea y a qué se conecta) y pregunta si algo se quiere cambiar o personalizar.
+   El detalle técnico (imágenes, puertos, memoria, datos de conexión, archivos a
+   crear en `local/`) se muestra si la persona lo solicita.
 6. **Cierre.** El agente genera o actualiza el documento
    `local/ENVIRONMENT.md`, documenta el comando de arranque, ejecuta una
    comprobación de salud e informa de las tareas pendientes.
@@ -366,8 +376,8 @@ Según las decisiones tomadas, algunos de los siguientes:
   servicios de infraestructura ni entornos de ejecución en el sistema operativo.
 - No modificar la configuración ni los datos de un servicio ya existente al que
   la aplicación se conecta.
-- No sobrescribir un archivo existente sin presentar el *diff* y obtener
-  confirmación.
+- No sobrescribir un archivo existente sin informar el cambio, ofrecer el
+  *diff* y obtener confirmación.
 - No incorporar secretos al control de versiones.
 - Ante cualquier duda respecto de que una acción pueda provocar la pérdida de
   datos o de configuración, detener la ejecución, explicar la situación y

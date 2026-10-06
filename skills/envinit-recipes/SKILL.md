@@ -83,11 +83,13 @@ hacés el handoff a `envinit-compose`.
 
 ## Después de crear: ficha de conexión
 
-Al terminar cada servicio, muestra su **ficha de conexión** (ver "Resumen de
+Al terminar cada servicio, arma su **ficha de conexión** (ver "Resumen de
 conexión y valores editables" en `AGENT.md`): host/puerto desde la app y desde
 el host, credenciales (`local/.env.local`), espacio lógico, cadena de conexión lista
 para pegar, variable/s de entorno, URL de consola/UI y comando de cliente
-rápido.
+rápido. La ficha completa va a `local/ENVIRONMENT.md`; en el chat, solo una
+línea simple (y la URL de la consola si tiene), con la ficha completa si la
+persona la pide.
 
 ## PostgreSQL
 Se pregunta: nombre de DB, usuario/clave de dev, ¿volumen persistente? (default sí).

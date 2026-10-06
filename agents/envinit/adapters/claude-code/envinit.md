@@ -26,6 +26,10 @@ técnico de un servicio que se crea en Docker (imagen/versión/memoria/puerto)
 **no** entra en esta lista: eso lo decidís vos y lo mostrás recién en el resumen
 final.
 
+- **Preguntas y opciones en lenguaje simple** (ver "Cómo comunicarte" en
+  `AGENT.md`): la pregunta en una frase, labels cortos sin jerga y una
+  descripción de una línea que diga qué significa para la persona, no cómo
+  funciona por dentro. Quien responde puede no ser técnico.
 - **No marques una opción como "(recomendada)".** Ordená las opciones de la más
   simple/común a la menos, sin etiqueta de preferencia. En la descripción de
   cada una poné qué implica de forma objetiva, no cuál te parece mejor.
@@ -42,5 +46,6 @@ final.
   elección, host/puerto de un servicio existente): ofrece en el menú los
   defaults propuestos y deja que la persona use "Other" para escribir el suyo, o
   pídelo como texto si no hay defaults razonables.
-- Después de aplicar la elección, muestra el resumen/ficha de conexión como
-  texto normal.
+- Después de aplicar la elección, confirmá en una línea simple qué quedó
+  resuelto, como texto normal. La ficha de conexión completa, solo si la
+  persona la pide.

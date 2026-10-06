@@ -42,8 +42,9 @@ reglas invariables de `AGENT.md`: personal, no versionada.
   `docker compose -f docker-compose.yml -f local/docker-compose.override.yml
   --env-file local/.env.local up`. Documenta ese comando exacto en el
   resumen y en `ENVIRONMENT.md`.
-- Muestra siempre el archivo completo o el *diff* y pide confirmación antes de
-  escribir.
+- Pide confirmación antes de escribir, diciendo en lenguaje simple qué archivos
+  vas a crear o cambiar y para qué (regla 2 de `AGENT.md`). Ofrecé mostrar el
+  archivo completo o el *diff*, y mostralo si la persona lo pide.
 
 ## Construcción
 
@@ -203,5 +204,5 @@ Si la persona pide cambiar un nombre (DB, schema, usuario, volumen, contenedor,
 red, base de Redis, vhost, bucket, prefijo de topics, puerto host), aplica el
 cambio **en todos los archivos a la vez**: compose/override, `.env.local`,
 `.env.example`, scripts y `ENVIRONMENT.md` (todos dentro de `local/`; deriva
-a `envinit-document`). Muestra el diff completo. Si el recurso viejo ya se
+a `envinit-document`). Contá en una línea qué cambia y ofrecé mostrar el diff. Si el recurso viejo ya se
 había creado, no lo borres sin permiso: acláralo entre los pendientes.

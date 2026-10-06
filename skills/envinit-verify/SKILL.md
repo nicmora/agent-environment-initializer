@@ -55,8 +55,24 @@ o ambos en orden si el plan es mixto.
 
 ## Reporte final
 
-- ✅ Servicios arriba y healthy.
-- ✅ App responde en `http://localhost:<puerto>`.
+Seguí "Cómo comunicarte" de `AGENT.md`. **En el chat**, un cierre corto y en
+lenguaje simple, por ejemplo:
+
+> ✅ Listo, la app está funcionando: abrila en http://localhost:3000
+> ✅ La base de datos está andando.
+> ⚠️ Falta: la clave del servicio de pagos (por ahora está simulado).
+>
+> Para levantar todo de nuevo: `local/scripts/dev-up`
+> Para apagarlo: `local/scripts/dev-down`
+>
+> Todos los datos de conexión quedaron en `local/ENVIRONMENT.md`. Si querés, te
+> los muestro acá.
+
+Después preguntá si dejás los servicios corriendo o los apagás.
+
+**Solo si la persona lo pide** (y siempre en `local/ENVIRONMENT.md`), el
+detalle completo:
+
 - **Ficha de conexión por dependencia** (ver "Resumen de conexión y valores
   editables" en `AGENT.md`). Una fila por servicio:
 
@@ -77,6 +93,10 @@ o ambos en orden si el plan es mixto.
 
 - Si algo falla, **diagnostica** (logs, puertos, variables, versión de runtime)
   y propón el arreglo; no borres volúmenes ni recrees servicios para "destrabar".
+  Contale el problema y el arreglo en una o dos frases simples; los logs y el
+  detalle técnico, solo si los pide.
+- Las colisiones de puerto se explican sin jerga ("ese lugar ya estaba ocupado
+  en tu máquina, así que usé otro").
 - No dejes servicios corriendo sin avisar; pregunta si los bajas o los dejas.
 - Nunca toques un servicio existente: si no responde, es un pendiente para la
   persona.

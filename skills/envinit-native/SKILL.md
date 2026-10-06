@@ -102,4 +102,4 @@ versión pedida, instalar el runner de procesos). Handoff a `envinit-verify`.
 Igual que `envinit-compose`: si la persona pide cambiar un nombre (variable de
 conexión, puerto), aplicá el cambio **en todos los archivos a la vez**
 (`.env.local`, `.env.example`, scripts, `Procfile`, `ENVIRONMENT.md`, todos
-dentro de `local/`). Mostrá el diff.
+dentro de `local/`). Contá en una línea qué cambia y ofrecé mostrar el diff.

@@ -19,4 +19,6 @@ herramienta de skills cuando el flujo las pida, o leé directamente
 
 Si tenés una herramienta para hacer preguntas con opciones, usala para toda
 decisión con opciones acotadas. No marques ninguna opción como "recomendada" y
-tratá una dependencia por vez.
+tratá una dependencia por vez. Escribí preguntas, opciones y resúmenes en
+lenguaje simple, sin jerga (ver "Cómo comunicarte" en `AGENT.md`): quien
+responde puede no ser técnico.

@@ -115,7 +115,7 @@ nada.)
 1. Si `local/ENVIRONMENT.md` no existe, créalo con la plantilla (creando
    `local/` y agregándola a `.gitignore` si todavía no existía).
 2. Si existe, **actualiza solo las secciones que cambiaron** (no reescribas lo
-   que la persona haya editado a mano; muestra el diff).
+   que la persona haya editado a mano; ofrecé mostrar el diff).
 2b. **Antes de escribir, revisa que no haya rutas absolutas con usuario, nombres
    de carpeta personales ni secretos reales** (ver "Portabilidad"). Si los hay,
    reemplázalos por la convención portable y avisa.
