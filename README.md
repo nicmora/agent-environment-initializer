@@ -62,59 +62,114 @@ Contexto y decisiones de diseño completos: [`context.md`](context.md).
 
 ```
 context.md                        Documento de contexto (el "por qué" y el "qué")
-agent/
-  AGENT.md                        Identidad y reglas del agente (fuente de verdad, agnóstica)
-  skills/
-    detect-environment/SKILL.md   Escaneo del repo (cualquier proyecto)
-    plan-environment/SKILL.md     Medio de ejecución + origen de cada dependencia
-    compose-builder/SKILL.md      Materializar los servicios en Docker
-    native-setup/SKILL.md         Materializar el arranque nativo de la app (scripts, Procfile)
-    service-recipes/SKILL.md      Recetas de compose por servicio
-    external-mocks/SKILL.md       Conexión real vs. mock (servicios de terceros)
-    verify-environment/SKILL.md   Healthchecks, colisiones de puerto y arranque de prueba
-    document-environment/SKILL.md Generación de ENVIRONMENT.md
-adapters/
-  claude-code/                    Skills + subagente nativos de Claude Code
+agents/
+  env-initializer/
+    AGENT.md                      Identidad y reglas del agente (fuente de verdad, agnóstica)
+    adapters/
+      claude-code/env-initializer.md   Agente en formato Claude Code (remite a AGENT.md)
+      opencode/env-initializer.md      Agente en formato OpenCode (remite a AGENT.md)
+skills/
+  detect-environment/SKILL.md     Escaneo del repo (cualquier proyecto)
+  plan-environment/SKILL.md       Medio de ejecución + origen de cada dependencia
+  compose-builder/SKILL.md        Materializar los servicios en Docker
+  native-setup/SKILL.md           Materializar el arranque nativo de la app (scripts, Procfile)
+  service-recipes/SKILL.md        Recetas de compose por servicio
+  external-mocks/SKILL.md         Conexión real vs. mock (servicios de terceros)
+  verify-environment/SKILL.md     Healthchecks, colisiones de puerto y arranque de prueba
+  document-environment/SKILL.md   Generación de ENVIRONMENT.md
 ```
 
+Cada agente vive en su propia carpeta dentro de `agents/`, junto con sus
+adaptadores; las skills están en `skills/` porque las comparten todos.
+
 Las *skills* son **archivos Markdown con un procedimiento paso a paso**. Cada una
-lleva un frontmatter (`name`, `description`) que Claude Code usa para activarlas
-solas; para otros asistentes, el agente simplemente **lee el archivo** cuando lo
-necesita.
+lleva un frontmatter (`name`, `description`) que Claude Code y OpenCode usan para
+activarlas solas; para otros asistentes, el agente simplemente **lee el archivo**
+cuando lo necesita.
+
+`AGENT.md` es la única fuente de verdad de las reglas y el flujo. Los archivos de
+`adapters/` son solo una "cáscara" con el frontmatter que pide cada herramienta y
+la instrucción de leer `AGENT.md`, así las reglas no se duplican.
 
 ## Cómo lo uso en otros proyectos
 
+> Guía de instalación paso a paso, con comandos para copiar desde la terminal:
+> [`INSTALL.md`](INSTALL.md).
+
+El agente se **copia a mano en cada proyecto** donde lo quieras usar, dentro de
+la carpeta de la herramienta: `.claude/` para Claude Code u `.opencode/` para
+OpenCode. Copiá solo la de la herramienta que vayas a usar. Podés hacerlo con el
+explorador de archivos o con la terminal de tu sistema operativo.
+
+### Qué se copia y adónde
+
+| Desde este repo | Claude Code | OpenCode |
+|---|---|---|
+| `agents/env-initializer/AGENT.md` | `.claude/env-initializer/AGENT.md` | `.opencode/env-initializer/AGENT.md` |
+| el contenido de `skills/` (las 8 carpetas) | `.claude/skills/` | `.opencode/skills/` |
+| `agents/env-initializer/adapters/<herramienta>/env-initializer.md` | `.claude/agents/env-initializer.md` | `.opencode/agents/env-initializer.md` |
+
+No copies la carpeta `agents/` entera a `.claude/agents/` u `.opencode/agents/`:
+ahí va **solo** el `.md` del adaptador de tu herramienta.
+
+Todas las rutas de destino son relativas a la **raíz del proyecto**. El
+resultado queda así (en OpenCode, igual pero con `.opencode/`):
+
+```
+<tu-proyecto>/
+└── .claude/
+    ├── env-initializer/
+    │   └── AGENT.md                ← reglas y flujo del agente
+    ├── agents/
+    │   └── env-initializer.md
+    └── skills/
+        ├── detect-environment/SKILL.md
+        ├── plan-environment/SKILL.md
+        ├── compose-builder/SKILL.md
+        ├── native-setup/SKILL.md
+        ├── service-recipes/SKILL.md
+        ├── external-mocks/SKILL.md
+        ├── verify-environment/SKILL.md
+        └── document-environment/SKILL.md
+```
+
+`AGENT.md` va dentro de una carpeta `env-initializer/` para que no se confunda
+con archivos de otros agentes que tenga el proyecto. No lo pongas dentro de
+`agents/`: las dos herramientas tratan cada `.md` de esa carpeta como un agente.
+
+Si después actualizás este repo, volvé a copiar los mismos archivos encima.
+
 ### Claude Code
 
-Instalación global (una vez), disponible en todos los proyectos:
-
-```powershell
-$repo = "C:\ruta\a\agent-environment-initializer"
-New-Item -ItemType Directory -Force "$HOME\.claude\skills","$HOME\.claude\agents" | Out-Null
-Copy-Item "$repo\agent\skills\*" "$HOME\.claude\skills\" -Recurse -Force
-Copy-Item "$repo\agent\AGENT.md" "$HOME\.claude\skills\AGENT.md" -Force
-Copy-Item "$repo\adapters\claude-code\agents\env-initializer.md" "$HOME\.claude\agents\" -Force
-```
-
-Luego, en cualquier repo:
+Abrí Claude Code en la raíz del proyecto y pedíselo al agente:
 
 ```
-> quiero levantar este proyecto localmente
-> prefiero correr la app en el host
-> agregá Redis al entorno de desarrollo
-> ya tengo un Postgres corriendo, conectate a ese
-> @env-initializer ¿por qué no arranca la base?
+> @env-initializer quiero levantar este proyecto localmente
 ```
 
-Detalle y opción por-proyecto: [`adapters/claude-code/README.md`](adapters/claude-code/README.md).
+También podés hablar sin mencionarlo (*"agregá Redis al entorno"*, *"ya tengo un
+Postgres corriendo, conectate a ese"*): las skills se activan solas.
 
-### GPT / ChatGPT / Gemini / Cursor / otros
+### OpenCode
 
-1. Copia la carpeta `agent/` a la raíz del proyecto.
-2. Pega el contenido de [`agent/AGENT.md`](agent/AGENT.md) como *system prompt* /
-   instrucciones del proyecto.
-3. Si el asistente no puede leer archivos, pega también el contenido de las
-   skills (`agent/skills/<nombre>/SKILL.md`) a medida que el flujo las pida.
+El agente **no fija ningún modelo**: usa el que tengas seleccionado en OpenCode,
+así que funciona con cualquier proveedor o gateway.
+
+1. Abrí `opencode` en la raíz del proyecto y elegí el modelo.
+2. Apretá **Tab** hasta que aparezca el agente `env-initializer`.
+3. Pedile lo que necesitás: *"quiero levantar este proyecto localmente"*.
+
+> En versiones viejas de OpenCode las carpetas se llamaban en singular
+> (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, probá con
+> esos nombres.
+
+### Otros asistentes (GPT / ChatGPT / Gemini / Cursor)
+
+1. Copiá `agents/env-initializer/AGENT.md` y `skills/` a una carpeta del proyecto.
+2. Pegá el contenido de `AGENT.md` como *system prompt* / instrucciones del
+   proyecto.
+3. Si el asistente no puede leer archivos, pegá también el contenido de las
+   skills (`skills/<nombre>/SKILL.md`) a medida que el flujo las pida.
 
 ## Cómo empieza una sesión
 

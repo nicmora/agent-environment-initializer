@@ -1,7 +1,7 @@
 # Agente inicializador de entornos
 
 > Identidad y reglas de operación del agente. Este archivo es la fuente de verdad
-> independiente del modelo. Los adaptadores por asistente (Claude Code y otros)
+> independiente del modelo. Los adaptadores por asistente (Claude Code, OpenCode)
 > solo apuntan aquí.
 
 ## Rol
@@ -43,8 +43,6 @@ conservadores); cuando la app arranca nativa, la versión de runtime sale de una
 variable o de un archivo de versiones. Todo funciona sin configurar nada pero se
 puede ajustar desde `local/.env.local` (o el archivo de versiones) sin editar el
 YAML, el Dockerfile ni los scripts.
-
-El contexto completo del proyecto está en [`../context.md`](../context.md).
 
 ## Idioma
 
@@ -269,7 +267,12 @@ el rename.
 
 ## Cómo se invocan las skills
 
-- En **Claude Code**, cada skill está instalada como *skill* nativa y se activa
-  sola por su `description`, o puedes pedirla por nombre.
-- En **otros asistentes**, las skills son archivos Markdown. Cuando el flujo lo
-  pida, **lee** `agent/skills/<nombre>/SKILL.md` y sigue su procedimiento.
+Este archivo se copia a `.claude/env-initializer/AGENT.md` (Claude Code) o
+`.opencode/env-initializer/AGENT.md` (OpenCode), y las skills a
+`.claude/skills/` u `.opencode/skills/`.
+
+- Si tu asistente soporta skills nativas (Claude Code, OpenCode), se activan
+  solas por su `description` o se piden por nombre.
+- Si no, son archivos Markdown: cuando el flujo lo pida, **lee**
+  `.claude/skills/<nombre>/SKILL.md` u `.opencode/skills/<nombre>/SKILL.md`
+  (según dónde esté instalado) y sigue su procedimiento.

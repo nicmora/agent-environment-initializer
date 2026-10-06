@@ -46,7 +46,7 @@ con su implicancia objetiva y la persona usuaria decide.
 ### 2.1. Independencia de modelo y de herramienta
 
 El agente debe poder utilizarse con distintos asistentes de programación —entre
-otros, Claude (Claude Code), GPT/ChatGPT y Cursor—. En
+otros, Claude Code, OpenCode (con cualquier modelo), GPT/ChatGPT y Cursor—. En
 consecuencia:
 
 - Las instrucciones se redactan en **Markdown plano**, sin dependencias respecto
@@ -380,7 +380,7 @@ Según las decisiones tomadas, algunos de los siguientes:
 > La organización definitiva se establecerá durante la implementación; lo
 > siguiente expresa la intención de diseño.
 
-- `AGENT.md`: identidad, idioma, principios y criterios de enrutamiento hacia
+- `agents/env-initializer/AGENT.md`: identidad, idioma, principios y criterios de enrutamiento hacia
   cada skill.
 - `skills/detect-environment/`: análisis del repositorio e informe de
   dependencias, para cualquier proyecto.
@@ -397,9 +397,9 @@ Según las decisiones tomadas, algunos de los siguientes:
   servicios de terceros.
 - `skills/verify-environment/`: comprobaciones de salud y arranque de prueba.
 - `skills/document-environment/`: generación y actualización de `ENVIRONMENT.md`.
-- `adapters/`: correspondencias opcionales con los formatos nativos de cada
-  asistente (skills de Claude Code y otros), que remiten a estos mismos
-  documentos.
+- `agents/env-initializer/adapters/`: el archivo de agente en el formato nativo de cada asistente
+  (Claude Code, OpenCode), que solo agrega el frontmatter propio de la
+  herramienta y remite a `AGENT.md`.
 
 ## 10. Criterios de éxito
 
