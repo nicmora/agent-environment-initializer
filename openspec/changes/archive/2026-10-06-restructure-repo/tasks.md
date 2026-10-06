@@ -28,7 +28,7 @@
 ## 5. Guía para asistentes de desarrollo
 
 - [x] 5.1 Crear `AGENTS.md` con qué es el producto (`agent/`), qué son `.claude/` y `.opencode/` en este repo, el trabajo con OpenSpec, la regla de rutas instaladas dentro de `agent/` y cómo probar con el script en otro proyecto. Verificar que menciona cada punto de la sección correspondiente de `design.md`
-- [ ] 5.2 Crear `CLAUDE.md` que importe `@AGENTS.md`. Verificar que al abrir Claude Code en el repo el contenido aparece en contexto (por ejemplo, con `/memory`)
+- [x] 5.2 Crear `CLAUDE.md` que importe `@AGENTS.md`. Verificar que al abrir Claude Code en el repo el contenido aparece en contexto (por ejemplo, con `/memory`)
 - [x] 5.3 Completar `context` en `openspec/config.yaml` con la descripción del proyecto y su layout. Verificar con `openspec instructions proposal --change restructure-repo --json` que el contexto aparece en la salida
 
 ## 6. Documentación
