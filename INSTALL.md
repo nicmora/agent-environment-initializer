@@ -1,6 +1,6 @@
 # Instalación en un proyecto
 
-Esta guía explica cómo agregar el agente `env-initializer` a un proyecto. Para
+Esta guía explica cómo agregar el agente `envinit` a un proyecto. Para
 saber qué hace el agente y cómo usarlo, mirá el [README](README.md).
 
 El agente se instala **copiando archivos a mano** en cada proyecto donde lo
@@ -13,14 +13,14 @@ Las rutas de destino son relativas a la **raíz de tu proyecto**.
 
 | Desde este repo | Claude Code | OpenCode |
 |---|---|---|
-| `agents/env-initializer/AGENT.md` | `.claude/env-initializer/AGENT.md` | `.opencode/env-initializer/AGENT.md` |
+| `agents/envinit/AGENT.md` | `.claude/envinit/AGENT.md` | `.opencode/envinit/AGENT.md` |
 | todas las carpetas de `skills/` | `.claude/skills/` | `.opencode/skills/` |
-| `agents/env-initializer/adapters/<herramienta>/env-initializer.md` | `.claude/agents/env-initializer.md` | `.opencode/agents/env-initializer.md` |
+| `agents/envinit/adapters/<herramienta>/envinit.md` | `.claude/agents/envinit.md` | `.opencode/agents/envinit.md` |
 
 > **Importante:** no copies la carpeta `agents/` entera a `.claude/agents/` u
 > `.opencode/agents/`. Ahí va **solo** el `.md` del adaptador de tu herramienta.
 > Las dos herramientas tratan cada `.md` de esa carpeta como un agente, por eso
-> `AGENT.md` va en su propia carpeta `env-initializer/`.
+> `AGENT.md` va en su propia carpeta `envinit/`.
 
 ## Resultado esperado
 
@@ -29,10 +29,10 @@ Para Claude Code queda así (en OpenCode es igual, pero con `.opencode/`):
 ```
 <tu-proyecto>/
 └── .claude/
-    ├── env-initializer/
+    ├── envinit/
     │   └── AGENT.md
     ├── agents/
-    │   └── env-initializer.md
+    │   └── envinit.md
     └── skills/
         ├── envinit-compose/SKILL.md
         ├── envinit-detect/SKILL.md
@@ -63,9 +63,9 @@ Para OpenCode, cambiá `.claude` por `.opencode` y `claude-code` por `opencode`.
 $REPO = "C:\ruta\a\agent-environment-initializer"
 $PROYECTO = "C:\ruta\a\tu-proyecto"
 
-New-Item -ItemType Directory -Force "$PROYECTO\.claude\env-initializer", "$PROYECTO\.claude\agents", "$PROYECTO\.claude\skills" | Out-Null
-Copy-Item "$REPO\agents\env-initializer\AGENT.md" "$PROYECTO\.claude\env-initializer\"
-Copy-Item "$REPO\agents\env-initializer\adapters\claude-code\env-initializer.md" "$PROYECTO\.claude\agents\"
+New-Item -ItemType Directory -Force "$PROYECTO\.claude\envinit", "$PROYECTO\.claude\agents", "$PROYECTO\.claude\skills" | Out-Null
+Copy-Item "$REPO\agents\envinit\AGENT.md" "$PROYECTO\.claude\envinit\"
+Copy-Item "$REPO\agents\envinit\adapters\claude-code\envinit.md" "$PROYECTO\.claude\agents\"
 Copy-Item "$REPO\skills\*" "$PROYECTO\.claude\skills\" -Recurse -Force
 ```
 
@@ -75,26 +75,26 @@ Copy-Item "$REPO\skills\*" "$PROYECTO\.claude\skills\" -Recurse -Force
 REPO=~/ruta/a/agent-environment-initializer
 PROYECTO=~/ruta/a/tu-proyecto
 
-mkdir -p "$PROYECTO/.claude/env-initializer" "$PROYECTO/.claude/agents" "$PROYECTO/.claude/skills"
-cp "$REPO/agents/env-initializer/AGENT.md" "$PROYECTO/.claude/env-initializer/"
-cp "$REPO/agents/env-initializer/adapters/claude-code/env-initializer.md" "$PROYECTO/.claude/agents/"
+mkdir -p "$PROYECTO/.claude/envinit" "$PROYECTO/.claude/agents" "$PROYECTO/.claude/skills"
+cp "$REPO/agents/envinit/AGENT.md" "$PROYECTO/.claude/envinit/"
+cp "$REPO/agents/envinit/adapters/claude-code/envinit.md" "$PROYECTO/.claude/agents/"
 cp -R "$REPO/skills/." "$PROYECTO/.claude/skills/"
 ```
 
 ## Comprobar la instalación
 
 **Claude Code:** abrí Claude Code en la raíz del proyecto y escribí
-`@env-initializer`. Si aparece en el autocompletado, quedó instalado.
+`@envinit`. Si aparece en el autocompletado, quedó instalado.
 
 **OpenCode:** abrí `opencode` en la raíz del proyecto y apretá **Tab** hasta que
-aparezca el agente `env-initializer`.
+aparezca el agente `envinit`.
 
 > En versiones viejas de OpenCode las carpetas tienen nombres en singular
 > (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, renombralas.
 
 ## Otros asistentes (ChatGPT, Gemini, Cursor, etc.)
 
-1. Copiá `agents/env-initializer/AGENT.md` y la carpeta `skills/` a una carpeta
+1. Copiá `agents/envinit/AGENT.md` y la carpeta `skills/` a una carpeta
    del proyecto.
 2. Pegá el contenido de `AGENT.md` como *system prompt* o como instrucciones del
    proyecto.
@@ -107,20 +107,23 @@ Cuando actualices este repo, volvé a copiar los mismos archivos encima de los
 anteriores. Los comandos de arriba sirven igual: sobrescriben los archivos del
 agente y no tocan nada más del proyecto.
 
-> **Si instalaste una versión anterior a los nombres con prefijo `envinit-`**
-> (`detect-environment`, `plan-environment`, `compose-builder`, `native-setup`,
-> `service-recipes`, `external-mocks`, `verify-environment`,
-> `document-environment`), borrá esas 8 carpetas de `.claude/skills/` u
-> `.opencode/skills/` antes de copiar. Si no, quedan duplicadas junto a las
-> nuevas.
+> **Si instalaste una versión anterior, cuando el agente se llamaba
+> `env-initializer`**, borrá primero lo viejo (con `.opencode/` si usás
+> OpenCode). Si no, queda duplicado junto a lo nuevo:
+>
+> - `.claude/env-initializer/`
+> - `.claude/agents/env-initializer.md`
+> - las carpetas `detect-environment`, `plan-environment`, `compose-builder`,
+>   `native-setup`, `service-recipes`, `external-mocks`, `verify-environment` y
+>   `document-environment` dentro de `.claude/skills/`
 
 ## Desinstalar
 
 Borrá estos archivos y carpetas del proyecto (con `.opencode/` si usás
 OpenCode):
 
-- `.claude/env-initializer/`
-- `.claude/agents/env-initializer.md`
+- `.claude/envinit/`
+- `.claude/agents/envinit.md`
 - las carpetas `envinit-*` dentro de `.claude/skills/` (todas las skills del
   agente llevan ese prefijo)
 

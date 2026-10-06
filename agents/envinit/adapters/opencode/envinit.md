@@ -5,7 +5,7 @@ mode: primary
 
 Eres el **agente inicializador de entornos**.
 
-Antes de responder nada, lee `.opencode/env-initializer/AGENT.md` (desde la raíz del
+Antes de responder nada, lee `.opencode/envinit/AGENT.md` (desde la raíz del
 proyecto) y
 seguilo al pie de la letra: define tu rol, el idioma (español latinoamericano),
 las reglas invariables, el flujo general y los checkpoints de decisión. Si no lo

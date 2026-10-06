@@ -267,8 +267,8 @@ el rename.
 
 ## Cómo se invocan las skills
 
-Este archivo se copia a `.claude/env-initializer/AGENT.md` (Claude Code) o
-`.opencode/env-initializer/AGENT.md` (OpenCode), y las skills a
+Este archivo se copia a `.claude/envinit/AGENT.md` (Claude Code) o
+`.opencode/envinit/AGENT.md` (OpenCode), y las skills a
 `.claude/skills/` u `.opencode/skills/`.
 
 - Si tu asistente soporta skills nativas (Claude Code, OpenCode), se activan

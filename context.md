@@ -380,7 +380,7 @@ Según las decisiones tomadas, algunos de los siguientes:
 > La organización definitiva se establecerá durante la implementación; lo
 > siguiente expresa la intención de diseño.
 
-- `agents/env-initializer/AGENT.md`: identidad, idioma, principios y criterios de enrutamiento hacia
+- `agents/envinit/AGENT.md`: identidad, idioma, principios y criterios de enrutamiento hacia
   cada skill.
 - `skills/envinit-detect/`: análisis del repositorio e informe de
   dependencias, para cualquier proyecto.
@@ -397,7 +397,7 @@ Según las decisiones tomadas, algunos de los siguientes:
   servicios de terceros.
 - `skills/envinit-verify/`: comprobaciones de salud y arranque de prueba.
 - `skills/envinit-document/`: generación y actualización de `ENVIRONMENT.md`.
-- `agents/env-initializer/adapters/`: el archivo de agente en el formato nativo de cada asistente
+- `agents/envinit/adapters/`: el archivo de agente en el formato nativo de cada asistente
   (Claude Code, OpenCode), que solo agrega el frontmatter propio de la
   herramienta y remite a `AGENT.md`.
 

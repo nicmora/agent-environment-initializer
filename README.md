@@ -63,11 +63,11 @@ Contexto y decisiones de diseño completos: [`context.md`](context.md).
 ```
 context.md                        Documento de contexto (el "por qué" y el "qué")
 agents/
-  env-initializer/
+  envinit/
     AGENT.md                      Identidad y reglas del agente (fuente de verdad, agnóstica)
     adapters/
-      claude-code/env-initializer.md   Agente en formato Claude Code (remite a AGENT.md)
-      opencode/env-initializer.md      Agente en formato OpenCode (remite a AGENT.md)
+      claude-code/envinit.md      Agente en formato Claude Code (remite a AGENT.md)
+      opencode/envinit.md         Agente en formato OpenCode (remite a AGENT.md)
 skills/
   envinit-detect/SKILL.md         Escaneo del repo (cualquier proyecto)
   envinit-plan/SKILL.md           Medio de ejecución + origen de cada dependencia
@@ -107,9 +107,9 @@ explorador de archivos o con la terminal de tu sistema operativo.
 
 | Desde este repo | Claude Code | OpenCode |
 |---|---|---|
-| `agents/env-initializer/AGENT.md` | `.claude/env-initializer/AGENT.md` | `.opencode/env-initializer/AGENT.md` |
+| `agents/envinit/AGENT.md` | `.claude/envinit/AGENT.md` | `.opencode/envinit/AGENT.md` |
 | el contenido de `skills/` (las 8 carpetas) | `.claude/skills/` | `.opencode/skills/` |
-| `agents/env-initializer/adapters/<herramienta>/env-initializer.md` | `.claude/agents/env-initializer.md` | `.opencode/agents/env-initializer.md` |
+| `agents/envinit/adapters/<herramienta>/envinit.md` | `.claude/agents/envinit.md` | `.opencode/agents/envinit.md` |
 
 No copies la carpeta `agents/` entera a `.claude/agents/` u `.opencode/agents/`:
 ahí va **solo** el `.md` del adaptador de tu herramienta.
@@ -120,10 +120,10 @@ resultado queda así (en OpenCode, igual pero con `.opencode/`):
 ```
 <tu-proyecto>/
 └── .claude/
-    ├── env-initializer/
+    ├── envinit/
     │   └── AGENT.md                ← reglas y flujo del agente
     ├── agents/
-    │   └── env-initializer.md
+    │   └── envinit.md
     └── skills/
         ├── envinit-detect/SKILL.md
         ├── envinit-plan/SKILL.md
@@ -135,7 +135,7 @@ resultado queda así (en OpenCode, igual pero con `.opencode/`):
         └── envinit-document/SKILL.md
 ```
 
-`AGENT.md` va dentro de una carpeta `env-initializer/` para que no se confunda
+`AGENT.md` va dentro de una carpeta `envinit/` para que no se confunda
 con archivos de otros agentes que tenga el proyecto. No lo pongas dentro de
 `agents/`: las dos herramientas tratan cada `.md` de esa carpeta como un agente.
 
@@ -146,7 +146,7 @@ Si después actualizás este repo, volvé a copiar los mismos archivos encima.
 Abrí Claude Code en la raíz del proyecto y pedíselo al agente:
 
 ```
-> @env-initializer quiero levantar este proyecto localmente
+> @envinit quiero levantar este proyecto localmente
 ```
 
 También podés hablar sin mencionarlo (*"agregá Redis al entorno"*, *"ya tengo un
@@ -158,7 +158,7 @@ El agente **no fija ningún modelo**: usa el que tengas seleccionado en OpenCode
 así que funciona con cualquier proveedor o gateway.
 
 1. Abrí `opencode` en la raíz del proyecto y elegí el modelo.
-2. Apretá **Tab** hasta que aparezca el agente `env-initializer`.
+2. Apretá **Tab** hasta que aparezca el agente `envinit`.
 3. Pedile lo que necesitás: *"quiero levantar este proyecto localmente"*.
 
 > En versiones viejas de OpenCode las carpetas se llamaban en singular
@@ -167,7 +167,7 @@ así que funciona con cualquier proveedor o gateway.
 
 ### Otros asistentes (GPT / ChatGPT / Gemini / Cursor)
 
-1. Copiá `agents/env-initializer/AGENT.md` y `skills/` a una carpeta del proyecto.
+1. Copiá `agents/envinit/AGENT.md` y `skills/` a una carpeta del proyecto.
 2. Pegá el contenido de `AGENT.md` como *system prompt* / instrucciones del
    proyecto.
 3. Si el asistente no puede leer archivos, pegá también el contenido de las
