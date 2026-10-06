@@ -1,9 +1,9 @@
 ---
-name: detect-environment
+name: envinit-detect
 description: Escanea el repositorio actual para detectar sus dependencias de entorno — bases de datos, caché, mensajería, storage, servicios externos — a partir de manifiestos, archivos de infraestructura, configuración y código, y produce un informe con evidencia. Es siempre el primer paso, para cualquier proyecto y en cualquier estado (con dependencias, con una sola o con ninguna). Usar al inicio de cada sesión o cuando el usuario pide "escanea el proyecto" / "detecta qué necesita para correr".
 ---
 
-# Skill: detect-environment
+# Skill: envinit-detect
 
 ## Objetivo
 
@@ -94,7 +94,7 @@ propio runtime") y no infieras dependencias que el código todavía no usa.
 
 Con ese resumen mostrado, pasa directo a preguntar el medio de ejecución de la
 app y —si hay dependencias— el origen de cada una (crear en Docker o usar un
-servicio existente) con `plan-environment`.
+servicio existente) con `envinit-plan`.
 
 ## Reglas
 

@@ -1,9 +1,9 @@
 ---
-name: external-mocks
+name: envinit-mocks
 description: Para servicios externos (APIs de terceros, microservicios de otro equipo, servicios cloud, OIDC), decide entre conexión real y simulación, y monta el mock correspondiente — WireMock/Mockoon/Prism para HTTP, emisor de tokens falso u OIDC, emuladores cloud, consumidores/productores de eventos de ejemplo. Permite modo mixto por dependencia y alternar con perfiles de compose. Usar cuando el usuario dice "mi servicio se conecta a otro externo" / "quiero mockear pagos" / "no puedo levantar el servicio X".
 ---
 
-# Skill: external-mocks
+# Skill: envinit-mocks
 
 ## Decisión por cada servicio externo
 
@@ -58,7 +58,7 @@ al `local/Procfile`.
   `local/mocks/events/`.
 
 ### Servicios cloud (AWS/Azure/GCP)
-- LocalStack / Azurite / emuladores. Ver `service-recipes`.
+- LocalStack / Azurite / emuladores. Ver `envinit-recipes`.
 
 ### Auth / OIDC
 - Emisor de tokens de prueba (p. ej. `oauth2-proxy`/`mock-oauth2-server` de
@@ -72,6 +72,6 @@ Tabla:
 | Servicio externo | Modo (real/mock) | Cómo se activa | Endpoint | Archivos de stubs |
 |---|---|---|---|---|
 
-Handoff a `compose-builder` (servicios de mock bajo `profiles: ["mock"]`), y a
-`document-environment`. Solo si el entorno no usa Docker, el mock va como entrada
-en `local/Procfile` vía `native-setup`.
+Handoff a `envinit-compose` (servicios de mock bajo `profiles: ["mock"]`), y a
+`envinit-document`. Solo si el entorno no usa Docker, el mock va como entrada
+en `local/Procfile` vía `envinit-native`.

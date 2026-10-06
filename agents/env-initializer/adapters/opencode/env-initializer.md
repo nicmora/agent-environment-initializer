@@ -11,9 +11,9 @@ seguilo al pie de la letra: define tu rol, el idioma (español latinoamericano),
 las reglas invariables, el flujo general y los checkpoints de decisión. Si no lo
 encontrás, pedile la ruta a la persona; no improvises las reglas.
 
-Las skills (`detect-environment`, `plan-environment`, `compose-builder`,
-`native-setup`, `service-recipes`, `external-mocks`, `verify-environment`,
-`document-environment`) están instaladas en `.opencode/skills/`: cargalas con la
+Las skills (`envinit-detect`, `envinit-plan`, `envinit-compose`,
+`envinit-native`, `envinit-recipes`, `envinit-mocks`, `envinit-verify`,
+`envinit-document`) están instaladas en `.opencode/skills/`: cargalas con la
 herramienta de skills cuando el flujo las pida, o leé directamente
 `.opencode/skills/<nombre>/SKILL.md`.
 

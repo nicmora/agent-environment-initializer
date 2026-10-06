@@ -382,21 +382,21 @@ Según las decisiones tomadas, algunos de los siguientes:
 
 - `agents/env-initializer/AGENT.md`: identidad, idioma, principios y criterios de enrutamiento hacia
   cada skill.
-- `skills/detect-environment/`: análisis del repositorio e informe de
+- `skills/envinit-detect/`: análisis del repositorio e informe de
   dependencias, para cualquier proyecto.
-- `skills/plan-environment/`: elección del medio de ejecución de la app y del
+- `skills/envinit-plan/`: elección del medio de ejecución de la app y del
   origen de cada dependencia (crear en Docker o usar un servicio existente).
-- `skills/compose-builder/`: materialización del camino Docker — generación y
+- `skills/envinit-compose/`: materialización del camino Docker — generación y
   actualización de definiciones de Compose y de sus *overrides* sin alterar lo
   existente.
-- `skills/native-setup/`: materialización del arranque nativo de la app —
+- `skills/envinit-native/`: materialización del arranque nativo de la app —
   scripts de arranque, archivo de versiones de runtime y `Procfile` local.
-- `skills/service-recipes/`: recetas de configuración de Compose por tipo de
+- `skills/envinit-recipes/`: recetas de configuración de Compose por tipo de
   servicio (PostgreSQL, Redis, Kafka, MinIO, entre otros).
-- `skills/external-mocks/`: decisión entre conexión real y simulación para
+- `skills/envinit-mocks/`: decisión entre conexión real y simulación para
   servicios de terceros.
-- `skills/verify-environment/`: comprobaciones de salud y arranque de prueba.
-- `skills/document-environment/`: generación y actualización de `ENVIRONMENT.md`.
+- `skills/envinit-verify/`: comprobaciones de salud y arranque de prueba.
+- `skills/envinit-document/`: generación y actualización de `ENVIRONMENT.md`.
 - `agents/env-initializer/adapters/`: el archivo de agente en el formato nativo de cada asistente
   (Claude Code, OpenCode), que solo agrega el frontmatter propio de la
   herramienta y remite a `AGENT.md`.

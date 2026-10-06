@@ -1,9 +1,9 @@
 ---
-name: service-recipes
+name: envinit-recipes
 description: Recetas de configuración por tipo de servicio de infraestructura (PostgreSQL, MySQL, MongoDB, Redis, RabbitMQ, Kafka, MinIO, Elasticsearch/OpenSearch, LocalStack, Keycloak, Mailpit). Define qué decide el agente solo, qué sigue preguntando y qué bloque de docker-compose + variables generar. Usar cuando hay que crear un servicio en Docker y se necesitan los detalles de configuración.
 ---
 
-# Skill: service-recipes
+# Skill: envinit-recipes
 
 Para cada servicio que **se crea en Docker**: **valores que el agente decide
 solo** (imagen, versión, memoria, puerto), **datos que sigue preguntando**
@@ -12,13 +12,13 @@ volumen persistente nombrado.
 
 Un servicio que se resolvió como **servicio existente** no usa estas recetas:
 solo se registran sus datos de conexión en `local/.env.local` (ver
-`plan-environment`). La "ficha de conexión" de abajo sí
+`envinit-plan`). La "ficha de conexión" de abajo sí
 aplica a los dos casos.
 
 ## Camino Docker
 
 > Los bloques de abajo muestran la forma del servicio. Al materializar,
-> `compose-builder` aplica sobre ellos: **imagen/tag por variable con default**
+> `envinit-compose` aplica sobre ellos: **imagen/tag por variable con default**
 > (`image: ${SVC_IMAGE:-repo:tag-alpine}`), **variante pequeña primero** (alpine →
 > slim → full, según lo que soporte la imagen) y **límites de recursos**
 > (`deploy.resources.limits` + `mem_limit`). Acá se escriben con el default ya
@@ -45,7 +45,7 @@ No preguntes imagen/variante, versión/tag, memoria ni puerto uno por uno — es
 frena el wizard con detalles técnicos que el agente puede resolver mejor que
 haciendo preguntas. Decidilos vos con el criterio de abajo (ver también "Lo que
 el agente decide solo" en `AGENT.md`) y déjalos, junto con una línea del porqué,
-en el **resumen final del plan** de `plan-environment`, donde recién ahí la
+en el **resumen final del plan** de `envinit-plan`, donde recién ahí la
 persona puede pedir cambiarlos.
 
 Lo que **sí** seguís preguntando de forma explícita para cada servicio nuevo
@@ -75,11 +75,11 @@ preferencia.
 3. **Presupuesto de memoria.** Usá el perfil por defecto de la receta (`xs`
    256m / `s` 512m / `m` 1g / `l` 2g según el tipo de servicio).
 4. **Puerto en el host.** Usá el puerto estándar del servicio. Si al levantar el
-   entorno resulta estar ocupado, `verify-environment` lo detecta y elige el
+   entorno resulta estar ocupado, `envinit-verify` lo detecta y elige el
    siguiente puerto libre.
 
 Con estos cuatro resueltos (más los nombres/credenciales que sí preguntaste)
-hacés el handoff a `compose-builder`.
+hacés el handoff a `envinit-compose`.
 
 ## Después de crear: ficha de conexión
 
@@ -109,7 +109,7 @@ postgres:
     timeout: 5s
     retries: 10
 ```
-`compose-builder` parametriza la imagen y la memoria al materializar
+`envinit-compose` parametriza la imagen y la memoria al materializar
 (`image: ${POSTGRES_IMAGE:-postgres:16-alpine}`, `mem_limit: ${POSTGRES_MEM:-512m}`)
 y documenta las alternativas en `local/.env.example`
 (`# POSTGRES_IMAGE=postgres:16-alpine (default) | 16-bookworm | 16`,
@@ -118,7 +118,7 @@ Vars: `DATABASE_URL=postgres://user:pass@postgres:5432/db`.
 
 > Nota: en los bloques, solo las credenciales quedan como `${VAR}` (salen de
 > `local/.env.local`); imagen, puerto y memoria van con el valor resuelto y los
-> parametriza `compose-builder`.
+> parametriza `envinit-compose`.
 
 ## MySQL / MariaDB
 Se pregunta: nombre de DB, usuario/clave de dev, root pass.

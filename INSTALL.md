@@ -34,14 +34,14 @@ Para Claude Code queda así (en OpenCode es igual, pero con `.opencode/`):
     ├── agents/
     │   └── env-initializer.md
     └── skills/
-        ├── compose-builder/SKILL.md
-        ├── detect-environment/SKILL.md
-        ├── document-environment/SKILL.md
-        ├── external-mocks/SKILL.md
-        ├── native-setup/SKILL.md
-        ├── plan-environment/SKILL.md
-        ├── service-recipes/SKILL.md
-        └── verify-environment/SKILL.md
+        ├── envinit-compose/SKILL.md
+        ├── envinit-detect/SKILL.md
+        ├── envinit-document/SKILL.md
+        ├── envinit-mocks/SKILL.md
+        ├── envinit-native/SKILL.md
+        ├── envinit-plan/SKILL.md
+        ├── envinit-recipes/SKILL.md
+        └── envinit-verify/SKILL.md
 ```
 
 Si tu proyecto ya tiene `.claude/skills/` u `.opencode/skills/` con otras
@@ -107,6 +107,13 @@ Cuando actualices este repo, volvé a copiar los mismos archivos encima de los
 anteriores. Los comandos de arriba sirven igual: sobrescriben los archivos del
 agente y no tocan nada más del proyecto.
 
+> **Si instalaste una versión anterior a los nombres con prefijo `envinit-`**
+> (`detect-environment`, `plan-environment`, `compose-builder`, `native-setup`,
+> `service-recipes`, `external-mocks`, `verify-environment`,
+> `document-environment`), borrá esas 8 carpetas de `.claude/skills/` u
+> `.opencode/skills/` antes de copiar. Si no, quedan duplicadas junto a las
+> nuevas.
+
 ## Desinstalar
 
 Borrá estos archivos y carpetas del proyecto (con `.opencode/` si usás
@@ -114,7 +121,8 @@ OpenCode):
 
 - `.claude/env-initializer/`
 - `.claude/agents/env-initializer.md`
-- las 8 carpetas del agente dentro de `.claude/skills/`
+- las carpetas `envinit-*` dentro de `.claude/skills/` (todas las skills del
+  agente llevan ese prefijo)
 
 La carpeta `local/` que generó el agente es tu entorno. Borrala solo si ya no
 la necesitás.

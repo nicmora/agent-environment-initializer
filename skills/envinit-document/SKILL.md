@@ -1,9 +1,9 @@
 ---
-name: document-environment
+name: envinit-document
 description: Genera o actualiza local/ENVIRONMENT.md — medio de ejecución de la app, inventario de servicios, origen de cada dependencia (creada en Docker / servicio existente / mock), variables de entorno, puertos, y procedimientos de arranque y apagado. Usar al cerrar cada sesión o cada vez que cambia algo del entorno.
 ---
 
-# Skill: document-environment
+# Skill: envinit-document
 
 ## Objetivo
 

@@ -1,12 +1,12 @@
 ---
-name: verify-environment
-description: Verifica que el entorno quedó operativo — valida la sintaxis del compose y los scripts de arranque, levanta los servicios en Docker, espera los healthchecks, detecta colisiones de puerto y propone alternativa, comprueba la conectividad a los servicios existentes, corre migraciones de esquema si el proyecto las tiene y el usuario lo aprueba, y confirma que la aplicación arranca y responde. Reporta qué quedó pendiente. Usar como paso final después de compose-builder o native-setup, o cuando el usuario dice "prueba si levanta" / "por qué no arranca".
+name: envinit-verify
+description: Verifica que el entorno quedó operativo — valida la sintaxis del compose y los scripts de arranque, levanta los servicios en Docker, espera los healthchecks, detecta colisiones de puerto y propone alternativa, comprueba la conectividad a los servicios existentes, corre migraciones de esquema si el proyecto las tiene y el usuario lo aprueba, y confirma que la aplicación arranca y responde. Reporta qué quedó pendiente. Usar como paso final después de envinit-compose o envinit-native, o cuando el usuario dice "prueba si levanta" / "por qué no arranca".
 ---
 
-# Skill: verify-environment
+# Skill: envinit-verify
 
 Usá el **comando del medio elegido**: el `docker compose … up` con sus `-f` (que
-arma `compose-builder`), el script `local/scripts/dev-up` (que arma `native-setup`),
+arma `envinit-compose`), el script `local/scripts/dev-up` (que arma `envinit-native`),
 o ambos en orden si el plan es mixto.
 
 ## Procedimiento

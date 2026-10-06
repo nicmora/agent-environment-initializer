@@ -69,18 +69,20 @@ agents/
       claude-code/env-initializer.md   Agente en formato Claude Code (remite a AGENT.md)
       opencode/env-initializer.md      Agente en formato OpenCode (remite a AGENT.md)
 skills/
-  detect-environment/SKILL.md     Escaneo del repo (cualquier proyecto)
-  plan-environment/SKILL.md       Medio de ejecución + origen de cada dependencia
-  compose-builder/SKILL.md        Materializar los servicios en Docker
-  native-setup/SKILL.md           Materializar el arranque nativo de la app (scripts, Procfile)
-  service-recipes/SKILL.md        Recetas de compose por servicio
-  external-mocks/SKILL.md         Conexión real vs. mock (servicios de terceros)
-  verify-environment/SKILL.md     Healthchecks, colisiones de puerto y arranque de prueba
-  document-environment/SKILL.md   Generación de ENVIRONMENT.md
+  envinit-detect/SKILL.md         Escaneo del repo (cualquier proyecto)
+  envinit-plan/SKILL.md           Medio de ejecución + origen de cada dependencia
+  envinit-compose/SKILL.md        Materializar los servicios en Docker
+  envinit-native/SKILL.md         Materializar el arranque nativo de la app (scripts, Procfile)
+  envinit-recipes/SKILL.md        Recetas de compose por servicio
+  envinit-mocks/SKILL.md          Conexión real vs. mock (servicios de terceros)
+  envinit-verify/SKILL.md         Healthchecks, colisiones de puerto y arranque de prueba
+  envinit-document/SKILL.md       Generación de ENVIRONMENT.md
 ```
 
 Cada agente vive en su propia carpeta dentro de `agents/`, junto con sus
-adaptadores; las skills están en `skills/` porque las comparten todos.
+adaptadores; las skills están en `skills/`. Todas llevan el prefijo `envinit-`
+para que se identifique a qué agente pertenecen cuando conviven con otras skills
+del proyecto.
 
 Las *skills* son **archivos Markdown con un procedimiento paso a paso**. Cada una
 lleva un frontmatter (`name`, `description`) que Claude Code y OpenCode usan para
@@ -123,14 +125,14 @@ resultado queda así (en OpenCode, igual pero con `.opencode/`):
     ├── agents/
     │   └── env-initializer.md
     └── skills/
-        ├── detect-environment/SKILL.md
-        ├── plan-environment/SKILL.md
-        ├── compose-builder/SKILL.md
-        ├── native-setup/SKILL.md
-        ├── service-recipes/SKILL.md
-        ├── external-mocks/SKILL.md
-        ├── verify-environment/SKILL.md
-        └── document-environment/SKILL.md
+        ├── envinit-detect/SKILL.md
+        ├── envinit-plan/SKILL.md
+        ├── envinit-compose/SKILL.md
+        ├── envinit-native/SKILL.md
+        ├── envinit-recipes/SKILL.md
+        ├── envinit-mocks/SKILL.md
+        ├── envinit-verify/SKILL.md
+        └── envinit-document/SKILL.md
 ```
 
 `AGENT.md` va dentro de una carpeta `env-initializer/` para que no se confunda
@@ -176,9 +178,9 @@ así que funciona con cualquier proveedor o gateway.
 El flujo es siempre el mismo, sin importar el estado del proyecto:
 
 ```
-detect-environment ─> plan-environment ──> service-recipes ─ external-mocks ─┐
-                                                                            ▼
-   resumen del plan + ajustes ─> compose-builder y/o native-setup ─> verify-environment ─> document-environment
+envinit-detect ─> envinit-plan ──> envinit-recipes ─ envinit-mocks ─┐
+                                                                    ▼
+   resumen del plan + ajustes ─> envinit-compose y/o envinit-native ─> envinit-verify ─> envinit-document
 ```
 
 Por cada dependencia elegís: **crearla en Docker** o **conectarte a un servicio

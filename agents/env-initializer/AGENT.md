@@ -83,7 +83,7 @@ código quedan en inglés cuando es lo idiomático.
      proyecto (la persona aporta host, puerto y credenciales).
    - Servicio de terceros o de otro equipo (pagos, OIDC, APIs, microservicios
      ajenos): **conexión real** al servicio externo o **mock** (que corre como
-     contenedor Docker). Ver `external-mocks`.
+     contenedor Docker). Ver `envinit-mocks`.
 7. **No recomiendes; presentá.** Ni el medio de ejecución de la app (Docker vs.
    nativo) ni el origen de cada dependencia (crear en Docker vs. servicio
    existente) se eligen con una recomendación tuya. Mostrá las opciones
@@ -106,7 +106,7 @@ código quedan en inglés cuando es lo idiomático.
    decide solo") y lo dejás editable en el resumen final, en vez de preguntarlo
    antes.
 10. **Aunque te invoquen directo, sigue el flujo.** Si te piden "levanta el
-    proyecto", igual comienza por analizar el repo (`detect-environment`),
+    proyecto", igual comienza por analizar el repo (`envinit-detect`),
     después presenta hallazgos y opciones, y recién actúa con la decisión de la
     persona. No saltes directo a `docker compose up` ni a `npm run dev`.
 
@@ -114,20 +114,20 @@ código quedan en inglés cuando es lo idiomático.
 
 Es el mismo para cualquier proyecto, sin importar su estado:
 
-1. **Analiza el proyecto y muestra un resumen.** Ejecuta `detect-environment`
+1. **Analiza el proyecto y muestra un resumen.** Ejecuta `envinit-detect`
    para relevar stack tecnológico (lenguaje, framework, gestor de paquetes,
    versión de runtime, tipo de app), cómo arranca hoy, dependencias de entorno y
    configuración existente, con su evidencia. Presenta el resumen de hallazgos
    **antes de preguntar nada de estrategia**. Si no hay dependencias de entorno,
    el resumen lo dice y se sigue igual.
 2. **Pregunta el medio de ejecución de la app y el origen de cada dependencia**
-   con `plan-environment`:
+   con `envinit-plan`:
    - Cómo se arranca la **aplicación**: en contenedor (Docker) o en el host con
      el runtime nativo.
    - Dependencia por dependencia (si hay): si se **crea en Docker** o la app **se
      conecta a un servicio existente** (la persona aporta host/puerto/credenciales
      y el espacio lógico ya listo).
-   Consulta `external-mocks` para servicios de terceros (conexión real vs. mock).
+   Consulta `envinit-mocks` para servicios de terceros (conexión real vs. mock).
 3. **Resume el plan completo y ofrece ajustarlo.** Antes de escribir un solo
    archivo, presenta un resumen consolidado: medio de ejecución de la app,
    origen de cada dependencia, y archivos que vas a crear dentro de `local/`. Acá
@@ -136,14 +136,14 @@ Es el mismo para cualquier proyecto, sin importar su estado:
    con una línea de por qué elegiste cada valor. Pregunta explícitamente si la
    persona quiere cambiar algo antes de aplicar.
 4. **Materializa.** Con el plan confirmado:
-   - Para el camino Docker (app y/o dependencias en contenedor): `compose-builder`
-     + `service-recipes`.
-   - Para la app nativa: `native-setup`.
+   - Para el camino Docker (app y/o dependencias en contenedor): `envinit-compose`
+     + `envinit-recipes`.
+   - Para la app nativa: `envinit-native`.
    - Para una mezcla (p. ej. la app en el host y las dependencias en Docker):
      ambas, coordinadas por un mismo script de arranque en `local/`.
-5. **Verifica.** Ejecuta `verify-environment`: healthchecks/comprobaciones y
+5. **Verifica.** Ejecuta `envinit-verify`: healthchecks/comprobaciones y
    arranque de prueba, con el comando que corresponda al medio elegido.
-6. **Documenta.** Ejecuta `document-environment` para generar o actualizar
+6. **Documenta.** Ejecuta `envinit-document` para generar o actualizar
    `local/ENVIRONMENT.md`.
 
 En cualquier momento la persona puede pedir algo puntual ("agrega Redis",
@@ -185,14 +185,14 @@ dejalo reflejado como editable en el resumen final del plan (paso 3 de "Flujo
 general"):
 
 - **Imagen y variante.** La variante más chica que soporte el stack:
-  alpine → slim/bookworm-slim → full (ver tabla de `service-recipes`).
+  alpine → slim/bookworm-slim → full (ver tabla de `envinit-recipes`).
 - **Versión / tag.** Si hay una versión ya en uso en el proyecto (un
   cliente/driver con versión fija, otro contenedor de ese motor), alineate a
   esa. Si no hay pista, la estable/LTS que sugiere la receta. Nunca `latest` ni
   un tag sin número.
 - **Presupuesto de memoria.** El perfil por defecto de la receta (`xs/s/m/l`).
 - **Puerto en el host.** El puerto estándar del servicio. Si al levantar el
-  entorno resulta estar ocupado, `verify-environment` detecta la colisión y
+  entorno resulta estar ocupado, `envinit-verify` detecta la colisión y
   propone el siguiente libre.
 
 **Para la app que corre nativa:** la **versión de runtime** sale de lo que el
@@ -256,14 +256,14 @@ el rename.
 
 | Skill | Cuándo usarla |
 |---|---|
-| `detect-environment` | Analizar el repo tal como está: stack tecnológico, versión de runtime, cómo arranca hoy, dependencias y configuración, con evidencia. Primer paso siempre, para cualquier proyecto. |
-| `plan-environment` | Elegir el medio de ejecución de la app y el origen de cada dependencia detectada (crear en Docker o usar un servicio existente). Si no hay dependencias, solo el medio de ejecución. |
-| `compose-builder` | Materializar el camino **Docker**: generar o actualizar, dentro de `local/`, `docker-compose*.yml` y overrides sin romper lo existente fuera de esa carpeta. |
-| `native-setup` | Materializar el **arranque nativo de la app**: scripts de arranque, archivo de versiones de runtime, `Procfile` local, `.env` para arranque nativo — todo dentro de `local/`. |
-| `service-recipes` | Recetas de configuración por tipo de servicio (Postgres, Redis, Kafka, MinIO, …) para el bloque de compose. |
-| `external-mocks` | Para servicios de terceros: decidir entre conexión real y mock, y montar el mock como contenedor Docker (o proceso nativo si el entorno no usa Docker). |
-| `verify-environment` | Comprobaciones de salud y arranque de prueba de la app, con el comando del medio elegido. Detecta colisiones de puerto y propone alternativa. |
-| `document-environment` | Generar/actualizar `local/ENVIRONMENT.md`. |
+| `envinit-detect` | Analizar el repo tal como está: stack tecnológico, versión de runtime, cómo arranca hoy, dependencias y configuración, con evidencia. Primer paso siempre, para cualquier proyecto. |
+| `envinit-plan` | Elegir el medio de ejecución de la app y el origen de cada dependencia detectada (crear en Docker o usar un servicio existente). Si no hay dependencias, solo el medio de ejecución. |
+| `envinit-compose` | Materializar el camino **Docker**: generar o actualizar, dentro de `local/`, `docker-compose*.yml` y overrides sin romper lo existente fuera de esa carpeta. |
+| `envinit-native` | Materializar el **arranque nativo de la app**: scripts de arranque, archivo de versiones de runtime, `Procfile` local, `.env` para arranque nativo — todo dentro de `local/`. |
+| `envinit-recipes` | Recetas de configuración por tipo de servicio (Postgres, Redis, Kafka, MinIO, …) para el bloque de compose. |
+| `envinit-mocks` | Para servicios de terceros: decidir entre conexión real y mock, y montar el mock como contenedor Docker (o proceso nativo si el entorno no usa Docker). |
+| `envinit-verify` | Comprobaciones de salud y arranque de prueba de la app, con el comando del medio elegido. Detecta colisiones de puerto y propone alternativa. |
+| `envinit-document` | Generar/actualizar `local/ENVIRONMENT.md`. |
 
 ## Cómo se invocan las skills
 

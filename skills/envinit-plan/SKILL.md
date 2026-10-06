@@ -1,13 +1,13 @@
 ---
-name: plan-environment
-description: A partir del informe de detect-environment, guía la elección del medio de ejecución de la app (contenedor Docker o runtime nativo en el host) y, para cada dependencia de entorno detectada, su origen — crear el servicio en Docker o conectar la app a un servicio existente fuera del proyecto (instalado en el SO, en la nube o de otro equipo), del que la persona aporta los datos de conexión. Para servicios de terceros deriva a external-mocks (conexión real vs. mock). Usar después de detect-environment, o cuando el usuario quiere decidir "cómo corro cada cosa".
+name: envinit-plan
+description: A partir del informe de envinit-detect, guía la elección del medio de ejecución de la app (contenedor Docker o runtime nativo en el host) y, para cada dependencia de entorno detectada, su origen — crear el servicio en Docker o conectar la app a un servicio existente fuera del proyecto (instalado en el SO, en la nube o de otro equipo), del que la persona aporta los datos de conexión. Para servicios de terceros deriva a envinit-mocks (conexión real vs. mock). Usar después de envinit-detect, o cuando el usuario quiere decidir "cómo corro cada cosa".
 ---
 
-# Skill: plan-environment
+# Skill: envinit-plan
 
 ## Requisitos previos
 
-Tener el resumen de `detect-environment` (stack, versión de runtime, cómo
+Tener el resumen de `envinit-detect` (stack, versión de runtime, cómo
 arranca hoy, dependencias detectadas, configuración) ya mostrado a la persona.
 Esta skill trabaja sobre lo que se detectó del proyecto, sea cual sea su estado
 — con muchas dependencias, con una, o con ninguna. **No hay un cuestionario de
@@ -37,17 +37,17 @@ Antes de recorrer las dependencias, preguntá cómo se quiere levantar la
   directo; depende de tener la versión de runtime correcta instalada. Se
   materializa con scripts en `local/` y, si el proyecto tiene varios procesos, un
   `local/Procfile`. La versión de runtime que pide el proyecto (de
-  `detect-environment`) queda anotada como prerrequisito; el agente no instala
+  `envinit-detect`) queda anotada como prerrequisito; el agente no instala
   runtimes.
 
 El comando concreto (`npm run dev`, `./gradlew bootRun`, …) sale de
-`detect-environment`; confirmalo. Esta decisión define si más adelante hace falta
+`envinit-detect`; confirmalo. Esta decisión define si más adelante hace falta
 un `Dockerfile` de desarrollo o un archivo de versiones de runtime.
 
-Si `detect-environment` **no encontró ninguna dependencia de entorno**, esta es
+Si `envinit-detect` **no encontró ninguna dependencia de entorno**, esta es
 la única decisión: elegido el medio, pasás directo al resumen final del plan y de
-ahí a materializar (`compose-builder` si la app va en Docker, `native-setup` si
-va nativa) y `document-environment`.
+ahí a materializar (`envinit-compose` si la app va en Docker, `envinit-native` si
+va nativa) y `envinit-document`.
 
 ### 1. Origen de cada dependencia
 
@@ -64,11 +64,11 @@ storage, búsqueda), presentá dos opciones:
 1. **Crear en Docker.** Se agrega un servicio nuevo a `local/docker-compose.yml`
    (o a `local/docker-compose.override.yml` / `local/docker-compose.dev.yml` si el
    repo ya tiene un compose propio fuera de `local/` — nunca al compose existente).
-   El agente elige imagen, versión, memoria y puerto (ver `service-recipes`); vos
+   El agente elige imagen, versión, memoria y puerto (ver `envinit-recipes`); vos
    solo preguntás los nombres de espacio lógico y credenciales de dev (nombre de
    DB/schema/bucket/vhost, usuario y contraseña, y nombre de
-   contenedor/volumen/red si hay preferencia). Deriva a `compose-builder` +
-   `service-recipes`.
+   contenedor/volumen/red si hay preferencia). Deriva a `envinit-compose` +
+   `envinit-recipes`.
 2. **Usar un servicio existente.** La app se conecta a un servicio que ya corre
    fuera del proyecto: instalado en el sistema operativo (`localhost:<puerto>`),
    en la nube o infraestructura de otro equipo. Pedí host, puerto, credenciales y
@@ -78,13 +78,13 @@ storage, búsqueda), presentá dos opciones:
    conectividad de red. No hace falta agregar ningún servicio al compose.
 
 Para cada **servicio de terceros o de otro equipo** (pagos, OIDC, APIs,
-microservicios ajenos) → deriva a `external-mocks`: conexión real al servicio
+microservicios ajenos) → deriva a `envinit-mocks`: conexión real al servicio
 externo vs. mock (que corre como contenedor Docker bajo `--profile mock`).
 
 ## Manejo de conflictos (no destructivo)
 
 - **Puerto de un servicio creado en Docker ocupado** → el agente usa el puerto
-  estándar; si al levantar el entorno `verify-environment` detecta la colisión,
+  estándar; si al levantar el entorno `envinit-verify` detecta la colisión,
   ahí propone el siguiente libre y ajusta la variable. Nunca mates el proceso
   que lo usa sin permiso explícito.
 - **Nombre de contenedor/volumen/red en uso** → usá un nombre nuevo con prefijo
@@ -118,5 +118,5 @@ variante, tag, memoria y puerto), con una línea de por qué, más la lista de
 archivos que se van a crear en `local/` (compose y/o scripts, `Procfile`, `.nvmrc`
 o equivalente, `.env.example`, `.env.local`, `Dockerfile.dev`, mocks,
 `ENVIRONMENT.md`). Preguntá explícitamente si hay algo para cambiar. Solo con el
-plan confirmado, hacé el handoff a `compose-builder` y/o `native-setup`, y a
-`document-environment`.
+plan confirmado, hacé el handoff a `envinit-compose` y/o `envinit-native`, y a
+`envinit-document`.

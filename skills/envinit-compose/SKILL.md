@@ -1,13 +1,13 @@
 ---
-name: compose-builder
+name: envinit-compose
 description: Genera o actualiza archivos docker-compose (base, override o dev) y los .env asociados a partir de las decisiones del wizard, sin reescribir ni romper la infraestructura existente. Maneja redes, volúmenes, perfiles (--profile), depends_on con healthchecks y mapeo de puertos evitando colisiones. Usar cuando ya está decidida la estrategia por dependencia y hay que "crear los archivos" / "armar el compose".
 ---
 
-# Skill: compose-builder
+# Skill: envinit-compose
 
 Esta skill materializa el **camino Docker**: los servicios de infra que se crean
 en Docker, los mocks, y la app si corre en contenedor. Si la app corre **nativa**
-(runtime en el host), esa parte la maneja `native-setup`; cuando el plan es mixto
+(runtime en el host), esa parte la maneja `envinit-native`; cuando el plan es mixto
 (app nativa + dependencias en Docker), las dos skills generan sus artefactos en
 `local/` y un mismo script de arranque en `local/scripts/` los orquesta.
 
@@ -17,8 +17,8 @@ servicio en el compose: solo variables en `local/.env.local`.
 ## Entrada
 
 El **plan ya confirmado** (con la persona habiendo tenido la oportunidad de
-cambiar algo, ver "Resumen final" en `plan-environment`): la tabla de decisiones
-y las recetas de `service-recipes`. No materialices nada si ese resumen final
+cambiar algo, ver "Resumen final" en `envinit-plan`): la tabla de decisiones
+y las recetas de `envinit-recipes`. No materialices nada si ese resumen final
 todavía no se mostró y confirmó.
 
 ## Todo vive en `local/`
@@ -52,7 +52,7 @@ reglas invariables de `AGENT.md`: personal, no versionada.
    `ports`, `depends_on` con `condition: service_healthy`, `develop.watch` o
    bind mounts para hot reload.
 2. **Servicios de infra creados en Docker.** Toma la definición de
-   `service-recipes` (imagen+versión, env, volumen nombrado, healthcheck).
+   `envinit-recipes` (imagen+versión, env, volumen nombrado, healthcheck).
    Ponlos bajo un `profiles: ["infra"]` si la persona quiere poder omitirlos.
    Parametriza imagen/tag y límites de recursos (ver secciones siguientes).
 3. **Conexión a un servicio existente.** No agregues servicio al compose; solo
@@ -62,10 +62,10 @@ reglas invariables de `AGENT.md`: personal, no versionada.
    `host.docker.internal` (agrega `extra_hosts: ["host.docker.internal:host-gateway"]`
    en Linux); si es un host remoto, va tal cual.
 4. **Mocks.** Agrega los servicios de mock bajo `profiles: ["mock"]` (ver
-   `external-mocks`).
+   `envinit-mocks`).
 5. **Puertos.** Usa el puerto estándar de cada servicio (lo fijó
-   `service-recipes`). No hay lista previa de ocupados: si al levantar el entorno
-   hay colisión, `verify-environment` la detecta y propone el siguiente libre,
+   `envinit-recipes`). No hay lista previa de ocupados: si al levantar el entorno
+   hay colisión, `envinit-verify` la detecta y propone el siguiente libre,
    que se refleja en `.env.example`/`.env.local`.
 6. **Redes y volúmenes.** Nombres con prefijo del proyecto. Nunca reutilices el
    nombre de un volumen existente con datos.
@@ -111,7 +111,7 @@ services:
 ```
 
 Presupuestos por tipo — el agente elige el perfil, no lo pregunta (ver
-`service-recipes`):
+`envinit-recipes`):
 
 | Perfil | Límite mem | Uso |
 |---|---|---|
@@ -127,7 +127,7 @@ Presupuestos por tipo — el agente elige el perfil, no lo pregunta (ver
 - Si la persona no quiere límites, déjalos comentados con una nota, no los
   borres.
 - La imagen/variante, la versión/tag, el perfil de memoria y el puerto ya
-  vienen decididos por el agente cuando llegás a esta skill (`service-recipes`
+  vienen decididos por el agente cuando llegás a esta skill (`envinit-recipes`
   los resolvió con su criterio automático y los mostró en el resumen final). No
   hace falta volver a preguntarlos acá; si la persona pidió cambiar alguno en
   ese resumen, materializa con el valor que confirmó.
@@ -186,16 +186,16 @@ O los targets equivalentes en `local/Makefile` / `local/Taskfile.yml`.
 **Plan mixto (app nativa + dependencias en Docker):** el script de
 `local/scripts/dev-up` hace las dos cosas en orden — primero levanta la infra en
 contenedor (`docker compose … --profile infra up -d`), después delega en el
-arranque nativo de la app de `native-setup` (fijar runtime, `foreman`/`overmind`
+arranque nativo de la app de `envinit-native` (fijar runtime, `foreman`/`overmind`
 sobre `local/Procfile`, o el comando directo). Coordiná los nombres con
-`native-setup` para no duplicar.
+`envinit-native` para no duplicar.
 
 ## Salida
 
 Lista de archivos creados/modificados dentro de `local/` (y la línea
 agregada a `.gitignore`), y el comando de arranque completo con sus `-f`.
-Si el plan es mixto, hacé también el handoff a `native-setup` antes de
-`verify-environment`; si es solo Docker, handoff directo a `verify-environment`.
+Si el plan es mixto, hacé también el handoff a `envinit-native` antes de
+`envinit-verify`; si es solo Docker, handoff directo a `envinit-verify`.
 
 ## Renombrar valores
 
@@ -203,5 +203,5 @@ Si la persona pide cambiar un nombre (DB, schema, usuario, volumen, contenedor,
 red, base de Redis, vhost, bucket, prefijo de topics, puerto host), aplica el
 cambio **en todos los archivos a la vez**: compose/override, `.env.local`,
 `.env.example`, scripts y `ENVIRONMENT.md` (todos dentro de `local/`; deriva
-a `document-environment`). Muestra el diff completo. Si el recurso viejo ya se
+a `envinit-document`). Muestra el diff completo. Si el recurso viejo ya se
 había creado, no lo borres sin permiso: acláralo entre los pendientes.
