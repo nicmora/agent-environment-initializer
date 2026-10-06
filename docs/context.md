@@ -390,24 +390,24 @@ Según las decisiones tomadas, algunos de los siguientes:
 > La organización definitiva se establecerá durante la implementación; lo
 > siguiente expresa la intención de diseño.
 
-- `agents/envinit/AGENT.md`: identidad, idioma, principios y criterios de enrutamiento hacia
+- `agent/AGENT.md`: identidad, idioma, principios y criterios de enrutamiento hacia
   cada skill.
-- `skills/envinit-detect/`: análisis del repositorio e informe de
+- `agent/skills/envinit-detect/`: análisis del repositorio e informe de
   dependencias, para cualquier proyecto.
-- `skills/envinit-plan/`: elección del medio de ejecución de la app y del
+- `agent/skills/envinit-plan/`: elección del medio de ejecución de la app y del
   origen de cada dependencia (crear en Docker o usar un servicio existente).
-- `skills/envinit-compose/`: materialización del camino Docker — generación y
+- `agent/skills/envinit-compose/`: materialización del camino Docker — generación y
   actualización de definiciones de Compose y de sus *overrides* sin alterar lo
   existente.
-- `skills/envinit-native/`: materialización del arranque nativo de la app —
+- `agent/skills/envinit-native/`: materialización del arranque nativo de la app —
   scripts de arranque, archivo de versiones de runtime y `Procfile` local.
-- `skills/envinit-recipes/`: recetas de configuración de Compose por tipo de
+- `agent/skills/envinit-recipes/`: recetas de configuración de Compose por tipo de
   servicio (PostgreSQL, Redis, Kafka, MinIO, entre otros).
-- `skills/envinit-mocks/`: decisión entre conexión real y simulación para
+- `agent/skills/envinit-mocks/`: decisión entre conexión real y simulación para
   servicios de terceros.
-- `skills/envinit-verify/`: comprobaciones de salud y arranque de prueba.
-- `skills/envinit-document/`: generación y actualización de `ENVIRONMENT.md`.
-- `agents/envinit/adapters/`: el archivo de agente en el formato nativo de cada asistente
+- `agent/skills/envinit-verify/`: comprobaciones de salud y arranque de prueba.
+- `agent/skills/envinit-document/`: generación y actualización de `ENVIRONMENT.md`.
+- `agent/adapters/`: el archivo de agente en el formato nativo de cada asistente
   (Claude Code, OpenCode), que solo agrega el frontmatter propio de la
   herramienta y remite a `AGENT.md`.
 

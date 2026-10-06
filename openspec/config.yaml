@@ -1,5 +1,20 @@
 schema: spec-driven
 
+context: |
+  Este repo construye el agente envinit: un wizard conversacional, agnóstico al
+  modelo, que ayuda a levantar cualquier aplicación con sus dependencias en un
+  entorno local (Docker o runtime nativo). El agente se instala en otros
+  proyectos para Claude Code u OpenCode.
+  Layout: agent/ es el producto (AGENT.md, adapters/, skills/envinit-*);
+  scripts/ instala agent/ en un proyecto (install.sh para bash 3.2+,
+  install.ps1 para Windows PowerShell 5.1+); docs/ tiene la documentación de uso
+  y docs/context.md las decisiones de diseño. .claude/ y .opencode/ de este repo
+  son tooling de desarrollo, no el agente.
+  El "código" del agente es Markdown: instrucciones, no programas. Las rutas
+  dentro de agent/ se escriben como rutas instaladas (.claude/... u
+  .opencode/...).
+  Idioma: español neutro, lenguaje simple. Commits convencionales en español.
+
 # Project context (optional)
 # This is shown to AI when creating artifacts.
 # Add your tech stack, conventions, style guides, domain knowledge, etc.

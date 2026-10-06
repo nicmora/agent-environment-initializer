@@ -1,28 +1,48 @@
 # Instalación en un proyecto
 
-Esta guía explica cómo agregar el agente `envinit` a un proyecto. Para
-saber qué hace el agente y cómo usarlo, mira el [README](README.md).
+Esta guía explica cómo agregar el agente `envinit` a un proyecto. Para saber
+qué hace el agente y cómo usarlo, mira el [README](../README.md).
 
-El agente se instala **copiando archivos a mano** en cada proyecto donde lo
-quieras usar. No hace falta instalar nada más. Copiá solo los archivos de la
-herramienta que vayas a usar: Claude Code u OpenCode.
+El agente se instala con un script incluido en este repo. No hace falta instalar
+nada más: solo tener este repo clonado o descargado. Se instala para una
+herramienta a la vez: **Claude Code** u **OpenCode**.
 
-## Qué se copia y adónde
+## Instalar
 
-Las rutas de destino son relativas a la **raíz de tu proyecto**.
+Abre una terminal en la carpeta de este repo y ejecuta el script de tu sistema.
+Reemplaza la ruta por la raíz del proyecto donde quieres usar el agente.
 
-| Desde este repo | Claude Code | OpenCode |
+### Windows (PowerShell)
+
+```powershell
+.\scripts\install.ps1 -Tool claude -Target C:\ruta\a\tu-proyecto
+```
+
+Si Windows no te deja ejecutar el script por la política de ejecución, usa:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\install.ps1 -Tool claude -Target C:\ruta\a\tu-proyecto
+```
+
+### macOS / Linux / Git Bash
+
+```bash
+bash scripts/install.sh --tool claude --target ~/ruta/a/tu-proyecto
+```
+
+### Opciones
+
+| PowerShell | Bash | Qué hace |
 |---|---|---|
-| `agents/envinit/AGENT.md` | `.claude/envinit/AGENT.md` | `.opencode/envinit/AGENT.md` |
-| todas las carpetas de `skills/` | `.claude/skills/` | `.opencode/skills/` |
-| `agents/envinit/adapters/<herramienta>/envinit.md` | `.claude/agents/envinit.md` | `.opencode/agents/envinit.md` |
+| `-Tool claude` / `-Tool opencode` | `--tool claude` / `--tool opencode` | Herramienta donde se instala. Si no la indicas, el script te la pregunta. |
+| `-Target <ruta>` | `--target <ruta>` | Raíz del proyecto. Tiene que existir. |
+| `-Uninstall` | `--uninstall` | Quita el agente en lugar de instalarlo. |
+| `Get-Help .\scripts\install.ps1` | `--help` | Muestra la ayuda. |
 
-> **Importante:** no copies la carpeta `agents/` entera a `.claude/agents/` u
-> `.opencode/agents/`. Ahí va **solo** el `.md` del adaptador de tu herramienta.
-> Las dos herramientas tratan cada `.md` de esa carpeta como un agente, por eso
-> `AGENT.md` va en su propia carpeta `envinit/`.
+Si usas las dos herramientas en el mismo proyecto, ejecuta el script dos veces,
+una con `claude` y otra con `opencode`.
 
-## Resultado esperado
+## Qué instala
 
 Para Claude Code queda así (en OpenCode es igual, pero con `.opencode/`):
 
@@ -30,9 +50,9 @@ Para Claude Code queda así (en OpenCode es igual, pero con `.opencode/`):
 <tu-proyecto>/
 └── .claude/
     ├── envinit/
-    │   └── AGENT.md
+    │   └── AGENT.md            ← reglas y flujo del agente
     ├── agents/
-    │   └── envinit.md
+    │   └── envinit.md          ← el agente, en el formato de la herramienta
     └── skills/
         ├── envinit-compose/SKILL.md
         ├── envinit-detect/SKILL.md
@@ -44,88 +64,53 @@ Para Claude Code queda así (en OpenCode es igual, pero con `.opencode/`):
         └── envinit-verify/SKILL.md
 ```
 
-Si tu proyecto ya tiene `.claude/skills/` u `.opencode/skills/` con otras
-skills, no pasa nada: las del agente se suman a las que ya están.
-
-## Copiar con la terminal
-
-Puedes copiar con el explorador de archivos o con estos comandos. En todos los
-casos, reemplaza las dos rutas del principio:
-
-- `REPO`: dónde clonaste este repo.
-- `PROYECTO`: la raíz del proyecto donde lo instalas.
-
-Para OpenCode, cambiá `.claude` por `.opencode` y `claude-code` por `opencode`.
-
-### Windows (PowerShell)
-
-```powershell
-$REPO = "C:\ruta\a\agent-environment-initializer"
-$PROYECTO = "C:\ruta\a\tu-proyecto"
-
-New-Item -ItemType Directory -Force "$PROYECTO\.claude\envinit", "$PROYECTO\.claude\agents", "$PROYECTO\.claude\skills" | Out-Null
-Copy-Item "$REPO\agents\envinit\AGENT.md" "$PROYECTO\.claude\envinit\"
-Copy-Item "$REPO\agents\envinit\adapters\claude-code\envinit.md" "$PROYECTO\.claude\agents\"
-Copy-Item "$REPO\skills\*" "$PROYECTO\.claude\skills\" -Recurse -Force
-```
-
-### macOS / Linux / Git Bash
-
-```bash
-REPO=~/ruta/a/agent-environment-initializer
-PROYECTO=~/ruta/a/tu-proyecto
-
-mkdir -p "$PROYECTO/.claude/envinit" "$PROYECTO/.claude/agents" "$PROYECTO/.claude/skills"
-cp "$REPO/agents/envinit/AGENT.md" "$PROYECTO/.claude/envinit/"
-cp "$REPO/agents/envinit/adapters/claude-code/envinit.md" "$PROYECTO/.claude/agents/"
-cp -R "$REPO/skills/." "$PROYECTO/.claude/skills/"
-```
+El script **solo toca archivos del agente**: `envinit/`, `agents/envinit.md` y
+las carpetas `envinit-*`. Si tu proyecto ya tiene otras skills u otros agentes,
+quedan como estaban. La carpeta `local/` que genera el agente tampoco se toca.
 
 ## Comprobar la instalación
 
-**Claude Code:** abre Claude Code en la raíz del proyecto y escribe
-`@envinit`. Si aparece en el autocompletado, quedó instalado.
+**Claude Code:** abre Claude Code en la raíz del proyecto y escribe `@envinit`.
+Si aparece en el autocompletado, quedó instalado.
 
-**OpenCode:** abre `opencode` en la raíz del proyecto y presiona **Tab** hasta que
-aparezca el agente `envinit`.
+**OpenCode:** abre `opencode` en la raíz del proyecto y presiona **Tab** hasta
+que aparezca el agente `envinit`.
 
 > En versiones viejas de OpenCode las carpetas tienen nombres en singular
 > (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, renómbralas.
 
+## Actualizar
+
+Actualiza este repo y vuelve a ejecutar el mismo comando de instalación. El
+script reemplaza los archivos del agente por los de la versión nueva y quita las
+skills que ya no existan.
+
+Si tenías instalada la versión anterior, cuando el agente se llamaba
+`env-initializer`, el script también borra esos archivos viejos y te muestra
+cuáles quitó.
+
+## Desinstalar
+
+Ejecuta el mismo comando con la opción de desinstalar:
+
+```powershell
+.\scripts\install.ps1 -Tool claude -Target C:\ruta\a\tu-proyecto -Uninstall
+```
+
+```bash
+bash scripts/install.sh --tool claude --target ~/ruta/a/tu-proyecto --uninstall
+```
+
+La carpeta `local/` que generó el agente es tu entorno y el script no la borra.
+Bórrala a mano solo si ya no la necesitas.
+
 ## Otros asistentes (ChatGPT, Gemini, Cursor, etc.)
 
-1. Copiá `agents/envinit/AGENT.md` y la carpeta `skills/` a una carpeta
-   del proyecto.
+Para estos asistentes no hay script: se instala a mano.
+
+1. Copia `agent/AGENT.md` y la carpeta `agent/skills/` a una carpeta del
+   proyecto.
 2. Pega el contenido de `AGENT.md` como *system prompt* o como instrucciones del
    proyecto.
 3. Si el asistente no puede leer archivos, pega también el contenido de cada
    skill (`skills/<nombre>/SKILL.md`) cuando el flujo la pida.
-
-## Actualizar
-
-Cuando actualices este repo, vuelve a copiar los mismos archivos encima de los
-anteriores. Los comandos de arriba sirven igual: sobrescriben los archivos del
-agente y no tocan nada más del proyecto.
-
-> **Si instalaste una versión anterior, cuando el agente se llamaba
-> `env-initializer`**, borra primero lo viejo (con `.opencode/` si usas
-> OpenCode). Si no, queda duplicado junto a lo nuevo:
->
-> - `.claude/env-initializer/`
-> - `.claude/agents/env-initializer.md`
-> - las carpetas `detect-environment`, `plan-environment`, `compose-builder`,
->   `native-setup`, `service-recipes`, `external-mocks`, `verify-environment` y
->   `document-environment` dentro de `.claude/skills/`
-
-## Desinstalar
-
-Borra estos archivos y carpetas del proyecto (con `.opencode/` si usas
-OpenCode):
-
-- `.claude/envinit/`
-- `.claude/agents/envinit.md`
-- las carpetas `envinit-*` dentro de `.claude/skills/` (todas las skills del
-  agente llevan ese prefijo)
-
-La carpeta `local/` que generó el agente es tu entorno. Bórrala solo si ya no
-la necesitas.

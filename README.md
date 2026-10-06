@@ -61,38 +61,44 @@ pidas ("muéstrame el detalle", "muéstrame el archivo").
   proyecto, que se agrega a `.gitignore`: es tu entorno personal, no se commitea
   ni se comparte con el equipo por git.
 
-Contexto y decisiones de diseño completos: [`context.md`](context.md).
+Contexto y decisiones de diseño completos: [`docs/context.md`](docs/context.md).
 
 ## Estructura del repo
 
-```
-context.md                        Documento de contexto (el "por qué" y el "qué")
-agents/
-  envinit/
-    AGENT.md                      Identidad y reglas del agente (fuente de verdad, agnóstica)
-    adapters/
-      claude-code/envinit.md      Agente en formato Claude Code (remite a AGENT.md)
-      opencode/envinit.md         Agente en formato OpenCode (remite a AGENT.md)
-skills/
-  envinit-detect/SKILL.md         Escaneo del repo (cualquier proyecto)
-  envinit-plan/SKILL.md           Medio de ejecución + origen de cada dependencia
-  envinit-compose/SKILL.md        Materializar los servicios en Docker
-  envinit-native/SKILL.md         Materializar el arranque nativo de la app (scripts, Procfile)
-  envinit-recipes/SKILL.md        Recetas de compose por servicio
-  envinit-mocks/SKILL.md          Conexión real vs. mock (servicios de terceros)
-  envinit-verify/SKILL.md         Healthchecks, colisiones de puerto y arranque de prueba
-  envinit-document/SKILL.md       Generación de ENVIRONMENT.md
-```
+Este repo **construye** el agente. Lo que se instala en tus proyectos está solo
+en `agent/`; el resto sirve para instalarlo, documentarlo y evolucionarlo.
 
-Cada agente vive en su propia carpeta dentro de `agents/`, junto con sus
-adaptadores; las skills están en `skills/`. Todas llevan el prefijo `envinit-`
-para que se identifique a qué agente pertenecen cuando conviven con otras skills
-del proyecto.
+```
+agent/                            EL AGENTE (lo único que se instala)
+  AGENT.md                        Identidad, reglas y flujo (fuente de verdad, agnóstica)
+  adapters/
+    claude-code/envinit.md        Agente en formato Claude Code (remite a AGENT.md)
+    opencode/envinit.md           Agente en formato OpenCode (remite a AGENT.md)
+  skills/
+    envinit-detect/SKILL.md       Escaneo del repo (cualquier proyecto)
+    envinit-plan/SKILL.md         Medio de ejecución + origen de cada dependencia
+    envinit-compose/SKILL.md      Materializar los servicios en Docker
+    envinit-native/SKILL.md       Materializar el arranque nativo de la app (scripts, Procfile)
+    envinit-recipes/SKILL.md      Recetas de compose por servicio
+    envinit-mocks/SKILL.md        Conexión real vs. mock (servicios de terceros)
+    envinit-verify/SKILL.md       Healthchecks, colisiones de puerto y arranque de prueba
+    envinit-document/SKILL.md     Generación de ENVIRONMENT.md
+scripts/
+  install.ps1                     Instalar / actualizar / desinstalar (Windows)
+  install.sh                      Instalar / actualizar / desinstalar (macOS, Linux, Git Bash)
+docs/
+  INSTALL.md                      Guía de instalación
+  context.md                      Documento de contexto (el "por qué" y el "qué")
+openspec/                         Specs y cambios con los que se evoluciona el agente
+AGENTS.md, CLAUDE.md              Guía para Claude / OpenCode al desarrollar en este repo
+.claude/, .opencode/              Tooling de desarrollo (OpenSpec), no es el agente
+```
 
 Las *skills* son **archivos Markdown con un procedimiento paso a paso**. Cada una
 lleva un frontmatter (`name`, `description`) que Claude Code y OpenCode usan para
 activarlas solas; para otros asistentes, el agente simplemente **lee el archivo**
-cuando lo necesita.
+cuando lo necesita. Todas llevan el prefijo `envinit-` para que se identifique a
+qué agente pertenecen cuando conviven con otras skills del proyecto.
 
 `AGENT.md` es la única fuente de verdad de las reglas y el flujo. Los archivos de
 `adapters/` son solo una "cáscara" con el frontmatter que pide cada herramienta y
@@ -100,54 +106,24 @@ la instrucción de leer `AGENT.md`, así las reglas no se duplican.
 
 ## Cómo lo uso en otros proyectos
 
-> Guía de instalación paso a paso, con comandos para copiar desde la terminal:
-> [`INSTALL.md`](INSTALL.md).
+El agente se instala con un script, una vez por proyecto y por herramienta.
+Desde la carpeta de este repo:
 
-El agente se **copia a mano en cada proyecto** donde lo quieras usar, dentro de
-la carpeta de la herramienta: `.claude/` para Claude Code u `.opencode/` para
-OpenCode. Copiá solo la de la herramienta que vayas a usar. Puedes hacerlo con el
-explorador de archivos o con la terminal de tu sistema operativo.
-
-### Qué se copia y adónde
-
-| Desde este repo | Claude Code | OpenCode |
-|---|---|---|
-| `agents/envinit/AGENT.md` | `.claude/envinit/AGENT.md` | `.opencode/envinit/AGENT.md` |
-| el contenido de `skills/` (las 8 carpetas) | `.claude/skills/` | `.opencode/skills/` |
-| `agents/envinit/adapters/<herramienta>/envinit.md` | `.claude/agents/envinit.md` | `.opencode/agents/envinit.md` |
-
-No copies la carpeta `agents/` entera a `.claude/agents/` u `.opencode/agents/`:
-ahí va **solo** el `.md` del adaptador de tu herramienta.
-
-Todas las rutas de destino son relativas a la **raíz del proyecto**. El
-resultado queda así (en OpenCode, igual pero con `.opencode/`):
-
-```
-<tu-proyecto>/
-└── .claude/
-    ├── envinit/
-    │   └── AGENT.md                ← reglas y flujo del agente
-    ├── agents/
-    │   └── envinit.md
-    └── skills/
-        ├── envinit-detect/SKILL.md
-        ├── envinit-plan/SKILL.md
-        ├── envinit-compose/SKILL.md
-        ├── envinit-native/SKILL.md
-        ├── envinit-recipes/SKILL.md
-        ├── envinit-mocks/SKILL.md
-        ├── envinit-verify/SKILL.md
-        └── envinit-document/SKILL.md
+```powershell
+# Windows
+.\scripts\install.ps1 -Tool claude -Target C:\ruta\a\tu-proyecto
 ```
 
-`AGENT.md` va dentro de una carpeta `envinit/` para que no se confunda
-con archivos de otros agentes que tenga el proyecto. No lo pongas dentro de
-`agents/`: las dos herramientas tratan cada `.md` de esa carpeta como un agente.
+```bash
+# macOS / Linux / Git Bash
+bash scripts/install.sh --tool claude --target ~/ruta/a/tu-proyecto
+```
 
-Si después actualizas este repo, vuelve a copiar los mismos archivos encima. Si
-tienes instalada una versión anterior (cuando el agente se llamaba
-`env-initializer`), primero borra los archivos viejos: el detalle está en
-[INSTALL.md › Actualizar](INSTALL.md#actualizar).
+Usa `opencode` en lugar de `claude` si trabajas con OpenCode. El script copia el
+agente a `.claude/` u `.opencode/` del proyecto, no toca nada más y también sirve
+para actualizar (vuelve a ejecutarlo) o desinstalar. Todas las opciones, qué
+queda instalado y cómo usarlo con otros asistentes están en
+[`docs/INSTALL.md`](docs/INSTALL.md).
 
 ### Claude Code
 
@@ -169,16 +145,16 @@ así que funciona con cualquier proveedor o gateway.
 2. Presiona **Tab** hasta que aparezca el agente `envinit`.
 3. Pídele lo que necesitas: *"quiero levantar este proyecto localmente"*.
 
-> En versiones viejas de OpenCode las carpetas tienen nombres en singular
-> (`.opencode/agent/`, `.opencode/skill/`). Si el agente no aparece, renómbralas.
-
 ### Otros asistentes (GPT / ChatGPT / Gemini / Cursor)
 
-1. Copiá `agents/envinit/AGENT.md` y `skills/` a una carpeta del proyecto.
-2. Pega el contenido de `AGENT.md` como *system prompt* / instrucciones del
-   proyecto.
-3. Si el asistente no puede leer archivos, pega también el contenido de las
-   skills (`skills/<nombre>/SKILL.md`) a medida que el flujo las pida.
+No hay script: se copia a mano `agent/AGENT.md` y `agent/skills/`. Los pasos
+están en [`docs/INSTALL.md`](docs/INSTALL.md#otros-asistentes-chatgpt-gemini-cursor-etc).
+
+## Cómo evolucionar el agente
+
+Los cambios al agente se trabajan con [OpenSpec](openspec/), asistidos por
+Claude Code u OpenCode (`/opsx:explore`, `/opsx:propose`, `/opsx:apply`,
+`/opsx:archive`). Antes de empezar, lee [`AGENTS.md`](AGENTS.md).
 
 ## Cómo empieza una sesión
 
