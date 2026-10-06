@@ -1,22 +1,4 @@
-# agent-installation Specification
-
-## Purpose
-
-Define cómo se instala, actualiza y desinstala el agente `envinit` en un
-proyecto destino mediante scripts, para Claude Code u OpenCode, sin tocar nada
-del proyecto que no pertenezca al agente.
-
-## Requirements
-
-### Requirement: Scripts de instalación equivalentes por plataforma
-El repositorio SHALL proveer un script de instalación para Windows (PowerShell)
-y otro para macOS, Linux y Git Bash. Los dos MUST aceptar las mismas opciones y
-producir el mismo resultado en el proyecto destino.
-
-#### Scenario: Mismo resultado en ambas plataformas
-- **WHEN** se instala el agente para la misma herramienta en dos proyectos
-  idénticos, uno con cada script
-- **THEN** los archivos instalados y sus rutas son idénticos en ambos proyectos
+## MODIFIED Requirements
 
 ### Requirement: Selección explícita de la herramienta
 El script SHALL requerir que se indique al menos una herramienta destino:
@@ -115,72 +97,6 @@ preguntar; si se indicó por opción, MUST terminar con error.
 - **THEN** el script termina con un código de error y un mensaje que explica la
   opción faltante, sin escribir archivos
 
-### Requirement: Rutas de instalación
-Al instalar para una herramienta `<dir>` (`.claude` para Claude Code,
-`.opencode` para OpenCode), el script SHALL dejar en el proyecto destino:
-- `<dir>/envinit/AGENT.md`: las reglas y el flujo del agente.
-- `<dir>/agents/envinit.md`: el adaptador correspondiente a la herramienta.
-- `<dir>/skills/envinit-*/`: una carpeta por cada skill del agente.
-
-El script MUST crear los directorios que falten bajo `<dir>`.
-
-#### Scenario: Instalación en un proyecto sin carpeta de la herramienta
-- **WHEN** se instala para `claude` en un proyecto que no tiene `.claude/`
-- **THEN** el proyecto queda con `.claude/envinit/AGENT.md`,
-  `.claude/agents/envinit.md` y todas las skills `envinit-*` en
-  `.claude/skills/`
-
-#### Scenario: Solo el adaptador de la herramienta elegida
-- **WHEN** se instala para `claude`
-- **THEN** `.claude/agents/` contiene el adaptador de Claude Code como
-  `envinit.md` y no contiene `AGENT.md` ni el adaptador de OpenCode
-
-### Requirement: No tocar archivos ajenos al agente
-El script MUST crear, sobrescribir o borrar únicamente estos archivos del agente:
-`<dir>/envinit/`, `<dir>/agents/envinit.md` y `<dir>/skills/envinit-*/`, además
-de los archivos de la versión antigua definidos en "Limpieza de la versión
-antigua". Cualquier otro archivo del proyecto destino MUST quedar intacto,
-incluidas otras skills, otros agentes y la carpeta `local/` que genera el
-agente.
-
-#### Scenario: Proyecto con otras skills y agentes
-- **WHEN** se instala en un proyecto cuyo `.claude/skills/` y `.claude/agents/`
-  ya contienen skills y agentes propios
-- **THEN** esas skills y esos agentes quedan sin cambios después de instalar
-
-#### Scenario: Entorno local ya generado
-- **WHEN** se instala, se actualiza o se desinstala en un proyecto que tiene una
-  carpeta `local/`
-- **THEN** la carpeta `local/` y su contenido quedan sin cambios
-
-### Requirement: Actualización idempotente
-Ejecutar la instalación sobre un proyecto que ya tiene el agente SHALL dejarlo
-igual que una instalación limpia de la versión actual. Las skills `envinit-*`
-instaladas que ya no existan en la versión actual MUST eliminarse.
-
-#### Scenario: Reinstalar la misma versión
-- **WHEN** se ejecuta la instalación dos veces seguidas con las mismas opciones
-- **THEN** el resultado es idéntico al de ejecutarla una sola vez
-
-#### Scenario: Skill retirada en la versión nueva
-- **WHEN** el proyecto tiene instalada una skill `envinit-*` que la versión
-  actual del agente ya no incluye y se ejecuta la instalación
-- **THEN** esa skill deja de estar en `<dir>/skills/`
-
-### Requirement: Limpieza de la versión antigua
-Al instalar, el script SHALL eliminar del directorio de la herramienta los
-restos de la versión anterior del agente, cuando el agente se llamaba
-`env-initializer`: `<dir>/env-initializer/`, `<dir>/agents/env-initializer.md`
-y las carpetas de skills `detect-environment`, `plan-environment`,
-`compose-builder`, `native-setup`, `service-recipes`, `external-mocks`,
-`verify-environment` y `document-environment` dentro de `<dir>/skills/`.
-
-#### Scenario: Proyecto con la versión antigua
-- **WHEN** se instala en un proyecto que tiene `.claude/agents/env-initializer.md`
-  y `.claude/skills/detect-environment/`
-- **THEN** después de instalar esos archivos ya no existen y el agente `envinit`
-  quedó instalado
-
 ### Requirement: Desinstalación
 El script SHALL ofrecer una opción de desinstalación que elimine del proyecto
 destino, para cada herramienta elegida, `<dir>/envinit/`,
@@ -221,6 +137,8 @@ herramienta.
 - **WHEN** termina una instalación para `claude,opencode`
 - **THEN** el script muestra la ruta del proyecto y, para cada herramienta, la
   carpeta donde quedó el agente y cómo invocarlo
+
+## ADDED Requirements
 
 ### Requirement: Confirmación antes de escribir
 Si el script hizo al menos una pregunta (la ruta o las herramientas), SHALL
