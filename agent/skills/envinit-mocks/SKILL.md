@@ -1,90 +1,58 @@
 ---
 name: envinit-mocks
-description: Para servicios externos (APIs de terceros, microservicios de otro equipo, servicios cloud, OIDC), decide entre conexión real y simulación, y monta el mock correspondiente — WireMock/Mockoon/Prism para HTTP, emisor de tokens falso u OIDC, emuladores cloud, consumidores/productores de eventos de ejemplo. Permite modo mixto por dependencia y alternar con perfiles de compose. Usar cuando el usuario dice "mi servicio se conecta a otro externo" / "quiero mockear pagos" / "no puedo levantar el servicio X".
+description: Parte del paso 6 del agente envinit. Simula con WireMock en Docker cada servicio externo o proyecto del mismo repositorio que la persona eligió mockear, con mappings basados en los endpoints que el proyecto consume y datos de prueba coherentes. La usa envinit-build al crear los archivos.
 ---
 
-# Skill: envinit-mocks
+# envinit-mocks
 
-## Decisión por cada servicio externo
+## Entrada
 
-Pregunta en lenguaje simple (ver "Cómo comunicarte" en `AGENT.md`), sin nombrar
-herramientas de mock salvo que la persona pida el detalle:
-1. **Conectarse al servicio real** — necesitas tener las credenciales de
-   desarrollo.
-2. **Simularlo** — la app funciona sin depender de él; las respuestas son de
-   prueba.
+Las dependencias que la persona eligió mockear, y para cada una el nombre de
+contenedor, el puerto y la imagen de WireMock que decidió `envinit-docker`.
 
-Se puede elegir distinto por servicio (**modo mixto**). La elección se controla
-con perfiles de compose (`--profile mock`) y/o una variable
-(`PAYMENTS_MODE=real|mock`), para poder alternar sin reconfigurar.
+## 1. Encontrar los endpoints que se consumen
 
-**El mock corre como contenedor Docker**, bajo `profiles: ["mock"]` en
-`local/docker-compose*.yml`. Todas las herramientas de abajo tienen imagen oficial
-(`stoplight/prism`, `wiremock/wiremock`, `mockoon/cli`, `localstack/localstack`,
-`ghcr.io/navikt/mock-oauth2-server`).
+Para cada servicio mockeado, busca en el código del proyecto que lo consume:
 
-**Elección de la imagen del mock:** mismo criterio que la infraestructura (ver
-"Lo que el agente decide solo" en `AGENT.md` y `envinit-recipes`). Primero
-revisa `docker image ls`: si ya hay una imagen descargada de esa herramienta
-(p. ej. `wiremock/wiremock:3.9.1-alpine`), úsala. Si no, elige la variante más
-chica con tag numerado (p. ej. `wiremock/wiremock:3.x-alpine`), nunca la
-genérica ni `latest`. La imagen va por variable con default
-(`${PAYMENTS_MOCK_IMAGE:-…}`), como en `envinit-compose`.
+- Las llamadas a ese servicio: cliente HTTP, cliente generado, Feign, Retrofit,
+  `fetch`, `axios` u otro, a partir de la variable con su URL base.
+- Para cada llamada: método, ruta, parámetros y cuerpo que se envía.
+- La forma de la respuesta que el código espera: los campos que lee y sus tipos,
+  según los modelos, DTOs o tipos del proyecto.
 
-Solo si el entorno **no usa Docker en
-absoluto** (app nativa y todas las demás dependencias externas), el mock puede
-correr como proceso nativo (`npx @stoplight/prism-cli`, WireMock `.jar`) agregado
-al `local/Procfile`.
+Si el repositorio tiene una especificación OpenAPI del servicio, úsala para
+completar las respuestas, pero crea mappings solo para los endpoints que el
+código llama. Si el servicio mockeado es otro proyecto del mismo repositorio,
+usa sus controladores o rutas como referencia de las respuestas.
 
-## Conexión real
+## 2. Crear los mappings
 
-- Credenciales y endpoints en `local/.env.local`.
-- Verifica conectividad (`curl`/ping desde donde corre la app).
-- Si es un microservicio propio en otro repo: ofrece clonarlo y sumarlo al
-  compose, o apuntar a su instancia de staging.
+Por cada servicio, en `env-local/wiremock/<servicio>/`:
 
-## Simulación por tipo
+- `mappings/`: un archivo JSON por endpoint, con el método y la ruta. Usa
+  `urlPathPattern` para las rutas con parámetros.
+- `__files/`: los cuerpos de respuesta largos, referenciados con
+  `bodyFileName`.
 
-### HTTP / REST
-- **Con OpenAPI/Swagger disponible** → Prism:
-  ```yaml
-  payments-mock:
-    image: stoplight/prism:4
-    command: mock -h 0.0.0.0 /specs/payments.yaml
-    volumes: ["local/mocks/payments:/specs:ro"]
-    ports: ["4010:4010"]
-    profiles: ["mock"]
-  ```
-- **Sin spec** → WireMock o Mockoon con stubs a mano en `local/mocks/<servicio>/`.
-  Documenta cómo agregar/editar respuestas.
-- Apunta la variable de la app (`PAYMENTS_BASE_URL`) al mock cuando el perfil
-  `mock` está activo.
+## 3. Datos de prueba
 
-### gRPC
-- WireMock gRPC extension o un stub server generado del `.proto`. Guarda los
-  `.proto` en `local/mocks/`.
+- Realistas: nombres, correos, montos, fechas y estados con forma real, nunca
+  `test1` ni `foo`.
+- Coherentes entre sí: el mismo identificador representa siempre la misma
+  entidad. Si un endpoint devuelve el cliente `42`, los pagos de ese cliente
+  usan `42`.
+- Suficientes para usar la aplicación: listas con varios elementos y al menos
+  un caso para cada estado que el código distingue.
 
-### Colas / eventos
-- Usa el broker local (real, de la pila) + un **productor de eventos de ejemplo**
-  (script o pequeño servicio que publica mensajes de muestra) y/o un
-  **consumidor simulado** que solo loguea. Guarda los payloads de ejemplo en
-  `local/mocks/events/`.
+## 4. Contenedor y conexión
 
-### Servicios cloud (AWS/Azure/GCP)
-- LocalStack / Azurite / emuladores. Ver `envinit-recipes`.
+- Un contenedor de WireMock por servicio, con la carpeta
+  `./wiremock/<servicio>` montada en `/home/wiremock`.
+- La variable de entorno con que la aplicación lee la URL del servicio apunta al
+  mock: `http://<contenedor>:8080` si la app corre en Docker, o
+  `http://localhost:<puerto>` si corre nativa.
 
-### Auth / OIDC
-- Emisor de tokens de prueba (p. ej. `oauth2-proxy`/`mock-oauth2-server` de
-  navikt, o Keycloak con un realm de dev). Configura `issuer`, `jwks_uri` y un
-  set de usuarios de prueba.
+## Siguiente paso
 
-## Salida
-
-Tabla:
-
-| Servicio externo | Modo (real/mock) | Cómo se activa | Endpoint | Archivos de stubs |
-|---|---|---|---|---|
-
-Handoff a `envinit-compose` (servicios de mock bajo `profiles: ["mock"]`), y a
-`envinit-document`. Solo si el entorno no usa Docker, el mock va como entrada
-en `local/Procfile` vía `envinit-native`.
+Vuelve a `envinit-build` con los archivos creados, el servicio para el compose y
+las variables para el archivo de entorno.

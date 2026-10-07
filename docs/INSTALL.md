@@ -84,19 +84,16 @@ Para Claude Code queda así (en OpenCode es igual, pero con `.opencode/`):
     ├── agents/
     │   └── envinit.md          ← el agente, en el formato de la herramienta
     └── skills/
-        ├── envinit-compose/SKILL.md
-        ├── envinit-detect/SKILL.md
-        ├── envinit-document/SKILL.md
+        ├── envinit-build/SKILL.md
+        ├── envinit-docker/SKILL.md
         ├── envinit-mocks/SKILL.md
-        ├── envinit-native/SKILL.md
-        ├── envinit-plan/SKILL.md
-        ├── envinit-recipes/SKILL.md
-        └── envinit-verify/SKILL.md
+        ├── envinit-scan/SKILL.md
+        └── envinit-wizard/SKILL.md
 ```
 
 El script **solo toca archivos del agente**: `envinit/`, `agents/envinit.md` y
 las carpetas `envinit-*`. Si tu proyecto ya tiene otras skills u otros agentes,
-quedan como estaban. La carpeta `local/` que genera el agente tampoco se toca.
+quedan como estaban. La carpeta `env-local/` que genera el agente tampoco se toca.
 
 ## Comprobar la instalación
 
@@ -142,7 +139,7 @@ También puedes indicar todo para que no pregunte:
 bash scripts/install.sh --tool claude --target ~/ruta/a/tu-proyecto --uninstall
 ```
 
-La carpeta `local/` que generó el agente es tu entorno y el script no la borra.
+La carpeta `env-local/` que generó el agente es tu entorno y el script no la borra.
 Bórrala a mano solo si ya no la necesitas.
 
 ## Otros asistentes (ChatGPT, Gemini, Cursor, etc.)

@@ -366,5 +366,5 @@ echo "  Proyecto: $TARGET"
 printf '%s' "$SUMMARY"
 if [ "$UNINSTALL" -eq 1 ]; then
   echo
-  echo "La carpeta local/ del proyecto (tu entorno) no se tocó."
+  echo "La carpeta env-local/ del proyecto (tu entorno) no se tocó."
 fi

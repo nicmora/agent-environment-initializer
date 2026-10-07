@@ -6,7 +6,7 @@
     Copia el agente envinit (AGENT.md, el adaptador de la herramienta y las
     skills envinit-*) a la carpeta .claude/ u .opencode/ del proyecto, o a las
     dos. Solo toca archivos del agente: el resto del proyecto, incluida la
-    carpeta local/, queda intacto. También quita la versión anterior
+    carpeta env-local/, queda intacto. También quita la versión anterior
     (env-initializer) si la encuentra.
 
     Si falta la ruta o la herramienta y la terminal es interactiva, se
@@ -330,5 +330,5 @@ Write-Host "  Proyecto: $Target"
 foreach ($line in $script:Summary) { Write-Host $line }
 if ($Uninstall) {
     Write-Host ''
-    Write-Host 'La carpeta local/ del proyecto (tu entorno) no se tocó.'
+    Write-Host 'La carpeta env-local/ del proyecto (tu entorno) no se tocó.'
 }
