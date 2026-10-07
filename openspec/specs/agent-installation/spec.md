@@ -140,7 +140,7 @@ El script MUST crear, sobrescribir o borrar únicamente estos archivos del agent
 `<dir>/envinit/`, `<dir>/agents/envinit.md` y `<dir>/skills/envinit-*/`, además
 de los archivos de la versión antigua definidos en "Limpieza de la versión
 antigua". Cualquier otro archivo del proyecto destino MUST quedar intacto,
-incluidas otras skills, otros agentes y la carpeta `local/` que genera el
+incluidas otras skills, otros agentes y la carpeta `env-local/` que genera el
 agente.
 
 #### Scenario: Proyecto con otras skills y agentes
@@ -150,8 +150,8 @@ agente.
 
 #### Scenario: Entorno local ya generado
 - **WHEN** se instala, se actualiza o se desinstala en un proyecto que tiene una
-  carpeta `local/`
-- **THEN** la carpeta `local/` y su contenido quedan sin cambios
+  carpeta `env-local/`
+- **THEN** la carpeta `env-local/` y su contenido quedan sin cambios
 
 ### Requirement: Actualización idempotente
 Ejecutar la instalación sobre un proyecto que ya tiene el agente SHALL dejarlo

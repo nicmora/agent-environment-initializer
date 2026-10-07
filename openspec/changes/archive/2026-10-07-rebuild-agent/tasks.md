@@ -25,5 +25,5 @@
 ## 5. Prueba integral
 
 - [x] 5.1 Instalar el agente en un proyecto de prueba que tenía la versión anterior, con `install.sh` y con `install.ps1`, y verificar que quedan solo las cinco skills nuevas y que las skills propias del proyecto siguen intactas
-- [ ] 5.2 Recorrer el flujo completo en un proyecto de prueba con una base de datos con migraciones, una API externa y la app nativa, y verificar el orden de las preguntas, el resumen final, el mock de WireMock, la verificación con apagado y la entrega del comando y la URL
-- [ ] 5.3 Recorrer el flujo en un monorepo de prueba con un frontend que consume un backend, con el backend en Docker, y verificar que la forma de arranque se pregunta por proyecto y que la dependencia compartida se pregunta una sola vez
+- [x] 5.2 Recorrer el flujo completo en un proyecto de prueba con una base de datos con migraciones, una API externa y la app nativa, y verificar el orden de las preguntas, el resumen final, el mock de WireMock, la verificación con apagado y la entrega del comando y la URL
+- [x] 5.3 Recorrer el flujo en un monorepo de prueba con un frontend que consume un backend, con el backend en Docker, y verificar que la forma de arranque se pregunta por proyecto y que la dependencia compartida se pregunta una sola vez
